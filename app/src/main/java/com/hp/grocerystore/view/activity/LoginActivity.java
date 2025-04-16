@@ -1,10 +1,11 @@
-package com.hp.grocerystore;
+package com.hp.grocerystore.view.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
+import com.hp.grocerystore.R;
 
 public class LoginActivity extends AppCompatActivity {
     MaterialButton loginButton, googleLoginButton;
