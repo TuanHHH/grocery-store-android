@@ -1,0 +1,8 @@
+<resources>
+    <style name="Widget.App.SmallRatingBar" parent="Widget.AppCompat.RatingBar.Small">
+        <item name="android:minHeight">16dp</item>
+        <item name="android:maxHeight">16dp</item>
+        <item name="android:layout_height">16dp</item>
+        <item name="android:layout_width">wrap_content</item>
+    </style>
+</resources>

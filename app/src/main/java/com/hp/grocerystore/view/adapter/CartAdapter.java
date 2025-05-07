@@ -69,29 +69,14 @@ public class CartAdapter extends BaseAdapter {
         Glide.with(context).load(item.getImageUrl()).into(holder.productImage);
         holder.productPrice.setText(FormatData.formatCurrency(item.getPrice()));
 
-        // Checkbox binding
-        holder.checkBox.setOnCheckedChangeListener(null); // prevent unwanted triggers
-        holder.checkBox.setChecked(item.isSelected());
-        // Blur and disable if out of stock
-        if (item.getInventoryQuantity() == 0) {
-            holder.checkBox.setEnabled(false);
-            holder.checkBox.setChecked(false);
-            // Blur the item view
-            holder.rootView.setAlpha(0.5f);
-            holder.buttonDelete.setVisibility(View.VISIBLE);
-            holder.buttonDelete.setEnabled(true);
-            holder.buttonDelete.setOnClickListener(v -> listener.onDeleteItem(position));
+        if (item.getInventoryQuantity() <= 0) {
+            holder.textOutOfStock.setVisibility(View.VISIBLE);
         } else {
-            holder.checkBox.setEnabled(true);
-            holder.rootView.setAlpha(1f);
-            holder.buttonDelete.setVisibility(View.VISIBLE);
-            holder.buttonDelete.setEnabled(true);
-            holder.buttonDelete.setOnClickListener(v -> listener.onDeleteItem(position));
-            holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                item.setSelected(isChecked);
-                if (listener != null) listener.onSelectionChanged();
-            });
+            holder.textOutOfStock.setVisibility(View.GONE);
         }
+
+        // Xử lý trạng thái hết hàng
+        handleOutOfStockState(holder, item, position);
 
         holder.buttonPlus.setOnClickListener(v -> listener.onIncreaseQuantity(position));
         holder.buttonMinus.setOnClickListener(v -> listener.onDecreaseQuantity(position));
@@ -112,6 +97,7 @@ public class CartAdapter extends BaseAdapter {
         MaterialButton buttonPlus, buttonMinus;
         ImageButton buttonDelete;
         android.widget.CheckBox checkBox;
+        TextView textOutOfStock;
         ViewHolder(View view) {
             rootView = view;
             checkBox = view.findViewById(R.id.checkbox_select);
@@ -123,6 +109,29 @@ public class CartAdapter extends BaseAdapter {
             buttonPlus = view.findViewById(R.id.button_plus);
             buttonMinus = view.findViewById(R.id.button_minus);
             buttonDelete = view.findViewById(R.id.button_delete);
+            textOutOfStock = view.findViewById(R.id.text_out_of_stock);
+        }
+    }
+
+    private void handleOutOfStockState(ViewHolder holder, CartItem item, int position) {
+        if (item.getInventoryQuantity() == 0) {
+            holder.checkBox.setEnabled(false);
+            holder.checkBox.setChecked(false);
+            // Làm mờ item
+            holder.rootView.setAlpha(0.5f);
+            holder.buttonDelete.setVisibility(View.VISIBLE);
+            holder.buttonDelete.setEnabled(true);
+            holder.buttonDelete.setOnClickListener(v -> listener.onDeleteItem(position));
+        } else {
+            holder.checkBox.setEnabled(true);
+            holder.rootView.setAlpha(1f);
+            holder.buttonDelete.setVisibility(View.VISIBLE);
+            holder.buttonDelete.setEnabled(true);
+            holder.buttonDelete.setOnClickListener(v -> listener.onDeleteItem(position));
+            holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                item.setSelected(isChecked);
+                if (listener != null) listener.onSelectionChanged();
+            });
         }
     }
 }

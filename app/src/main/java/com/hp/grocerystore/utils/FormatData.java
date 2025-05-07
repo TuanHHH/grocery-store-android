@@ -11,5 +11,4 @@ public class FormatData {
         formatter.setDecimalFormatSymbols(symbols);
         return formatter.format(amount) + " đ";
     }
-
 }
