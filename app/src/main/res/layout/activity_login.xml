@@ -82,7 +82,8 @@
                 android:textSize="16sp"
                 android:layout_marginBottom="16dp"
                 app:cornerRadius="8dp"
-                android:backgroundTint="@color/button_green" />
+                android:backgroundTint="@color/button_green"
+                android:onClick="processLogin"/>
 
             <!-- Nút Google login -->
             <com.google.android.material.button.MaterialButton

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/white">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Đánh giá sản phẩm"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:paddingBottom="8dp" />
+
+    <RatingBar
+        android:id="@+id/rating_selector"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:numStars="5"
+        android:stepSize="1"
+        android:rating="5"
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        android:progressTint="@color/star_yellow"
+        android:layout_gravity="center"/>
+
+    <EditText
+        android:id="@+id/edit_comment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Viết bình luận của bạn..."
+        android:minHeight="80dp"
+        android:gravity="top"
+        android:padding="8dp"
+        android:background="@drawable/bg_comment_box"
+        android:inputType="textCapSentences|textMultiLine"
+        android:maxLines="5" />
+
+    <Button
+        android:id="@+id/button_send_review"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Gửi đánh giá"
+        android:layout_marginTop="12dp"
+        android:backgroundTint="@color/primary"
+        android:textColor="@color/white" />
+</LinearLayout>

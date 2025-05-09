@@ -11,9 +11,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
-import com.hp.grocerystore.model.CartItem;
+import com.hp.grocerystore.model.cart.CartItem;
 import com.hp.grocerystore.R;
-import com.hp.grocerystore.utils.FormatData;
+import com.hp.grocerystore.utils.Extensions;
 
 import java.util.List;
 
@@ -67,7 +67,7 @@ public class CartAdapter extends BaseAdapter {
         holder.inventoryQuantity.setText(String.format("Có sẵn: %d", item.getInventoryQuantity()));
         holder.quantity.setText(String.valueOf(item.getQuantity()));
         Glide.with(context).load(item.getImageUrl()).into(holder.productImage);
-        holder.productPrice.setText(FormatData.formatCurrency(item.getPrice()));
+        holder.productPrice.setText(Extensions.formatCurrency(item.getPrice()));
 
         if (item.getInventoryQuantity() <= 0) {
             holder.textOutOfStock.setVisibility(View.VISIBLE);

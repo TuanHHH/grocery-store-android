@@ -9,9 +9,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.hp.grocerystore.utils.FormatData;
+import com.hp.grocerystore.utils.Extensions;
 import com.hp.grocerystore.view.adapter.CartAdapter;
-import com.hp.grocerystore.model.CartItem;
+import com.hp.grocerystore.model.cart.CartItem;
 import com.hp.grocerystore.R;
 
 import java.util.ArrayList;
@@ -89,7 +89,7 @@ public class CartActivity extends AppCompatActivity {
                     total += item.getPrice() * item.getQuantity();
                 }
             }
-            android.widget.Toast.makeText(this, "Thanh toán: " + FormatData.formatCurrency(total), android.widget.Toast.LENGTH_SHORT).show();
+            android.widget.Toast.makeText(this, "Thanh toán: " + Extensions.formatCurrency(total), android.widget.Toast.LENGTH_SHORT).show();
         });
 
         checkBoxSelectAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -120,7 +120,7 @@ public class CartActivity extends AppCompatActivity {
                 total += item.getPrice() * item.getQuantity();
             }
         }
-        textTotalPrice.setText(String.format("Tổng: %s", FormatData.formatCurrency(total)));
+        textTotalPrice.setText(String.format("Tổng: %s", Extensions.formatCurrency(total)));
     }
 
     private void syncSelectAllCheckbox() {

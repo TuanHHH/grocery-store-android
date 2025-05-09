@@ -1,12 +1,6 @@
 plugins {
     id 'com.android.application'
 }
-
-def secretsFile = rootProject.file("secrets.properties")
-def secrets = new Properties()
-if (secretsFile.exists()) {
-    secrets.load(new FileInputStream(secretsFile))
-}
 android {
     namespace 'com.hp.grocerystore'
     compileSdk 35
@@ -17,8 +11,8 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0"
-        buildConfigField "String", "BASE_URL_API", "\"${secrets['BASE_URL_API']}\""
     }
+
 
     buildTypes {
         release {
@@ -48,5 +42,7 @@ dependencies {
     implementation "androidx.activity:activity:1.8.0"
     implementation 'com.github.bumptech.glide:glide:4.16.0'
     implementation 'com.squareup.retrofit2:retrofit:2.11.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
+    implementation 'com.google.android.gms:play-services-auth:21.3.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
 }

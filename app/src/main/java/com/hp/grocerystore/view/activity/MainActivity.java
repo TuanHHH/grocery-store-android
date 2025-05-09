@@ -8,7 +8,6 @@ import com.google.android.material.button.MaterialButton;
 import com.hp.grocerystore.R;
 
 public class MainActivity extends AppCompatActivity {
-    private MaterialButton loginButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

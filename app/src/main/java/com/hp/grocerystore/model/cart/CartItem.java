@@ -1,4 +1,4 @@
-package com.hp.grocerystore.model;
+package com.hp.grocerystore.model.cart;
 
 public class CartItem {
     private String productName;

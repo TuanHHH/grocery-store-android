@@ -1,5 +1,6 @@
 package com.hp.grocerystore.view.adapter;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,9 +14,8 @@ import com.hp.grocerystore.R;
 
 import java.util.List;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.RatingBar;
-import com.hp.grocerystore.model.Feedback;
+import com.hp.grocerystore.model.feedback.Feedback;
 
 public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackAdapter.FeedbackViewHolder> {
     private List<Feedback> feedbackList;
@@ -35,19 +35,27 @@ public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackAdapter.Feedba
     public void onBindViewHolder(@NonNull FeedbackViewHolder holder, int position) {
         Feedback feedback = feedbackList.get(position);
         Glide.with(holder.imageAvatar.getContext())
-                .load(feedback.getUserAvatar()) // Giả sử `getAvatarUrl()` trả về URL của ảnh
-                .placeholder(R.drawable.ic_avatar_placeholder)  // Ảnh placeholder khi đang tải
-                .error(R.drawable.ic_avatar_placeholder)  // Ảnh lỗi khi tải thất bại
+                .load(feedback.getUserAvatarUrl())
+                .placeholder(R.drawable.ic_avatar_placeholder)
+                .timeout(10000)
+                .error(R.drawable.ic_avatar_placeholder)
                 .into(holder.imageAvatar);
-        holder.textName.setText(feedback.getName());
-        holder.ratingBar.setRating(feedback.getRating());
+        holder.textName.setText(feedback.getUserName());
+        holder.ratingBar.setRating(feedback.getRatingStar());
         holder.textDescription.setText(feedback.getDescription());
-        holder.textTime.setText(feedback.getTime());
+        holder.textTime.setText(feedback.getUpdatedAt());
     }
 
     @Override
     public int getItemCount() {
         return feedbackList != null ? feedbackList.size() : 0;
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void setFeedbackList(List<Feedback> feedbackList) {
+        this.feedbackList.clear();
+        this.feedbackList.addAll(feedbackList);
+        notifyDataSetChanged();
     }
 
     static class FeedbackViewHolder extends RecyclerView.ViewHolder {
