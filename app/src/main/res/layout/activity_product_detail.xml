@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/product_detail"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+    <include layout="@layout/loading_overlay" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Custom AppBar -->
+        <RelativeLayout
+            android:id="@+id/custom_appbar"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@android:color/white"
+            android:elevation="4dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp">
+
+            <ImageButton
+                android:id="@+id/button_back"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:background="@android:color/transparent"
+                android:contentDescription="Back"
+                android:padding="8dp"
+                android:src="@drawable/ic_arrow_back" />
+
+            <EditText
+                android:id="@+id/edit_search"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_toStartOf="@id/button_cart"
+                android:layout_toEndOf="@id/button_back"
+                android:background="@drawable/bg_comment_box"
+                android:hint="Search products..."
+                android:inputType="text"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:singleLine="true"
+                android:textSize="16sp" />
+
+            <ImageButton
+                android:id="@+id/button_cart"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@android:color/transparent"
+                android:contentDescription="Cart"
+                android:padding="8dp"
+                android:src="@drawable/ic_cart"
+                android:onClick="redirectToCart"/>
+        </RelativeLayout>
+
+        <!-- ScrollView for Product Details -->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scroll_view_product_detail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="72dp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Product Image -->
+                <ImageView
+                    android:id="@+id/image_product"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/bg_hero_rounded"
+                    android:contentDescription="@string/product_image"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/product_placeholder" />
+
+                <!-- Price -->
+                <TextView
+                    android:id="@+id/text_price"
+                    style="@style/TextAppearance.MaterialComponents.Headline6"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="59.000đ"
+                    android:textColor="@color/primary"
+                    android:textStyle="bold" />
+
+                <!-- Product Title -->
+                <TextView
+                    android:id="@+id/text_title"
+                    style="@style/TextAppearance.MaterialComponents.Headline5"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Example"
+                    android:textColor="@color/black"
+                    android:textStyle="bold" />
+
+                <!-- Unit -->
+                <TextView
+                    android:id="@+id/text_unit"
+                    style="@style/TextAppearance.MaterialComponents.Body2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="1.5 kg"
+                    android:textColor="@color/gray" />
+
+                    <RatingBar
+                        android:id="@+id/rating_bar"
+                        style="?android:attr/ratingBarStyleSmall"
+                        android:layout_marginTop="8dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:isIndicator="true"
+                        android:numStars="5"
+                        android:progressTint="@color/star_yellow"
+                        android:rating="4.5"
+                        android:stepSize="0.5" />
+
+
+                <!-- Short Description -->
+                <TextView
+                    android:id="@+id/text_description"
+                    style="@style/TextAppearance.MaterialComponents.Body1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="Chanh hữu cơ được trồng tự nhiên, không hóa chất, thích hợp cho nước ép và nấu ăn."
+                    android:textColor="@color/black" />
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@color/gray_light" />
+
+                <!-- Quantity Selector -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/bg_quantity_selector"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="12dp"
+                        android:text="Số lượng"
+                        android:textColor="@color/gray"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_minus"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:padding="0dp"
+                        android:text="-"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="18sp"
+                        app:cornerRadius="18dp" />
+
+                    <TextView
+                        android:id="@+id/text_quantity"
+                        android:layout_width="40dp"
+                        android:layout_height="36dp"
+                        android:gravity="center"
+                        android:text="1"
+                        android:textSize="16sp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_plus"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:padding="0dp"
+                        android:text="+"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="18sp"
+                        app:cornerRadius="18dp" />
+                </LinearLayout>
+                <!-- Feedback Section -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/text_feedback_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Phản hồi của khách hàng"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_write_feedback"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Gửi đánh giá"
+                        android:textColor="@color/white"
+                        android:backgroundTint="@color/primary"
+                        android:padding="8dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:layout_marginStart="8dp"
+                        android:minHeight="36dp"
+                        android:onClick="showFeedbackDialog"
+                        android:textSize="14sp"/>
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_feedback"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
+
+    <!-- Sticky Bottom Bar for Add to Wishlist & Cart -->
+    <LinearLayout
+        android:id="@+id/bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <ImageButton
+            android:id="@+id/button_wishlist"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/add_to_wishlist"
+            android:padding="8dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_favorite"
+            app:tint="@color/primary" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_add_to_cart"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="10dp"
+            android:layout_weight="3"
+            android:backgroundTint="@color/primary"
+            android:text="@string/add_to_cart"
+            android:textColor="@color/white"
+            app:iconTint="@color/primary" />
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

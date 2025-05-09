@@ -10,4 +10,8 @@
     <color name="input_stroke">#34D399</color>
     <color name="red">#e63946</color>
     <color name="light_gray">#edede9</color>
+    <color name="gray">#757575</color>
+    <color name="gray_light">#E0E0E0</color>
+    <color name="star_yellow">#FFD600</color>
+    <color name="background">#FFFFFF</color>
 </resources>

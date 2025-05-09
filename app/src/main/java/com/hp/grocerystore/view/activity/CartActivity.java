@@ -9,8 +9,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.hp.grocerystore.utils.Extensions;
 import com.hp.grocerystore.view.adapter.CartAdapter;
-import com.hp.grocerystore.model.CartItem;
+import com.hp.grocerystore.model.cart.CartItem;
 import com.hp.grocerystore.R;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public class CartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_cart);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.cart), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -88,7 +89,7 @@ public class CartActivity extends AppCompatActivity {
                     total += item.getPrice() * item.getQuantity();
                 }
             }
-            android.widget.Toast.makeText(this, "Thanh toán: " + String.format("%.0f", total) + "đ", android.widget.Toast.LENGTH_SHORT).show();
+            android.widget.Toast.makeText(this, "Thanh toán: " + Extensions.formatCurrency(total), android.widget.Toast.LENGTH_SHORT).show();
         });
 
         checkBoxSelectAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -107,7 +108,7 @@ public class CartActivity extends AppCompatActivity {
         android.widget.TextView textTotalProducts = findViewById(R.id.text_total_products);
         ListView listView = findViewById(R.id.list_cart);
         int count = adapter.getCount();
-        textTotalProducts.setText("Giỏ hàng (" + count + ")");
+        textTotalProducts.setText(String.format("Giỏ hàng (%d)", count));
     }
 
     private void updateFooter() {
@@ -119,7 +120,7 @@ public class CartActivity extends AppCompatActivity {
                 total += item.getPrice() * item.getQuantity();
             }
         }
-        textTotalPrice.setText("Tổng: " + String.format("%.0f", total) + "đ");
+        textTotalPrice.setText(String.format("Tổng: %s", Extensions.formatCurrency(total)));
     }
 
     private void syncSelectAllCheckbox() {

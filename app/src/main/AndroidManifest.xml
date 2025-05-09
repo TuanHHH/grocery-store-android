@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".application.GRCApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -15,14 +16,9 @@
         android:theme="@style/Theme.Grocerystore"
         tools:targetApi="31">
         <activity
-            android:name=".view.activity.CartActivity"
-            android:exported="true" />
-        <activity
-            android:name=".view.activity.RegisterActivity"
-            android:exported="false" />
-        <activity
-            android:name=".view.activity.MainActivity"
+            android:name=".view.activity.SplashActivity"
             android:exported="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -30,8 +26,25 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".view.activity.ProductDetailActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".view.activity.CartActivity"
+            android:exported="true" />
+        <activity
             android:name=".view.activity.LoginActivity"
+            android:exported="true">
+        </activity>
+        <activity
+            android:name=".view.activity.RegisterActivity"
             android:exported="false" />
+        <activity
+            android:name=".view.activity.MainActivity"
+            android:exported="true">
+        </activity>
     </application>
 
 </manifest>
+
+
