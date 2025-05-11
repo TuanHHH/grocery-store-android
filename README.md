@@ -2,7 +2,7 @@
 
 **Grocery Store** is a Java-based Android application that allows users to browse, search, and purchase grocery and food items. The app features a clean interface and supports common shopping functionalities.
 
-## 🚀 Main Features
+## Main Features
 
 | **Activity**       | **Fragment**     | **Feature**                                                                    |
 |--------------------|------------------|--------------------------------------------------------------------------------|
@@ -17,7 +17,7 @@
 | **Checkout**       | -                | Process payment for selected products                                          |
 | **Product Detail** | -                | Product images, details, add to cart/wishlist, leave feedback                  |
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Language**: Java  
 - **IDE**: Android Studio  

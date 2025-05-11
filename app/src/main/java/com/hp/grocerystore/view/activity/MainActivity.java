@@ -1,6 +1,7 @@
 package com.hp.grocerystore.view.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
 
 import android.os.Bundle;
 
@@ -14,5 +15,6 @@ public class MainActivity extends AppCompatActivity {
         androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
     }
 }

@@ -1,7 +1,9 @@
 package com.hp.grocerystore.network.api;
 
 import com.hp.grocerystore.model.auth.LoginRequest;
-import com.hp.grocerystore.model.auth.LoginResponse;
+import com.hp.grocerystore.model.auth.AuthResponse;
+import com.hp.grocerystore.model.auth.RegisterRequest;
+import com.hp.grocerystore.model.auth.RegisterResponse;
 import com.hp.grocerystore.model.base.ApiResponse;
 
 import retrofit2.Call;
@@ -10,5 +12,8 @@ import retrofit2.http.POST;
 
 public interface AuthApi {
     @POST("auth/login")
-    Call<ApiResponse<LoginResponse>> login(@Body LoginRequest loginRequest);
+    Call<ApiResponse<AuthResponse>> login(@Body LoginRequest loginRequest);
+    @POST("auth/register")
+    Call<ApiResponse<RegisterResponse>> register(@Body RegisterRequest registerRequest);
+
 }

@@ -12,7 +12,7 @@ public class GRCApplication extends Application {
     public void onCreate() {
         super.onCreate();
         instance = this;
-        appContext = getApplicationContext();  // Lưu Context ứng dụng
+        appContext = getApplicationContext();
     }
 
     public static GRCApplication getInstance() {

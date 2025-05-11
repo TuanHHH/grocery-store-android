@@ -2,8 +2,9 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
+    android:layout_height="match_parent"
+    android:id="@+id/register_activity">
+    <include layout="@layout/loading_overlay" />
     <!-- Ảnh nền mờ -->
     <ImageView
         android:layout_width="match_parent"
@@ -76,7 +77,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="16dp"
                 app:passwordToggleEnabled="true"
                 app:boxStrokeColor="@color/input_stroke"
                 app:hintTextColor="@color/text_dark"
@@ -91,6 +92,25 @@
                     android:inputType="textPassword" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Xác nhận mật khẩu -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:passwordToggleEnabled="true"
+                app:boxStrokeColor="@color/input_stroke"
+                app:hintTextColor="@color/text_dark"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/confirmPasswordEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Xác nhận mật khẩu"
+                    android:textColor="@color/text_dark"
+                    android:inputType="textPassword" />
+            </com.google.android.material.textfield.TextInputLayout>
+
             <!-- Nút Đăng ký -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/registerButton"
@@ -100,7 +120,8 @@
                 android:textSize="16sp"
                 android:layout_marginBottom="32dp"
                 app:cornerRadius="8dp"
-                android:backgroundTint="@color/button_green" />
+                android:backgroundTint="@color/button_green"
+                android:onClick="processRegister"/>
 
             <!-- Đã có tài khoản / Về trang chủ -->
             <LinearLayout
@@ -117,7 +138,8 @@
                     android:text="Đã có tài khoản? Đăng nhập"
                     android:textColor="@color/text_dark"
                     android:textSize="15sp"
-                    android:padding="8dp" />
+                    android:padding="8dp"
+                    android:onClick="navigateToLogin" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -133,7 +155,8 @@
                     android:text="Về trang chủ"
                     android:textColor="@color/text_dark"
                     android:textSize="15sp"
-                    android:padding="8dp" />
+                    android:padding="8dp"
+                    android:onClick="navigateToHome" />
             </LinearLayout>
 
         </LinearLayout>

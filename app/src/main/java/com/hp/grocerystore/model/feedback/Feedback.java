@@ -1,5 +1,7 @@
 package com.hp.grocerystore.model.feedback;
 
+import com.hp.grocerystore.utils.Extensions;
+
 public class Feedback {
     private long id;
     private String userAvatarUrl;
@@ -49,7 +51,7 @@ public class Feedback {
     }
 
     public String getUpdatedAt() {
-        return updatedAt;
+        return Extensions.showPrettyTime(updatedAt);
     }
 
     public void setUpdatedAt(String updatedAt) {

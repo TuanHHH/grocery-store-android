@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">grocerystore</string>
+    <string name="app_name">Grocery Store</string>
     <string name="title_activity_register">RegisterActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>

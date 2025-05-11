@@ -22,7 +22,7 @@ public class CartAdapter extends BaseAdapter {
         void onIncreaseQuantity(int position);
         void onDecreaseQuantity(int position);
         void onDeleteItem(int position);
-        void onSelectionChanged(); // new callback for selection changes
+        void onSelectionChanged();
     }
 
     private Context context;
@@ -64,28 +64,51 @@ public class CartAdapter extends BaseAdapter {
 
         final CartItem item = cartItems.get(position);
         holder.productName.setText(item.getProductName());
-        holder.inventoryQuantity.setText(String.format("Có sẵn: %d", item.getInventoryQuantity()));
+        holder.inventoryQuantity.setText(String.format("Có sẵn: %d", item.getStock()));
         holder.quantity.setText(String.valueOf(item.getQuantity()));
         Glide.with(context).load(item.getImageUrl()).into(holder.productImage);
         holder.productPrice.setText(Extensions.formatCurrency(item.getPrice()));
 
-        if (item.getInventoryQuantity() <= 0) {
+        // Cập nhật trạng thái checkbox
+        holder.checkBox.setChecked(item.isSelected());
+        holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            item.setSelected(isChecked);
+            if (listener != null) {
+                listener.onSelectionChanged();
+            }
+        });
+
+        if (item.getStock() <= 0) {
             holder.textOutOfStock.setVisibility(View.VISIBLE);
+            holder.checkBox.setEnabled(false);
+            holder.checkBox.setChecked(false);
+            // Làm mờ item khi hết hàng, trừ nút xóa
+            holder.productImage.setAlpha(0.5f);
+            holder.productName.setAlpha(0.5f);
+            holder.productPrice.setAlpha(0.5f);
+            holder.inventoryQuantity.setAlpha(0.5f);
+            holder.quantity.setAlpha(0.5f);
+            holder.buttonPlus.setAlpha(0.5f);
+            holder.buttonMinus.setAlpha(0.5f);
+            holder.buttonPlus.setEnabled(false);
+            holder.buttonMinus.setEnabled(false);
         } else {
             holder.textOutOfStock.setVisibility(View.GONE);
+            holder.checkBox.setEnabled(true);
+            holder.productImage.setAlpha(1.0f);
+            holder.productName.setAlpha(1.0f);
+            holder.productPrice.setAlpha(1.0f);
+            holder.inventoryQuantity.setAlpha(1.0f);
+            holder.quantity.setAlpha(1.0f);
+            holder.buttonPlus.setAlpha(1.0f);
+            holder.buttonMinus.setAlpha(1.0f);
+            holder.buttonPlus.setEnabled(item.getQuantity() < item.getStock());
+            holder.buttonMinus.setEnabled(item.getQuantity() > 1);
         }
-
-        // Xử lý trạng thái hết hàng
-        handleOutOfStockState(holder, item, position);
 
         holder.buttonPlus.setOnClickListener(v -> listener.onIncreaseQuantity(position));
         holder.buttonMinus.setOnClickListener(v -> listener.onDecreaseQuantity(position));
         holder.buttonDelete.setOnClickListener(v -> listener.onDeleteItem(position));
-
-        // Disable plus if quantity >= inventory
-        holder.buttonPlus.setEnabled(item.getQuantity() < item.getInventoryQuantity());
-        // Disable minus if quantity <= 1
-        holder.buttonMinus.setEnabled(item.getQuantity() > 1);
 
         return convertView;
     }
@@ -110,28 +133,6 @@ public class CartAdapter extends BaseAdapter {
             buttonMinus = view.findViewById(R.id.button_minus);
             buttonDelete = view.findViewById(R.id.button_delete);
             textOutOfStock = view.findViewById(R.id.text_out_of_stock);
-        }
-    }
-
-    private void handleOutOfStockState(ViewHolder holder, CartItem item, int position) {
-        if (item.getInventoryQuantity() == 0) {
-            holder.checkBox.setEnabled(false);
-            holder.checkBox.setChecked(false);
-            // Làm mờ item
-            holder.rootView.setAlpha(0.5f);
-            holder.buttonDelete.setVisibility(View.VISIBLE);
-            holder.buttonDelete.setEnabled(true);
-            holder.buttonDelete.setOnClickListener(v -> listener.onDeleteItem(position));
-        } else {
-            holder.checkBox.setEnabled(true);
-            holder.rootView.setAlpha(1f);
-            holder.buttonDelete.setVisibility(View.VISIBLE);
-            holder.buttonDelete.setEnabled(true);
-            holder.buttonDelete.setOnClickListener(v -> listener.onDeleteItem(position));
-            holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                item.setSelected(isChecked);
-                if (listener != null) listener.onSelectionChanged();
-            });
         }
     }
 }

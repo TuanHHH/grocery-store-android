@@ -3,6 +3,12 @@ package com.hp.grocerystore.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKey;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+
 public class PreferenceManager {
     private static final String PREF_NAME = "grc_app_pref";
     private static final String KEY_ACCESS_TOKEN = "access_token";
@@ -15,8 +21,23 @@ public class PreferenceManager {
     private final SharedPreferences.Editor editor;
 
     public PreferenceManager(Context context) {
-        sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        editor = sharedPreferences.edit();
+        try {
+            MasterKey masterKey = new MasterKey.Builder(context)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .build();
+
+            sharedPreferences = EncryptedSharedPreferences.create(
+                    context,
+                    PREF_NAME,
+                    masterKey,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+
+            editor = sharedPreferences.edit();
+        } catch (GeneralSecurityException | IOException e) {
+            throw new RuntimeException("Lỗi khi khởi tạo EncryptedSharedPreferences", e);
+        }
     }
 
     public void saveTokens(String accessToken, String refreshToken, String device) {
@@ -40,6 +61,11 @@ public class PreferenceManager {
         return sharedPreferences.getString(KEY_REFRESH_TOKEN, null);
     }
 
+    public void setAccessToken(String accessToken) {
+        editor.putString(KEY_ACCESS_TOKEN, accessToken);
+        editor.apply();
+    }
+
     public String getDevice() {
         return sharedPreferences.getString(KEY_DEVICE, null);
     }
@@ -54,5 +80,15 @@ public class PreferenceManager {
 
     public void clear() {
         editor.clear().apply();
+    }
+
+    public boolean isUserLoggedIn() {
+        String accessToken = sharedPreferences.getString(KEY_ACCESS_TOKEN, null);
+        String userName = getUserName();
+        String userEmail = getUserEmail();
+
+        return accessToken != null && !accessToken.isEmpty()
+                && userName != null && !userName.isEmpty()
+                && userEmail != null && !userEmail.isEmpty();
     }
 }
