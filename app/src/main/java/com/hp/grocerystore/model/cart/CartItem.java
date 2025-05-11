@@ -1,31 +1,53 @@
 package com.hp.grocerystore.model.cart;
 
 public class CartItem {
+    private long id;
     private String productName;
     private String imageUrl;
-    private int inventoryQuantity;
+    private int stock;
     private int quantity;
     private double price;
     private boolean selected = false;
 
-    public CartItem(String productName, String imageUrl, int inventoryQuantity, int quantity, double price) {
+    public CartItem(long id, String productName, String imageUrl, int stock, int quantity, double price) {
+        this.id = id;
         this.productName = productName;
         this.imageUrl = imageUrl;
-        this.inventoryQuantity = inventoryQuantity;
+        this.stock = stock;
         this.quantity = quantity;
         this.price = price;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getProductName() {
         return productName;
     }
 
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
     public String getImageUrl() {
         return imageUrl;
     }
 
-    public int getInventoryQuantity() {
-        return inventoryQuantity;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
     }
 
     public int getQuantity() {
@@ -39,6 +61,7 @@ public class CartItem {
     public double getPrice() {
         return price;
     }
+
     public void setPrice(double price) {
         this.price = price;
     }
@@ -46,6 +69,7 @@ public class CartItem {
     public boolean isSelected() {
         return selected;
     }
+
     public void setSelected(boolean selected) {
         this.selected = selected;
     }

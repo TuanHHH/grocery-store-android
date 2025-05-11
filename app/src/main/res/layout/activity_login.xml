@@ -2,9 +2,10 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/login_activity">
+    <include layout="@layout/loading_overlay" />
 
-    <!-- Ảnh nền -->
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -12,7 +13,6 @@
         android:src="@drawable/background_login"
         android:alpha="0.3" />
 
-    <!-- Nội dung chính với ConstraintLayout -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -113,8 +113,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Quên mật khẩu?"
-                    android:textColor="@color/text_dark"
-                    android:textSize="15sp"
+                    android:textColor="@color/button_green"
+                    android:onClick="navigateToForgotPassword"
                     android:padding="8dp" />
 
                 <TextView
@@ -129,8 +129,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Đăng ký"
-                    android:textColor="@color/text_dark"
-                    android:textSize="15sp"
+                    android:textColor="@color/button_green"
+                    android:onClick="navigateToRegister"
                     android:padding="8dp" />
             </LinearLayout>
 
@@ -139,9 +139,9 @@
                 android:id="@+id/homeText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Về trang chủ"
-                android:textColor="@color/text_dark"
-                android:textSize="15sp"
+                android:text="Trang chủ"
+                android:textColor="@color/button_green"
+                android:onClick="navigateToHome"
                 android:padding="8dp" />
         </LinearLayout>
 

@@ -1,7 +1,6 @@
 package com.hp.grocerystore.network.interceptor;
 
-import android.content.Context;
-
+import com.hp.grocerystore.application.GRCApplication;
 import com.hp.grocerystore.utils.PreferenceManager;
 
 import java.io.IOException;
@@ -13,8 +12,8 @@ import okhttp3.Response;
 public class AuthInterceptor implements Interceptor {
     private final PreferenceManager preferenceManager;
 
-    public AuthInterceptor(Context context) {
-        this.preferenceManager = new PreferenceManager(context);
+    public AuthInterceptor() {
+        this.preferenceManager = new PreferenceManager(GRCApplication.getAppContext());
     }
 
     @Override

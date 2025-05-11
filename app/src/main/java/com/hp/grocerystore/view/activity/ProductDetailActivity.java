@@ -145,6 +145,10 @@ public class ProductDetailActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void navigateBack(View view) {
+        finish();
+    }
+
     private void showLoading() {
         if (loadingOverlay != null) {
             loadingOverlay.setVisibility(View.VISIBLE);

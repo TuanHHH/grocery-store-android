@@ -1,24 +1,48 @@
 package com.hp.grocerystore.view.activity;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AbsListView;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Toast;
+import android.widget.TextView;
+import android.widget.CheckBox;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.hp.grocerystore.application.GRCApplication;
 import com.hp.grocerystore.utils.Extensions;
+import com.hp.grocerystore.utils.PreferenceManager;
+import com.hp.grocerystore.utils.Resource;
 import com.hp.grocerystore.view.adapter.CartAdapter;
 import com.hp.grocerystore.model.cart.CartItem;
 import com.hp.grocerystore.R;
+import com.hp.grocerystore.viewmodel.CartViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CartActivity extends AppCompatActivity {
-    CartAdapter adapter;
+    private LinearLayout loginRequiredLayout;
+    private Button buttonLoginRequired;
+    private ImageView imageLoginIcon;
+    private CartAdapter adapter;
+    private List<CartItem> cartItems;
+    private CartViewModel viewModel;
+    private ListView listView;
+    private TextView textEmptyCart;
+    private Button buttonAddMoreProducts;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,30 +54,48 @@ public class CartActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Setup ListView and Adapter
-        ListView listView = findViewById(R.id.list_cart);
-        android.widget.TextView textTotalProducts = findViewById(R.id.text_total_products);
-        android.widget.TextView textTotalPrice = findViewById(R.id.text_total_price);
-        android.widget.Button buttonCheckout = findViewById(R.id.button_checkout);
-        android.widget.ImageButton buttonBack = findViewById(R.id.button_back);
-        android.widget.CheckBox checkBoxSelectAll = findViewById(R.id.checkbox_select_all);
-        // Dummy data for demonstration
-        List<CartItem> cartItems = new ArrayList<>();
-        cartItems.add(new CartItem("Apple", "https://cdn-icons-png.flaticon.com/256/7078/7078312.png", 0, 2, 10000));
-        cartItems.add(new CartItem("Banana", "https://cdn-icons-png.flaticon.com/256/7078/7078312.png", 5, 1, 15000));
-        cartItems.add(new CartItem("Orange", "https://cdn-icons-png.flaticon.com/256/7078/7078312.png", 8, 3, 13000));
-        cartItems.add(new CartItem("Apple", "https://cdn-icons-png.flaticon.com/256/7078/7078312.png", 10, 2, 12345));
+        initViews();
+        setupLoginCheck();
+        setupListView();
+        setupViewModel();
+        setupSelectAllCheckbox();
+    }
 
+    private void initViews() {
+        loginRequiredLayout = findViewById(R.id.login_required);
+        buttonLoginRequired = findViewById(R.id.button_login_required);
+        imageLoginIcon = findViewById(R.id.image_login_icon);
+        listView = findViewById(R.id.list_cart);
+        textEmptyCart = findViewById(R.id.text_empty_cart);
+        buttonAddMoreProducts = findViewById(R.id.button_add_more_products);
+        cartItems = new ArrayList<>();
+    }
+
+    private void setupLoginCheck() {
+        PreferenceManager pref = new PreferenceManager(GRCApplication.getAppContext());
+        boolean isLoggedIn = pref.isUserLoggedIn();
+        if (!isLoggedIn) {
+            loginRequiredLayout.setVisibility(View.VISIBLE);
+            buttonLoginRequired.setVisibility(View.VISIBLE);
+            imageLoginIcon.setVisibility(View.VISIBLE);
+            listView.setVisibility(View.GONE);
+            textEmptyCart.setVisibility(View.GONE);
+            buttonAddMoreProducts.setVisibility(View.GONE);
+        }
+    }
+
+    private void setupListView() {
         adapter = new CartAdapter(this, cartItems, new CartAdapter.CartActionListener() {
             @Override
             public void onIncreaseQuantity(int position) {
                 CartItem item = cartItems.get(position);
-                if (item.getQuantity() < item.getInventoryQuantity()) {
+                if (item.getQuantity() < item.getStock()) {
                     item.setQuantity(item.getQuantity() + 1);
                     adapter.notifyDataSetChanged();
                     updateFooter();
                 }
             }
+
             @Override
             public void onDecreaseQuantity(int position) {
                 CartItem item = cartItems.get(position);
@@ -63,13 +105,16 @@ public class CartActivity extends AppCompatActivity {
                     updateFooter();
                 }
             }
+
             @Override
             public void onDeleteItem(int position) {
                 cartItems.remove(position);
                 adapter.notifyDataSetChanged();
                 updateHeader();
                 updateFooter();
+                checkEmptyCart();
             }
+
             @Override
             public void onSelectionChanged() {
                 updateFooter();
@@ -77,45 +122,94 @@ public class CartActivity extends AppCompatActivity {
             }
         });
         listView.setAdapter(adapter);
-        updateHeader();
-        updateFooter();
-        syncSelectAllCheckbox();
 
-        buttonBack.setOnClickListener(v -> finish());
-        buttonCheckout.setOnClickListener(v -> {
-            double total = 0.0;
-            for (CartItem item : cartItems) {
-                if (item.isSelected()) {
-                    total += item.getPrice() * item.getQuantity();
+        // Setup lazy loading
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                if (scrollState == SCROLL_STATE_IDLE) {
+                    if (listView.getLastVisiblePosition() >= adapter.getCount() - 1) {
+                        viewModel.loadMoreItems();
+                    }
                 }
             }
-            android.widget.Toast.makeText(this, "Thanh toán: " + Extensions.formatCurrency(total), android.widget.Toast.LENGTH_SHORT).show();
-        });
 
-        checkBoxSelectAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // Prevent recursion: only act if user toggled
-            if (checkBoxSelectAll.isPressed() || checkBoxSelectAll.isFocused()) {
-                for (CartItem item : cartItems) {
-                    item.setSelected(isChecked);
-                }
-                adapter.notifyDataSetChanged();
-                updateFooter();
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
             }
         });
     }
 
+    private void setupViewModel() {
+        viewModel = new ViewModelProvider(this).get(CartViewModel.class);
+        viewModel.getCartItems().observe(this, this::handleCartItemsResponse);
+    }
+
+    private void handleCartItemsResponse(Resource<List<CartItem>> resource) {
+        switch (resource.status) {
+            case SUCCESS:
+                if (resource.data != null) {
+                    cartItems.clear();
+                    cartItems.addAll(resource.data);
+                    adapter.notifyDataSetChanged();
+                    updateHeader();
+                    updateFooter();
+                    checkEmptyCart();
+                    syncSelectAllCheckbox();
+                }
+                break;
+            case ERROR:
+                Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                break;
+            case LOADING:
+                // Handle loading state if needed
+                break;
+        }
+    }
+
+    private void checkEmptyCart() {
+        if (cartItems.isEmpty()) {
+            textEmptyCart.setVisibility(View.VISIBLE);
+            buttonAddMoreProducts.setVisibility(View.VISIBLE);
+            listView.setVisibility(View.GONE);
+        } else {
+            textEmptyCart.setVisibility(View.GONE);
+            buttonAddMoreProducts.setVisibility(View.GONE);
+            listView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void navigateBack(View view) {
+        finish();
+    }
+
+    public void processCheckout(View view) {
+        double total = 0.0;
+        for (CartItem item : cartItems) {
+            if (item.isSelected()) {
+                total += item.getPrice() * item.getQuantity();
+            }
+        }
+        Toast.makeText(this, "Thanh toán: " + Extensions.formatCurrency(total), Toast.LENGTH_SHORT).show();
+    }
+
+    public void navigateToLogin(View view) {
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    @SuppressLint("DefaultLocale")
     private void updateHeader() {
-        android.widget.TextView textTotalProducts = findViewById(R.id.text_total_products);
-        ListView listView = findViewById(R.id.list_cart);
+        TextView textTotalProducts = findViewById(R.id.text_total_products);
         int count = adapter.getCount();
         textTotalProducts.setText(String.format("Giỏ hàng (%d)", count));
     }
 
     private void updateFooter() {
-        android.widget.TextView textTotalPrice = findViewById(R.id.text_total_price);
+        TextView textTotalPrice = findViewById(R.id.text_total_price);
         double total = 0.0;
-        for (int i = 0; i < adapter.getCount(); i++) {
-            CartItem item = (CartItem) adapter.getItem(i);
+        for (CartItem item : cartItems) {
             if (item.isSelected()) {
                 total += item.getPrice() * item.getQuantity();
             }
@@ -124,19 +218,36 @@ public class CartActivity extends AppCompatActivity {
     }
 
     private void syncSelectAllCheckbox() {
-        android.widget.CheckBox checkBoxSelectAll = findViewById(R.id.checkbox_select_all);
+        CheckBox checkBoxSelectAll = findViewById(R.id.checkbox_select_all);
         boolean allSelected = true;
         boolean anySelected = false;
-        for (int i = 0; i < adapter.getCount(); i++) {
-            CartItem item = (CartItem) adapter.getItem(i);
+        for (CartItem item : cartItems) {
             if (!item.isSelected()) allSelected = false;
             if (item.isSelected()) anySelected = true;
         }
-        // Only update if changed, to avoid recursion
         if (allSelected && !checkBoxSelectAll.isChecked()) {
             checkBoxSelectAll.setChecked(true);
         } else if (!allSelected && checkBoxSelectAll.isChecked()) {
             checkBoxSelectAll.setChecked(false);
         }
+    }
+
+    private void setupSelectAllCheckbox() {
+        CheckBox selectAllCheckbox = findViewById(R.id.checkbox_select_all);
+        viewModel.getSelectAllState().observe(this, resource -> {
+            if (resource != null && resource.status == Resource.Status.SUCCESS) {
+                selectAllCheckbox.setChecked(resource.data);
+            }
+        });
+        selectAllCheckbox.setOnClickListener(v -> {
+            boolean isChecked = selectAllCheckbox.isChecked();
+            viewModel.selectAll(isChecked);
+        });
+    }
+
+    public void onSelectAllClick(View view) {
+        CheckBox selectAllCheckbox = findViewById(R.id.checkbox_select_all);
+        boolean isChecked = selectAllCheckbox.isChecked();
+        viewModel.selectAll(isChecked);
     }
 }

@@ -44,5 +44,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.11.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
     implementation 'com.google.android.gms:play-services-auth:21.3.0'
+    implementation 'org.ocpsoft.prettytime:prettytime:5.0.9.Final'
+    implementation "androidx.security:security-crypto:1.1.0-alpha07"
     annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
 }
