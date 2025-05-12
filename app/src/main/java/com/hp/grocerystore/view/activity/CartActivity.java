@@ -3,6 +3,7 @@ package com.hp.grocerystore.view.activity;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.Button;
@@ -189,12 +190,27 @@ public class CartActivity extends AppCompatActivity {
 
     public void processCheckout(View view) {
         double total = 0.0;
+        int selectedCount = 0;
+        StringBuilder selectedItems = new StringBuilder();
+        
         for (CartItem item : cartItems) {
-            if (item.isSelected()) {
+            if (item.isSelected() && item.getStock() > 0) {
                 total += item.getPrice() * item.getQuantity();
+                selectedCount++;
+                selectedItems.append(String.format("\n- %s: %d x %s = %s", 
+                    item.getProductName(),
+                    item.getQuantity(),
+                    Extensions.formatCurrency(item.getPrice()),
+                    Extensions.formatCurrency(item.getPrice() * item.getQuantity())
+                ));
             }
         }
-        Toast.makeText(this, "Thanh toán: " + Extensions.formatCurrency(total), Toast.LENGTH_SHORT).show();
+        
+        String message = String.format("Thanh toán %d sản phẩm:%s\nTổng cộng: %s", 
+            selectedCount, selectedItems.toString(), Extensions.formatCurrency(total));
+            
+        Log.d("CartActivity", "Chi tiết thanh toán: " + message);
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
     public void navigateToLogin(View view) {
@@ -208,41 +224,64 @@ public class CartActivity extends AppCompatActivity {
         TextView textTotalProducts = findViewById(R.id.text_total_products);
         int count = adapter.getCount();
         textTotalProducts.setText(String.format("Giỏ hàng (%d)", count));
+        Log.d("CartActivity", "Tổng số sản phẩm: " + count);
     }
 
     private void updateFooter() {
         TextView textTotalPrice = findViewById(R.id.text_total_price);
         double total = 0.0;
+        int selectedCount = 0;
+        
         for (CartItem item : cartItems) {
-            if (item.isSelected()) {
+            if (item.isSelected() && item.getStock() > 0) {
                 total += item.getPrice() * item.getQuantity();
+                selectedCount++;
+                Log.d("CartActivity", String.format("Sản phẩm: %s, Số lượng: %d, Giá: %s, Tổng: %s", 
+                    item.getProductName(),
+                    item.getQuantity(),
+                    Extensions.formatCurrency(item.getPrice()),
+                    Extensions.formatCurrency(item.getPrice() * item.getQuantity())
+                ));
             }
         }
+        
+        Log.d("CartActivity", String.format("Tổng số sản phẩm đã chọn: %d, Tổng tiền: %s", 
+            selectedCount, Extensions.formatCurrency(total)));
+            
         textTotalPrice.setText(String.format("Tổng: %s", Extensions.formatCurrency(total)));
     }
 
     private void syncSelectAllCheckbox() {
         if (cartItems == null || cartItems.isEmpty()) {
             checkboxSelectAll.setChecked(false);
+            Log.d("CartActivity", "Giỏ hàng trống, bỏ chọn tất cả");
             return;
         }
 
         // Kiểm tra xem tất cả các sản phẩm còn hàng có được chọn không
         boolean allInStockSelected = true;
         boolean hasInStockItems = false;
+        int inStockCount = 0;
+        int selectedInStockCount = 0;
 
         for (CartItem item : cartItems) {
             if (item.getStock() > 0) {
                 hasInStockItems = true;
-                if (!item.isSelected()) {
+                inStockCount++;
+                if (item.isSelected()) {
+                    selectedInStockCount++;
+                } else {
                     allInStockSelected = false;
-                    break;
                 }
             }
         }
 
+        Log.d("CartActivity", String.format("Tổng số sản phẩm còn hàng: %d, Đã chọn: %d", 
+            inStockCount, selectedInStockCount));
+
         // Chỉ đánh dấu checkbox "Chọn tất cả" nếu có ít nhất một sản phẩm còn hàng
         checkboxSelectAll.setChecked(hasInStockItems && allInStockSelected);
+        Log.d("CartActivity", "Trạng thái chọn tất cả: " + (hasInStockItems && allInStockSelected));
     }
 
     private void setupSelectAllCheckbox() {

@@ -14,6 +14,6 @@ public interface CartApi {
     @GET("cart")
     Call<ApiResponse<PaginationResponse<CartItem>>> getCartItems(
         @Query("page") int page,
-        @Query("limit") int limit
+        @Query("size") int size
     );
 }
