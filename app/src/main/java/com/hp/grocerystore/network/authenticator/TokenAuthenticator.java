@@ -97,33 +97,15 @@ public class TokenAuthenticator implements Authenticator {
                 Gson gson = new Gson();
                 Type type = new TypeToken<ApiResponse<AuthResponse>>() {}.getType();
                 ApiResponse<AuthResponse> apiResponse = gson.fromJson(responseBody, type);
-
-                List<String> cookies = refreshResponse.headers("Set-Cookie");
-                Map<String, String> cookieMap = new HashMap<>();
-                for (String cookie : cookies) {
-                    String[] parts = cookie.split(";", 2);
-                    String[] kv = parts[0].split("=", 2);
-                    if (kv.length == 2) {
-                        cookieMap.put(kv[0].trim(), kv[1].trim());
-                    }
-                }
-
-                String newRefreshToken = cookieMap.get("refresh_token");
-                String newDevice = cookieMap.get("device");
-
                 if (apiResponse != null && apiResponse.getData() != null) {
                     String token = apiResponse.getData().getAccessToken();
 
                     if (token != null) {
                         Log.d(TAG, "New access token received");
                         newAccessToken = token;
-                        pref.saveTokens(
-                                token,
-                                newRefreshToken != null ? newRefreshToken : refreshToken,
-                                newDevice != null ? newDevice : device
-                        );
+                        List<String> cookies = refreshResponse.headers("Set-Cookie");
+                        PreferenceManager.saveTokens(cookies, token);
                         pref.saveUserData(apiResponse.getData().getUser().getName(), apiResponse.getData().getUser().getEmail());
-
                         // Thông báo cho các request khác biết đã có token mới
                         synchronized (isRefreshing) {
                             isRefreshing.notifyAll();
