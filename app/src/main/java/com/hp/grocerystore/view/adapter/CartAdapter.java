@@ -2,6 +2,7 @@ package com.hp.grocerystore.view.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,6 +64,10 @@ public class CartAdapter extends BaseAdapter {
         }
 
         final CartItem item = cartItems.get(position);
+        
+        // Tắt listener trước khi cập nhật trạng thái để tránh gọi callback không cần thiết
+        holder.checkBox.setOnCheckedChangeListener(null);
+        
         holder.productName.setText(item.getProductName());
         holder.inventoryQuantity.setText(String.format("Có sẵn: %d", item.getStock()));
         holder.quantity.setText(String.valueOf(item.getQuantity()));
@@ -71,8 +76,13 @@ public class CartAdapter extends BaseAdapter {
 
         // Cập nhật trạng thái checkbox
         holder.checkBox.setChecked(item.isSelected());
+        holder.checkBox.setEnabled(item.getStock() > 0);
+        
+        // Thêm lại listener sau khi đã cập nhật trạng thái
         holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             item.setSelected(isChecked);
+            Log.d("CartAdapter", String.format("Sản phẩm %s đã %s", 
+                item.getProductName(), isChecked ? "được chọn" : "bỏ chọn"));
             if (listener != null) {
                 listener.onSelectionChanged();
             }
@@ -106,9 +116,20 @@ public class CartAdapter extends BaseAdapter {
             holder.buttonMinus.setEnabled(item.getQuantity() > 1);
         }
 
-        holder.buttonPlus.setOnClickListener(v -> listener.onIncreaseQuantity(position));
-        holder.buttonMinus.setOnClickListener(v -> listener.onDecreaseQuantity(position));
-        holder.buttonDelete.setOnClickListener(v -> listener.onDeleteItem(position));
+        holder.buttonPlus.setOnClickListener(v -> {
+            Log.d("CartAdapter", String.format("Tăng số lượng sản phẩm %s", item.getProductName()));
+            listener.onIncreaseQuantity(position);
+        });
+        
+        holder.buttonMinus.setOnClickListener(v -> {
+            Log.d("CartAdapter", String.format("Giảm số lượng sản phẩm %s", item.getProductName()));
+            listener.onDecreaseQuantity(position);
+        });
+        
+        holder.buttonDelete.setOnClickListener(v -> {
+            Log.d("CartAdapter", String.format("Xóa sản phẩm %s", item.getProductName()));
+            listener.onDeleteItem(position);
+        });
 
         return convertView;
     }

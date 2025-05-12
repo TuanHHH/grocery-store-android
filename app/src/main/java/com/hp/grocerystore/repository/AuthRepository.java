@@ -1,15 +1,23 @@
 package com.hp.grocerystore.repository;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.gson.Gson;
+import com.hp.grocerystore.application.GRCApplication;
 import com.hp.grocerystore.model.auth.AuthResponse;
 import com.hp.grocerystore.model.auth.LoginRequest;
 import com.hp.grocerystore.model.auth.RegisterRequest;
 import com.hp.grocerystore.model.auth.RegisterResponse;
 import com.hp.grocerystore.model.base.ApiResponse;
 import com.hp.grocerystore.network.api.AuthApi;
+import com.hp.grocerystore.utils.PreferenceManager;
 import com.hp.grocerystore.utils.Resource;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -31,14 +39,26 @@ public class AuthRepository {
             @Override
             public void onResponse(Call<ApiResponse<AuthResponse>> call, Response<ApiResponse<AuthResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<AuthResponse> apiResponse = response.body();
-                    if (apiResponse.getStatusCode() == 200) {
-                        loginResult.setValue(Resource.success(apiResponse.getData()));
-                    } else {
-                        loginResult.setValue(Resource.error(apiResponse.getMessage()));
-                    }
+                    AuthResponse loginData = response.body().getData();
+                    String accessToken = loginData.getAccessToken();
+                    List<String> cookies = response.headers().values("Set-Cookie");
+                    PreferenceManager prefManager = PreferenceManager.saveTokens(cookies, accessToken);
+                    prefManager.saveUserData(loginData.getUser().getName(), loginData.getUser().getEmail());
+                    loginResult.setValue(Resource.success(loginData));
                 } else {
-                    loginResult.setValue(Resource.error("Đăng nhập thất bại"));
+                    String errorMessage = "Đăng nhập thất bại";
+                    try {
+                        if (response.errorBody() != null) {
+                            Gson gson = new Gson();
+                            ApiResponse<?> errorResponse = gson.fromJson(response.errorBody().charStream(), ApiResponse.class);
+                            if (errorResponse.getMessage() != null) {
+                                errorMessage = errorResponse.getMessage();
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    loginResult.setValue(Resource.error(errorMessage));
                 }
             }
 
