@@ -22,6 +22,7 @@ public class CartRepository {
     private final CartApi cartApi;
     private final MutableLiveData<Resource<List<CartItem>>> cartItemsLiveData;
     private final MutableLiveData<Resource<Boolean>> selectAllLiveData;
+    private final MutableLiveData<Resource<Integer>> totalItemsLiveData;
     private int currentPage;
     private boolean isLoading;
     private boolean hasMoreData;
@@ -32,6 +33,7 @@ public class CartRepository {
         this.cartApi = cartApi;
         this.cartItemsLiveData = new MutableLiveData<>();
         this.selectAllLiveData = new MutableLiveData<>();
+        this.totalItemsLiveData = new MutableLiveData<>();
         this.currentPage = 1;
         this.isLoading = false;
         this.hasMoreData = true;
@@ -47,6 +49,10 @@ public class CartRepository {
 
     public LiveData<Resource<Boolean>> getSelectAllState() {
         return selectAllLiveData;
+    }
+
+    public LiveData<Resource<Integer>> getTotalItems() {
+        return totalItemsLiveData;
     }
 
     public void selectAll(boolean isSelected) {
@@ -87,6 +93,31 @@ public class CartRepository {
         loadCartItems("refresh");
     }
 
+    public void removeCartItem(long productId) {
+        Log.d("CartRepository", "Bắt đầu xóa sản phẩm: " + productId);
+        cartApi.removeCartItem(productId).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<Void> apiResponse = response.body();
+                    if (apiResponse.getStatusCode() == 200) {
+                        Log.d("CartRepository", "Xóa sản phẩm thành công, cập nhật lại dữ liệu");
+                        refreshCartItems();
+                    } else {
+                        Log.e("CartRepository", "Lỗi khi xóa sản phẩm: " + apiResponse.getMessage());
+                    }
+                } else {
+                    Log.e("CartRepository", "Lỗi khi xóa sản phẩm: " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+                Log.e("CartRepository", "Lỗi kết nối khi xóa sản phẩm: " + t.getMessage());
+            }
+        });
+    }
+
     private void loadCartItems(String loadType) {
         if (isLoading) return;
         
@@ -107,12 +138,15 @@ public class CartRepository {
                         PaginationResponse<CartItem> paginationResponse = apiResponse.getData();
                         List<CartItem> newItems = paginationResponse.getResult();
                         
+                        totalItemsLiveData.setValue(Resource.success(paginationResponse.getMeta().getTotal()));
+                        
                         if (newItems != null && !newItems.isEmpty()) {
                             hasMoreData = currentPage < paginationResponse.getMeta().getPages();
-                            Log.d("CartRepository", String.format("Trang %d/%d, Số sản phẩm: %d, Còn dữ liệu: %s", 
+                            Log.d("CartRepository", String.format("Trang %d/%d, Số sản phẩm: %d, Tổng sản phẩm: %d, Còn dữ liệu: %s", 
                                 currentPage, 
                                 paginationResponse.getMeta().getPages(),
                                 newItems.size(),
+                                paginationResponse.getMeta().getTotal(),
                                 hasMoreData));
 
                             if ("loadMore".equals(loadType)) {

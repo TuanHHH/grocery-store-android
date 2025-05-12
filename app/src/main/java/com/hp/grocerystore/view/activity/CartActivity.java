@@ -7,9 +7,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.TextView;
 import android.widget.CheckBox;
@@ -23,6 +25,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.hp.grocerystore.application.GRCApplication;
 import com.hp.grocerystore.utils.Extensions;
+import com.hp.grocerystore.utils.LoadingUtil;
 import com.hp.grocerystore.utils.PreferenceManager;
 import com.hp.grocerystore.utils.Resource;
 import com.hp.grocerystore.view.adapter.CartAdapter;
@@ -35,17 +38,16 @@ import java.util.List;
 
 public class CartActivity extends AppCompatActivity {
     private LinearLayout loginRequiredLayout;
-    private Button buttonLoginRequired;
+    private Button buttonLoginRequired, buttonCheckout;
     private ImageView imageLoginIcon;
     private CartAdapter adapter;
     private List<CartItem> cartItems;
     private CartViewModel viewModel;
     private ListView listView;
     private TextView textEmptyCart;
-    private Button buttonAddMoreProducts;
-
     private CheckBox checkboxSelectAll;
-
+    private FrameLayout loadingOverlay;
+    private ProgressBar progressBar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
@@ -66,13 +68,15 @@ public class CartActivity extends AppCompatActivity {
     }
 
     private void initViews() {
+        loadingOverlay = findViewById(R.id.loading_overlay);
+        progressBar = findViewById(R.id.progress_bar);
         loginRequiredLayout = findViewById(R.id.login_required);
         buttonLoginRequired = findViewById(R.id.button_login_required);
         imageLoginIcon = findViewById(R.id.image_login_icon);
         listView = findViewById(R.id.list_cart);
         textEmptyCart = findViewById(R.id.text_empty_cart);
-        buttonAddMoreProducts = findViewById(R.id.button_add_more_products);
         checkboxSelectAll = findViewById(R.id.checkbox_select_all);
+        buttonCheckout = findViewById(R.id.button_checkout);
         cartItems = new ArrayList<>();
     }
 
@@ -85,7 +89,6 @@ public class CartActivity extends AppCompatActivity {
             imageLoginIcon.setVisibility(View.VISIBLE);
             listView.setVisibility(View.GONE);
             textEmptyCart.setVisibility(View.GONE);
-            buttonAddMoreProducts.setVisibility(View.GONE);
         }
     }
 
@@ -113,11 +116,8 @@ public class CartActivity extends AppCompatActivity {
 
             @Override
             public void onDeleteItem(int position) {
-                cartItems.remove(position);
-                adapter.notifyDataSetChanged();
-                updateHeader();
-                updateFooter();
-                checkEmptyCart();
+                CartItem item = cartItems.get(position);
+                viewModel.removeCartItem(item.getId());
             }
 
             @Override
@@ -148,38 +148,47 @@ public class CartActivity extends AppCompatActivity {
     private void setupViewModel() {
         viewModel = new ViewModelProvider(this).get(CartViewModel.class);
         viewModel.getCartItems().observe(this, this::handleCartItemsResponse);
+        viewModel.getTotalItems().observe(this, this::handleTotalItemsResponse);
     }
 
     private void handleCartItemsResponse(Resource<List<CartItem>> resource) {
         switch (resource.status) {
             case SUCCESS:
+                LoadingUtil.hideLoading(loadingOverlay, progressBar);
                 if (resource.data != null) {
                     cartItems.clear();
                     cartItems.addAll(resource.data);
                     adapter.notifyDataSetChanged();
-                    updateHeader();
                     updateFooter();
                     checkEmptyCart();
                     syncSelectAllCheckbox();
                 }
                 break;
             case ERROR:
+                LoadingUtil.hideLoading(loadingOverlay, progressBar);
                 Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
                 break;
             case LOADING:
-                // Handle loading state if needed
+                LoadingUtil.showLoading(loadingOverlay, progressBar);
                 break;
+        }
+    }
+
+    private void handleTotalItemsResponse(Resource<Integer> resource) {
+        if (resource.status == Resource.Status.SUCCESS && resource.data != null) {
+            updateHeader(resource.data);
         }
     }
 
     private void checkEmptyCart() {
         if (cartItems.isEmpty()) {
             textEmptyCart.setVisibility(View.VISIBLE);
-            buttonAddMoreProducts.setVisibility(View.VISIBLE);
             listView.setVisibility(View.GONE);
+            checkboxSelectAll.setVisibility(View.GONE);
+            buttonCheckout.setEnabled(false);
+            buttonCheckout.setAlpha(0.5f);
         } else {
             textEmptyCart.setVisibility(View.GONE);
-            buttonAddMoreProducts.setVisibility(View.GONE);
             listView.setVisibility(View.VISIBLE);
         }
     }
@@ -188,6 +197,7 @@ public class CartActivity extends AppCompatActivity {
         finish();
     }
 
+    @SuppressLint("DefaultLocale")
     public void processCheckout(View view) {
         double total = 0.0;
         int selectedCount = 0;
@@ -220,11 +230,10 @@ public class CartActivity extends AppCompatActivity {
     }
 
     @SuppressLint("DefaultLocale")
-    private void updateHeader() {
+    private void updateHeader(int totalItems) {
         TextView textTotalProducts = findViewById(R.id.text_total_products);
-        int count = adapter.getCount();
-        textTotalProducts.setText(String.format("Giỏ hàng (%d)", count));
-        Log.d("CartActivity", "Tổng số sản phẩm: " + count);
+        textTotalProducts.setText(String.format("Giỏ hàng (%d)", totalItems));
+        Log.d("CartActivity", "Tổng số sản phẩm từ API: " + totalItems);
     }
 
     private void updateFooter() {
@@ -278,8 +287,6 @@ public class CartActivity extends AppCompatActivity {
 
         Log.d("CartActivity", String.format("Tổng số sản phẩm còn hàng: %d, Đã chọn: %d", 
             inStockCount, selectedInStockCount));
-
-        // Chỉ đánh dấu checkbox "Chọn tất cả" nếu có ít nhất một sản phẩm còn hàng
         checkboxSelectAll.setChecked(hasInStockItems && allInStockSelected);
         Log.d("CartActivity", "Trạng thái chọn tất cả: " + (hasInStockItems && allInStockSelected));
     }
@@ -295,11 +302,5 @@ public class CartActivity extends AppCompatActivity {
             boolean isChecked = selectAllCheckbox.isChecked();
             viewModel.selectAll(isChecked);
         });
-    }
-
-    public void onSelectAllClick(View view) {
-        CheckBox selectAllCheckbox = findViewById(R.id.checkbox_select_all);
-        boolean isChecked = selectAllCheckbox.isChecked();
-        viewModel.selectAll(isChecked);
     }
 }

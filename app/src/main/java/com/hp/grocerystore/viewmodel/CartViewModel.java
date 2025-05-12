@@ -28,6 +28,10 @@ public class CartViewModel extends ViewModel {
         return repository.getSelectAllState();
     }
 
+    public LiveData<Resource<Integer>> getTotalItems() {
+        return repository.getTotalItems();
+    }
+
     public void selectAll(boolean isSelected) {
         repository.selectAll(isSelected);
     }
@@ -38,5 +42,9 @@ public class CartViewModel extends ViewModel {
 
     public void refresh() {
         repository.refreshCartItems();
+    }
+
+    public void removeCartItem(long productId) {
+        repository.removeCartItem(productId);
     }
 }

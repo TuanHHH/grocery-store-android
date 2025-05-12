@@ -29,6 +29,7 @@ import com.hp.grocerystore.R;
 import com.hp.grocerystore.model.feedback.Feedback;
 import com.hp.grocerystore.model.product.Product;
 import com.hp.grocerystore.utils.Extensions;
+import com.hp.grocerystore.utils.LoadingUtil;
 import com.hp.grocerystore.utils.Resource;
 import com.hp.grocerystore.view.adapter.FeedbackAdapter;
 import com.hp.grocerystore.viewmodel.ProductViewModel;
@@ -66,13 +67,13 @@ public class ProductDetailActivity extends AppCompatActivity {
     private void observeProduct(long productId) {
         viewModel.getProduct(productId).observe(this, resource -> {
             if (resource.status == Resource.Status.LOADING) {
-                showLoading();
+                LoadingUtil.showLoading(loadingOverlay, progressBar);
             } else if (resource.status == Resource.Status.SUCCESS) {
                 showProductDetails(resource.data);
-                hideLoading();
+                LoadingUtil.hideLoading(loadingOverlay, progressBar);
             } else {
                 Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
-                hideLoading();
+                LoadingUtil.hideLoading(loadingOverlay, progressBar);
             }
         });
     }
@@ -80,13 +81,11 @@ public class ProductDetailActivity extends AppCompatActivity {
     private void observeFeedback(long productId) {
         viewModel.getFeedback(productId).observe(this, resource -> {
             if (resource.status == Resource.Status.LOADING) {
-                showLoading();
+                //
             } else if (resource.status == Resource.Status.SUCCESS) {
                 feedbackAdapter.setFeedbackList(resource.data);
-                hideLoading();
             } else {
                 Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
-                hideLoading();
             }
         });
     }
@@ -148,18 +147,5 @@ public class ProductDetailActivity extends AppCompatActivity {
 
     public void navigateBack(View view) {
         finish();
-    }
-
-    private void showLoading() {
-        if (loadingOverlay != null) {
-            loadingOverlay.setVisibility(View.VISIBLE);
-            progressBar.setVisibility(View.VISIBLE);
-        }
-    }
-    private void hideLoading() {
-        if (loadingOverlay != null) {
-            loadingOverlay.setVisibility(View.GONE);
-            progressBar.setVisibility(View.GONE);
-        }
     }
 }
