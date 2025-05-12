@@ -43,8 +43,11 @@ public class CartActivity extends AppCompatActivity {
     private TextView textEmptyCart;
     private Button buttonAddMoreProducts;
 
+    private CheckBox checkboxSelectAll;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_cart);
@@ -68,6 +71,7 @@ public class CartActivity extends AppCompatActivity {
         listView = findViewById(R.id.list_cart);
         textEmptyCart = findViewById(R.id.text_empty_cart);
         buttonAddMoreProducts = findViewById(R.id.button_add_more_products);
+        checkboxSelectAll = findViewById(R.id.checkbox_select_all);
         cartItems = new ArrayList<>();
     }
 
@@ -218,18 +222,27 @@ public class CartActivity extends AppCompatActivity {
     }
 
     private void syncSelectAllCheckbox() {
-        CheckBox checkBoxSelectAll = findViewById(R.id.checkbox_select_all);
-        boolean allSelected = true;
-        boolean anySelected = false;
+        if (cartItems == null || cartItems.isEmpty()) {
+            checkboxSelectAll.setChecked(false);
+            return;
+        }
+
+        // Kiểm tra xem tất cả các sản phẩm còn hàng có được chọn không
+        boolean allInStockSelected = true;
+        boolean hasInStockItems = false;
+
         for (CartItem item : cartItems) {
-            if (!item.isSelected()) allSelected = false;
-            if (item.isSelected()) anySelected = true;
+            if (item.getStock() > 0) {
+                hasInStockItems = true;
+                if (!item.isSelected()) {
+                    allInStockSelected = false;
+                    break;
+                }
+            }
         }
-        if (allSelected && !checkBoxSelectAll.isChecked()) {
-            checkBoxSelectAll.setChecked(true);
-        } else if (!allSelected && checkBoxSelectAll.isChecked()) {
-            checkBoxSelectAll.setChecked(false);
-        }
+
+        // Chỉ đánh dấu checkbox "Chọn tất cả" nếu có ít nhất một sản phẩm còn hàng
+        checkboxSelectAll.setChecked(hasInStockItems && allInStockSelected);
     }
 
     private void setupSelectAllCheckbox() {

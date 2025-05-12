@@ -16,10 +16,11 @@ import com.hp.grocerystore.utils.PreferenceManager;
 
 @SuppressLint("CustomSplashScreen")
 public class SplashActivity extends AppCompatActivity {
-    private static final int SPLASH_DELAY = 2000;
+    private static final int SPLASH_DELAY = 1500;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_splash);
@@ -31,7 +32,7 @@ public class SplashActivity extends AppCompatActivity {
 
         new Handler().postDelayed(() -> {
             PreferenceManager prefManager = new PreferenceManager(SplashActivity.this);
-            boolean isLoggedIn = prefManager.getAccessToken() != null;
+            boolean isLoggedIn = prefManager.isUserLoggedIn();
 
             if (isLoggedIn) {
                 // fake access token to check refresh token api

@@ -3,11 +3,17 @@ package com.hp.grocerystore.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.NonNull;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
 
+import com.hp.grocerystore.application.GRCApplication;
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class PreferenceManager {
     private static final String PREF_NAME = "grc_app_pref";
@@ -90,5 +96,23 @@ public class PreferenceManager {
         return accessToken != null && !accessToken.isEmpty()
                 && userName != null && !userName.isEmpty()
                 && userEmail != null && !userEmail.isEmpty();
+    }
+
+    @NonNull
+    public static PreferenceManager saveTokens(List<String> cookies, String accessToken) {
+        Map<String, String> cookieMap = new HashMap<>();
+        for (String cookie : cookies) {
+            String[] parts = cookie.split(";", 2);
+            String[] kv = parts[0].split("=", 2);
+            if (kv.length == 2) {
+                cookieMap.put(kv[0].trim(), kv[1].trim());
+            }
+        }
+
+        String refreshToken = cookieMap.get("refresh_token");
+        String device = cookieMap.get("device");
+        PreferenceManager prefManager = new PreferenceManager(GRCApplication.getAppContext());
+        prefManager.saveTokens(accessToken, refreshToken, device);
+        return prefManager;
     }
 }
