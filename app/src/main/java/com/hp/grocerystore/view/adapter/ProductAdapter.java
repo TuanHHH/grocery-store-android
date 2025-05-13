@@ -1,8 +1,6 @@
 package com.hp.grocerystore.view.adapter;
-import com.hp.grocerystore.R;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,22 +9,30 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-//import com.hp.grocerystore.model.
+
 import com.bumptech.glide.Glide;
+import com.hp.grocerystore.R;
 import com.hp.grocerystore.model.product.Product;
 
 import java.util.List;
 
-//public class ProductAdapter {
-//}
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
 
     private final Context context;
     private final List<Product> productList;
+    private OnItemClickListener onItemClickListener;
+
+    public interface OnItemClickListener {
+        void onItemClick(Product product);
+    }
 
     public ProductAdapter(Context context, List<Product> productList) {
         this.context = context;
         this.productList = productList;
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.onItemClickListener = listener;
     }
 
     @NonNull
@@ -39,23 +45,27 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = productList.get(position);
-//        Log.d("Hien xam ",product.getProductName());
-        holder.tvName.setText(product.getProductName());
-//        String name = product.getProductName();
-//        Log.d("Hien xam", name != null ? name : "Tên sản phẩm null");
 
-//        holder.tvName.setText(name != null ? name : "Không rõ tên");
+        holder.tvName.setText(product.getProductName());
+//        holder.tvName.setText(String.format("%s", product.getProductName()));
+//        holder.tvName.setText("jodsjfods");
         holder.tvPrice.setText(String.format("%,.0f đ", product.getPrice()));
 
         Glide.with(context)
                 .load(product.getImageUrl())
-                .placeholder(R.drawable.product_placeholder) // ảnh placeholder bạn nên thêm vào drawable
+                .placeholder(R.drawable.product_placeholder)
                 .into(holder.imgProduct);
+
+        holder.itemView.setOnClickListener(v -> {
+            if (onItemClickListener != null) {
+                onItemClickListener.onItemClick(product);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return productList.size();
+        return productList == null ? 0 : productList.size();
     }
 
     static class ProductViewHolder extends RecyclerView.ViewHolder {

@@ -72,11 +72,13 @@
 //}
 package com.hp.grocerystore.view.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -101,6 +103,12 @@ public class ProductListActivity extends AppCompatActivity {
     private ProductAdapter productAdapter;
     private final List<Product> productsList = new ArrayList<>();
 
+    private boolean isLoading = false;
+    private boolean isLastPage = false;
+    private int currentPage = 1;
+    private int pageSize = 15;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,14 +121,24 @@ public class ProductListActivity extends AppCompatActivity {
             return insets;
         });
 
+
         recyclerProductList = findViewById(R.id.recyclerViewProducts);
         recyclerProductList.setLayoutManager(new LinearLayoutManager(this));
         productAdapter = new ProductAdapter(this, productsList);
         recyclerProductList.setAdapter(productAdapter);
 
         viewModel = new ViewModelProvider(this).get(ProductViewModel.class);
+
+        productAdapter.setOnItemClickListener(product -> {
+            Intent intent = new Intent(ProductListActivity.this, ProductDetailActivity.class);
+            intent.putExtra("productId", product.getId());
+            startActivity(intent);
+        });
+
         observeProductList();
+        setupPagination();
     }
+
 
     private void observeProductList() {
         viewModel.getProducts().observe(this, resource -> {
@@ -128,7 +146,7 @@ public class ProductListActivity extends AppCompatActivity {
                 // Show loading indicator if needed
             } else if (resource.status == Resource.Status.SUCCESS) {
                 if (resource.data != null) {
-                    productsList.clear();
+//                    productsList.clear();
                     productsList.addAll(resource.data);
                     Log.d("ProductListActivity", "Received products: " + resource.data.size());
                     productAdapter.notifyDataSetChanged();
@@ -139,6 +157,49 @@ public class ProductListActivity extends AppCompatActivity {
 
 //                Toast.makeText(this, resource.message != null ? resource.message : "Đã có lỗi xảy ra", Toast.LENGTH_SHORT).show();
             }
+        });
+    }
+    private void setupPagination() {
+        recyclerProductList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (layoutManager == null) return;
+
+                int visibleItemCount = layoutManager.getChildCount();
+                int totalItemCount = layoutManager.getItemCount();
+                int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+
+                if (!isLoading && !isLastPage) {
+                    if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                            && firstVisibleItemPosition >= 0) {
+                        loadMoreProducts(); // Gọi API để tải thêm sản phẩm
+                    }
+                }
+            }
+        });
+    }
+
+    private void loadMoreProducts() {
+        isLoading = true;
+        viewModel.loadMoreProducts();
+        // Gọi API qua Retrofit hoặc các phương thức tương tự
+        viewModel.getProducts().observe(this, resource -> {
+            if (resource.status == Resource.Status.LOADING) {
+                // Hiển thị loading indicator nếu cần
+            } else if (resource.status == Resource.Status.SUCCESS) {
+                if (resource.data != null && !resource.data.isEmpty()) {
+                    productsList.addAll(resource.data);
+                    productAdapter.notifyDataSetChanged();
+                    currentPage++;
+                } else {
+                    isLastPage = true; // Đã tải hết sản phẩm
+                }
+            } else {
+                Toast.makeText(this, "Đã có lỗi xảy ra", Toast.LENGTH_SHORT).show();
+            }
+            isLoading = false;
         });
     }
 }

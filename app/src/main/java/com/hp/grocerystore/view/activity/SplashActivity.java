@@ -37,7 +37,8 @@ public class SplashActivity extends AppCompatActivity {
             if (isLoggedIn) {
                 // fake access token to check refresh token api
 //                prefManager.setAccessToken("fake-eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdWRvcmkxMDA4QGdtYWlsLmNvbSIsImV4cCI6MTc0NTI3MDA1MCwiaWF0IjoxNzQ1MjI2ODUwLCJ1c2VyIjp7ImlkIjozMSwiZW1haWwiOiJzdWRvcmkxMDA4QGdtYWlsLmNvbSIsIm5hbWUiOiJTdWRvcmkiLCJyb2xlIjp7ImlkIjoyLCJyb2xlTmFtZSI6IlVTRsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiJdfQ.h8pGHiiUVGlZ3DM9p5zqdt7agcE9yYoCU7q4lgJ3Mlxg2HI7BVP5nvpm3Ef2x0o-K8OA9NJxn-VQVVzqc_QHYQ");
-                startActivity(new Intent(SplashActivity.this, ProductDetailActivity.class));
+//                startActivity(new Intent(SplashActivity.this, ProductDetailActivity.class));
+                startActivity(new Intent(SplashActivity.this, ProductListActivity.class));
             } else {
                 startActivity(new Intent(SplashActivity.this, LoginActivity.class));
             }
