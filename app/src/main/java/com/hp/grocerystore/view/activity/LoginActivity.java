@@ -85,7 +85,9 @@ public class LoginActivity extends AppCompatActivity {
                 case SUCCESS:
                     hideLoading();
                     Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+//                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    Intent intent = new Intent(LoginActivity.this, ProductListActivity.class);
+//                    Intent intent = new Intent(LoginActivity.this, ProductDetailActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                     break;
