@@ -59,14 +59,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progress_bar);
         viewModel = new ViewModelProvider(this).get(ProductViewModel.class);
         setupRecyclerView();
-//        long productId = 222;
-        long productId = getIntent().getLongExtra("productId", -1);
-        if (productId == -1) {
-            Toast.makeText(this, "Lỗi: Không tìm thấy sản phẩm", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
+        long productId = 222;
         observeProduct(productId);
         observeFeedback(productId);
     }

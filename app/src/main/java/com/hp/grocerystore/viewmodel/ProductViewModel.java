@@ -23,8 +23,6 @@ public class ProductViewModel extends ViewModel {
         this.repository = new ProductRepository(productApi, feedbackApi);
     }
 
-//    public LiveData<Resource<Product>> getProducts();
-
     public LiveData<Resource<Product>> getProduct(long productId) {
         return repository.getProduct(productId);
     }
