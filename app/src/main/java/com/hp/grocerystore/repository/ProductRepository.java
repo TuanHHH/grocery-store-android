@@ -113,35 +113,38 @@ public class ProductRepository {
         isLoading = true;
         productsLiveData.setValue(Resource.loading());
 
-        productApi.getProducts(currentPage, 15).enqueue(new Callback<ApiResponse<List<Product>>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<List<Product>>> call, Response<ApiResponse<List<Product>>> response) {
-                isLoading = false;
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<List<Product>> apiResponse = response.body();
-                    if (apiResponse.getStatusCode() == 200) {
-                        List<Product> products = apiResponse.getData();
-                        if (products != null) {
-                            if (products.isEmpty()) {
-                                hasMoreData = false;
+        productApi.getProducts(currentPage, 15, null, null)
+                .enqueue(new Callback<ApiResponse<PaginationResponse<Product>>>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse<PaginationResponse<Product>>> call, Response<ApiResponse<PaginationResponse<Product>>> response) {
+                        isLoading = false;
+                        if (response.isSuccessful() && response.body() != null) {
+                            ApiResponse<PaginationResponse<Product>> apiResponse = response.body();
+                            if (apiResponse.getStatusCode() == 200) {
+                                PaginationResponse<Product> paginationData = apiResponse.getData();
+                                if (paginationData != null && paginationData.getResult() != null) {
+                                    List<Product> products = paginationData.getResult();
+                                    if (products.isEmpty()) {
+                                        hasMoreData = false;
+                                    }
+                                    productsLiveData.setValue(Resource.success(products));
+                                } else {
+                                    productsLiveData.setValue(Resource.error("Không có dữ liệu"));
+                                }
+                            } else {
+                                productsLiveData.setValue(Resource.error(apiResponse.getMessage()));
                             }
-                            productsLiveData.setValue(Resource.success(products));
                         } else {
-                            productsLiveData.setValue(Resource.error("Không có dữ liệu"));
+                            productsLiveData.setValue(Resource.error("Lỗi khi tải dữ liệu"));
                         }
-                    } else {
-                        productsLiveData.setValue(Resource.error(apiResponse.getMessage()));
                     }
-                } else {
-                    productsLiveData.setValue(Resource.error("Lỗi khi tải dữ liệu"));
-                }
-            }
 
-            @Override
-            public void onFailure(Call<ApiResponse<List<Product>>> call, Throwable t) {
-                isLoading = false;
-                productsLiveData.setValue(Resource.error(t.getMessage()));
-            }
-        });
+                    @Override
+                    public void onFailure(Call<ApiResponse<PaginationResponse<Product>>> call, Throwable t) {
+                        isLoading = false;
+                        productsLiveData.setValue(Resource.error(t.getMessage()));
+                    }
+                });
     }
+
 }

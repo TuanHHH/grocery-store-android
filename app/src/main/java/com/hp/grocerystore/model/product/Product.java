@@ -6,7 +6,7 @@ public class Product {
     @SerializedName("id")
     private long id;
 
-    @SerializedName("productName")
+    @SerializedName("product_name")
     private String productName;
 
     @SerializedName("price")
