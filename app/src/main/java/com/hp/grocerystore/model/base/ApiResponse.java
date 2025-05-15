@@ -21,6 +21,14 @@ public class ApiResponse<T> {
         return error;
     }
 
+    public void setError(Object error) {
+        this.error = error;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public String getMessage() {
         return message;
     }

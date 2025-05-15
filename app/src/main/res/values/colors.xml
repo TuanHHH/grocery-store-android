@@ -14,4 +14,7 @@
     <color name="gray_light">#E0E0E0</color>
     <color name="star_yellow">#FFD600</color>
     <color name="background">#FFFFFF</color>
+    <color name="color_variation">#2ECC71</color>
+    <color name="color_variation_shaped">#186c3c</color>
+    <color name="color_variation_tint">#ebfaf2</color>
 </resources>

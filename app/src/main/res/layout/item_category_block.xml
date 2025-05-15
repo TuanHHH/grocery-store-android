@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#F6FFF5"
+    android:paddingBottom="16dp"
+    android:layout_marginTop="16dp">
+
+    <!-- Banner quảng cáo Category -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="4dp"
+        android:background="@drawable/background_gradient"
+        android:layout_marginBottom="8dp"
+        android:gravity="center_vertical"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:backgroundTintMode="src_in"
+        android:elevation="4dp"
+        android:layout_gravity="center"
+        android:shape="rectangle"
+
+        >
+
+        <TextView
+            android:id="@+id/category_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Trái cây"
+            android:textColor="#27ae60"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/category_image"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:src="@drawable/category_placeholder"
+            android:scaleType="fitCenter"
+            android:contentDescription="Banner Category" />
+    </LinearLayout>
+
+    <!-- Container that includes header and content -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:clipChildren="false"
+        android:clipToPadding="false">
+
+        <!-- 2. Section content with background -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp"
+            android:elevation="5dp"> <!-- Cao hơn trapezoid -->
+
+            <!-- View nền -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_category_header"
+                android:layout_gravity="center" />
+
+            <!-- Content -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="16dp">
+
+                <!-- RecyclerView -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerView_products"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="4dp"
+                    android:nestedScrollingEnabled="false"
+                    android:layout_marginVertical="8dp"
+                    android:scrollbars="none"
+                    tools:listitem="@layout/item_product" />
+
+                <!-- Xem thêm -->
+                <TextView
+                    android:id="@+id/btn_view_more"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Xem thêm sản phẩm Trái cây >"
+                    android:textColor="#57606f"
+                    android:textSize="14sp"
+                    android:layout_gravity="center"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- 3. Label "TRÁI CÂY" nổi trên cùng -->
+        <TextView
+            android:id="@+id/section_title"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_gravity="top|center_horizontal"
+            android:background="@drawable/bg_category_label"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:text="TRÁI CÂY"
+            android:textStyle="bold"
+            android:textColor="#27ae60"
+            android:gravity="center"
+            android:elevation="0dp"
+            android:translationZ="10dp"
+            android:layout_marginTop="6dp"
+            android:outlineProvider="none"
+            />
+    </FrameLayout>
+</LinearLayout>

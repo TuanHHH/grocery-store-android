@@ -4,8 +4,10 @@ import android.content.Context;
 
 import com.hp.grocerystore.network.api.AuthApi;
 import com.hp.grocerystore.network.api.CartApi;
+import com.hp.grocerystore.network.api.CategoryApi;
 import com.hp.grocerystore.network.api.FeedbackApi;
 import com.hp.grocerystore.network.api.ProductApi;
+import com.hp.grocerystore.network.api.WishlistApi;
 import com.hp.grocerystore.network.authenticator.TokenAuthenticator;
 import com.hp.grocerystore.network.interceptor.AuthInterceptor;
 import com.hp.grocerystore.network.interceptor.UserAgentInterceptor;
@@ -45,5 +47,11 @@ public class RetrofitClient {
 
     public static CartApi getCartApi(Context context) {
         return createRetrofit(context).create(CartApi.class);
+    }
+    public static CategoryApi getCategoryApi(Context context) {
+        return createRetrofit(context).create(CategoryApi.class);
+    }
+    public static WishlistApi getWishlistApi(Context context) {
+        return createRetrofit(context).create(WishlistApi.class);
     }
 }

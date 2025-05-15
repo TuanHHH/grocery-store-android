@@ -6,7 +6,7 @@ public class Product {
     @SerializedName("id")
     private long id;
 
-    @SerializedName("productName")
+    @SerializedName("product_name")
     private String productName;
 
     @SerializedName("price")
@@ -38,6 +38,8 @@ public class Product {
 
     @SerializedName("description")
     private String description;
+    @SerializedName("category")
+    private String category;
 
     public long getId() {
         return id;
@@ -85,5 +87,9 @@ public class Product {
 
     public String getDescription() {
         return description;
+    }
+
+    public String getCategory() {
+        return category;
     }
 }

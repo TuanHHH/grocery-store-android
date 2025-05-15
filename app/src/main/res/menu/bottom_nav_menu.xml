@@ -9,6 +9,10 @@
         android:icon="@drawable/ic_category"
         android:title="Danh mục"/>
     <item
+        android:id="@+id/navigation_heart"
+        android:icon="@drawable/ic_heart_outline"
+        android:title="Yêu thích"/>
+    <item
         android:id="@+id/navigation_cart"
         android:icon="@drawable/ic_cart"
         android:title="Giỏ hàng"/>
