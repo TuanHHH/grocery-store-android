@@ -7,6 +7,8 @@
     android:background="@color/white"
     tools:context=".view.fragment.HomeFragment">
 
+
+
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -74,19 +76,27 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <ProgressBar
+                android:id="@+id/progress_bar_category_view"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:visibility="visible"
+                android:indeterminate="true" />
             <!-- Danh sách category -->
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:scrollbars="none">
-
+                android:scrollbars="none"
+                >
                 <LinearLayout
                     android:id="@+id/category_container"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingHorizontal="8dp" />
+                    android:paddingHorizontal="8dp"
+                    android:visibility="gone"/>
             </HorizontalScrollView>
 
             <!-- Giao diện sản phẩm -->
@@ -95,7 +105,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="16dp"/>
+                android:layout_marginTop="16dp"
+                android:visibility="gone"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

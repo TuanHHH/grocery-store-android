@@ -8,7 +8,13 @@
     android:background="#FFFFFF"
     tools:context=".view.fragment.SearchFragment"
     >
-
+    <ProgressBar
+        android:id="@+id/progress_bar_search_view"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:visibility="visible"
+        android:indeterminate="true" />
     <!-- Danh mục nhỏ -->
     <HorizontalScrollView
         android:layout_width="match_parent"
@@ -24,8 +30,9 @@
             android:orientation="horizontal"
             android:paddingHorizontal="8dp"
             android:paddingVertical="6dp"
-            android:layout_marginHorizontal="4dp"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone"/>
     </HorizontalScrollView>
 
     <RelativeLayout
@@ -135,6 +142,7 @@
 
 
     </RelativeLayout>
+
     <!-- Danh sách sản phẩm -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_result_products"
@@ -142,6 +150,7 @@
         android:layout_height="match_parent"
         android:padding="8dp"
         android:layout_marginBottom="70dp"
+        android:visibility="gone"
         />
 
 </LinearLayout>

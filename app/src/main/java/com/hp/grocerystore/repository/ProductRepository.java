@@ -182,4 +182,55 @@ public class ProductRepository {
 
         return liveData;
     }
+
+    public LiveData<Resource<List<Product>>> searchProducts(int page, int size, String filter) {
+        MutableLiveData<Resource<List<Product>>> liveData = new MutableLiveData<>();
+        liveData.setValue(Resource.loading());
+        productApi.searchProducts(page, size, filter).enqueue(new Callback<ApiResponse<PagedResult<Product>>>() {
+
+
+            @Override
+            public void onResponse(Call<ApiResponse<PagedResult<Product>>> call, Response<ApiResponse<PagedResult<Product>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Product> products = response.body().getData().getResult();
+                    liveData.setValue(Resource.success(products));
+                } else {
+                    liveData.setValue(Resource.error("Lỗi khi tải danh sách sản phẩm"));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<PagedResult<Product>>> call, Throwable throwable) {
+                liveData.setValue(Resource.error(throwable.getMessage()));
+            }
+        });
+
+        return liveData;
+    }
+
+    public LiveData<Resource<List<Product>>> searchAndFilterProducts(int page, int size, String filter1,
+                                                                     String filter2,String filter3,String filter4,String sort) {
+        MutableLiveData<Resource<List<Product>>> liveData = new MutableLiveData<>();
+        liveData.setValue(Resource.loading());
+        productApi.searchAndFilterProducts(page, size, filter1,filter2,filter3,filter4,sort).enqueue(new Callback<ApiResponse<PagedResult<Product>>>() {
+
+
+            @Override
+            public void onResponse(Call<ApiResponse<PagedResult<Product>>> call, Response<ApiResponse<PagedResult<Product>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Product> products = response.body().getData().getResult();
+                    liveData.setValue(Resource.success(products));
+                } else {
+                    liveData.setValue(Resource.error("Lỗi khi tải danh sách sản phẩm"));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<PagedResult<Product>>> call, Throwable throwable) {
+                liveData.setValue(Resource.error(throwable.getMessage()));
+            }
+        });
+
+        return liveData;
+    }
 }

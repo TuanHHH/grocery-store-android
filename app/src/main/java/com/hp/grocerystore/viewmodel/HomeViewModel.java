@@ -26,4 +26,7 @@ public class HomeViewModel extends ViewModel {
     public LiveData<Resource<List<Category>>> getAllCategories() {
         return categoryRepository.getAllCategories();
     }
+    public LiveData<Resource<Category>> getCategoryById(long categoryId) {
+        return categoryRepository.getCategoryById(categoryId);
+    }
 }

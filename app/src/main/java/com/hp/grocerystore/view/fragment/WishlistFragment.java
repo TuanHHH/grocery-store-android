@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.hp.grocerystore.R;
@@ -38,7 +39,9 @@ public class WishlistFragment extends Fragment {
     private WishlistViewModel mViewModel;
     private RecyclerView recyclerView;
     private WishlistAdapter adapter;
+    private ProgressBar progressBar;
     private List<Wishlist> wishlist = new ArrayList<>();
+
 
     public static WishlistFragment newInstance() {
         return new WishlistFragment();
@@ -59,6 +62,7 @@ public class WishlistFragment extends Fragment {
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         adapter = new WishlistAdapter(getContext(), wishlist);
         recyclerView.setAdapter(adapter);
+        progressBar = view.findViewById(R.id.progress_bar_wishlist_view);
 
         // Khởi tạo ViewModel
         mViewModel = new ViewModelProvider(this, new ViewModelProvider.Factory() {
@@ -82,6 +86,8 @@ public class WishlistFragment extends Fragment {
         mViewModel.getWishlistLiveData().observe(getViewLifecycleOwner(), resource -> {
             switch (resource.status) {
                 case SUCCESS:
+                    progressBar.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
                     if (resource.data != null && !resource.data.isEmpty()) {
                         adapter.updateData(resource.data);
                     } else {
@@ -94,7 +100,8 @@ public class WishlistFragment extends Fragment {
                     break;
 
                 case LOADING:
-                    // Hiển thị tiến trình nếu cần
+                    progressBar.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.GONE);
                     break;
             }
         });
