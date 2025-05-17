@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.appbar.AppBarLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -11,9 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
-        android:padding="12dp"
-        android:background="@android:color/transparent"
-        app:title="">
+        android:background="@android:color/transparent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -21,19 +18,15 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
-            <!-- Menu Button - riêng biệt -->
             <ImageButton
-                android:id="@+id/btn_menu"
+                android:id="@+id/btn_back"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:minWidth="48dp"
                 android:minHeight="48dp"
-                android:padding="8dp"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_menu_rounded"
-                android:src="@drawable/ic_menu"
-                android:contentDescription="Menu" />
-
+                android:src="@drawable/ic_back" />
 
             <!-- Search Container -->
             <LinearLayout
@@ -43,10 +36,9 @@
                 android:orientation="horizontal"
                 android:background="@drawable/bg_search_rounded"
                 android:gravity="center_vertical"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp">
+                android:layout_marginEnd="8dp">
 
-                <!-- Icon Kính Lúp - Có thể bấm -->
+                <!-- Icon Kính Lúp -->
                 <ImageButton
                     android:id="@+id/btn_search"
                     android:layout_width="wrap_content"
@@ -70,7 +62,6 @@
                     android:inputType="text"
                     android:imeOptions="actionSearch" />
 
-                <!-- Close Button -->
                 <ImageButton
                     android:id="@+id/btn_close"
                     android:layout_width="wrap_content"
@@ -81,8 +72,17 @@
                     android:background="@android:color/transparent"
                     android:src="@drawable/ic_close"
                     android:contentDescription="Đóng" />
-
             </LinearLayout>
+            <ImageButton
+                android:id="@+id/btn_cart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/ic_cart"
+                android:background="@android:color/transparent"
+                android:contentDescription="Giỏ hàng"
+                android:padding="8dp" />
         </LinearLayout>
     </androidx.appcompat.widget.Toolbar>
 </com.google.android.material.appbar.AppBarLayout>

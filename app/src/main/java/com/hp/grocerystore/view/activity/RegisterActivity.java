@@ -91,7 +91,6 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        // Gọi API đăng ký
         viewModel.register(name, email, password).observe(this, resource -> {
             if (resource == null) return;
 
