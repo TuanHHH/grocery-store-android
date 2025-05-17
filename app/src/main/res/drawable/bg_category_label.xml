@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--<shape xmlns:android="http://schemas.android.com/apk/res/android">-->
+<!--    <solid android:color="#E8F8F3" />-->
+<!--    <stroke-->
+<!--        android:width="2dp"-->
+<!--        android:color="#27ae60" />-->
+<!--    <corners android:bottomLeftRadius="8dp"-->
+<!--        android:bottomRightRadius="8dp" />-->
+<!--</shape>-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Left top shadow -->
+    <item android:right="2dp" android:bottom="0dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#3027ae60" /> <!-- 30% opacity of #27ae60 -->
+            <corners
+                android:bottomLeftRadius="16dp"
+                android:bottomRightRadius="16dp"
+                />
+            <padding android:left="2dp" android:top="2dp" />
+
+        </shape>
+    </item>
+
+    <!--     Right top shadow-->
+    <item android:bottom="0dp" android:left="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#3027ae60" /> <!-- 30% opacity of #27ae60 -->
+            <corners
+                android:bottomLeftRadius="16dp"
+                android:bottomRightRadius="16dp"
+                />
+            <padding android:right="2dp" android:top="2dp" />
+
+        </shape>
+    </item>
+    <!--    <item android:bottom="2dp">-->
+    <!--        <shape android:shape="rectangle">-->
+    <!--            <solid android:color="#3027ae60" /> &lt;!&ndash; 30% opacity of #27ae60 &ndash;&gt;-->
+    <!--            <corners android:radius="16dp"-->
+    <!--                />-->
+    <!--            <padding android:bottom="2dp" />-->
+    <!--        </shape>-->
+    <!--    </item>-->
+
+    <!-- Main content -->
+    <item android:top="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#e0f2e9" /> <!-- Light green background -->
+            <corners
+
+                android:bottomLeftRadius="8dp"
+                android:bottomRightRadius="8dp" />
+            <stroke
+                android:width="1dp"
+                android:color="#27ae60" /> <!-- Border color -->
+        </shape>
+    </item>
+</layer-list>
+    <!--<shape android:shape="rectangle" xmlns:android="http://schemas.android.com/apk/res/android">-->
+    <!--    <solid android:color="#e0f2e9" /> &lt;!&ndash; Light green background &ndash;&gt;-->
+    <!--    <corners-->
+
+    <!--        android:bottomLeftRadius="8dp"-->
+    <!--        android:bottomRightRadius="8dp" />-->
+    <!--    <stroke-->
+    <!--        android:width="1dp"-->
+    <!--        android:color="#27ae60" /> &lt;!&ndash; Border color &ndash;&gt;-->
+    <!--</shape>-->

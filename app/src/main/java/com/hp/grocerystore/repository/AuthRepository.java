@@ -39,12 +39,17 @@ public class AuthRepository {
             @Override
             public void onResponse(Call<ApiResponse<AuthResponse>> call, Response<ApiResponse<AuthResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    AuthResponse loginData = response.body().getData();
-                    String accessToken = loginData.getAccessToken();
-                    List<String> cookies = response.headers().values("Set-Cookie");
-                    PreferenceManager prefManager = PreferenceManager.saveTokens(cookies, accessToken);
-                    prefManager.saveUserData(loginData.getUser().getName(), loginData.getUser().getEmail());
-                    loginResult.setValue(Resource.success(loginData));
+                    if (response.body().getStatusCode() == 200) {
+                        AuthResponse loginData = response.body().getData();
+                        String accessToken = loginData.getAccessToken();
+                        List<String> cookies = response.headers().values("Set-Cookie");
+                        PreferenceManager prefManager = PreferenceManager.saveTokens(cookies, accessToken);
+                        prefManager.saveUserData(loginData.getUser().getName(), loginData.getUser().getEmail());
+                        loginResult.setValue(Resource.success(loginData));
+                    }
+                    else {
+                        loginResult.setValue(Resource.error(response.body().getMessage()));
+                    }
                 } else {
                     String errorMessage = "Đăng nhập thất bại";
                     try {
@@ -78,7 +83,7 @@ public class AuthRepository {
             public void onResponse(Call<ApiResponse<RegisterResponse>> call, Response<ApiResponse<RegisterResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<RegisterResponse> apiResponse = response.body();
-                    if (apiResponse.getStatusCode() == 200) {
+                    if (apiResponse.getStatusCode() == 201) {
                         registerResult.setValue(Resource.success(apiResponse.getData()));
                     } else {
                         registerResult.setValue(Resource.error(apiResponse.getMessage()));

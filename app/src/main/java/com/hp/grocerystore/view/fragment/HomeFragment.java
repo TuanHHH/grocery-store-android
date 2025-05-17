@@ -1,0 +1,212 @@
+package com.hp.grocerystore.view.fragment;
+
+
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+
+import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
+import com.hp.grocerystore.R;
+import com.hp.grocerystore.application.GRCApplication;
+import com.hp.grocerystore.model.category.Category;
+import com.hp.grocerystore.model.product.Product;
+import com.hp.grocerystore.model.wishlist.Wishlist;
+import com.hp.grocerystore.network.RetrofitClient;
+import com.hp.grocerystore.repository.CategoryRepository;
+import com.hp.grocerystore.repository.ProductRepository;
+import com.hp.grocerystore.repository.WishlistRepository;
+import com.hp.grocerystore.utils.GridSpacingItemDecoration;
+import com.hp.grocerystore.utils.LoadingUtil;
+import com.hp.grocerystore.view.adapter.CategoryAdapter;
+import com.hp.grocerystore.view.adapter.ProductAdapter;
+import com.hp.grocerystore.view.adapter.WishlistAdapter;
+import com.hp.grocerystore.viewmodel.HomeViewModel;
+import com.hp.grocerystore.viewmodel.ProductViewModel;
+import com.hp.grocerystore.viewmodel.WishlistViewModel;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class HomeFragment extends Fragment {
+
+    private HomeViewModel homeViewModel;
+    private WishlistViewModel wishlistViewModel;
+
+    private RecyclerView recyclerViewProducts;
+    private LinearLayout linearCategoryContainer, linearCategoryBlockContainer;
+    private TextView btnViewMore;
+    private List<Category> categoryList = new ArrayList<>();
+    private List<Product> productList = new ArrayList<>();
+    private List<Wishlist> wishLists = new ArrayList<>();
+    private ProductAdapter adapter;
+    private CategoryAdapter categoryAdapter;
+    private WishlistAdapter wishlistAdapter;
+
+
+    public static HomeFragment newInstance() {
+        return new HomeFragment();
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_home, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+//        btnViewMore = view.findViewById(R.id.btn_view_more);
+        linearCategoryContainer = view.findViewById(R.id.category_container);
+        linearCategoryBlockContainer = view.findViewById(R.id.category_block_container);
+
+
+        // ViewModelProvider có thể được dùng với factory nếu ProductRepository cần context hoặc params
+        homeViewModel = new ViewModelProvider(this, new ViewModelProvider.Factory() {
+            @NonNull
+            @Override
+            public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+                ProductRepository productRepo = new ProductRepository(RetrofitClient.getProductApi(GRCApplication.getAppContext())); // Đảm bảo constructor đúng
+                CategoryRepository categoryRepo = new CategoryRepository(RetrofitClient.getCategoryApi(GRCApplication.getAppContext()));
+                return (T) new HomeViewModel(productRepo, categoryRepo);
+            }
+        }).get(HomeViewModel.class);
+
+        wishlistViewModel =  new ViewModelProvider(this, new ViewModelProvider.Factory() {
+            @NonNull
+            @Override
+            public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+                WishlistRepository wishlistRepo = new WishlistRepository(RetrofitClient.getWishlistApi(GRCApplication.getAppContext()));  // Đảm bảo constructor đúng
+                return (T) new WishlistViewModel(wishlistRepo);
+            }
+        }).get(WishlistViewModel.class);
+
+
+        adapter = new ProductAdapter(getContext(), productList);
+//        adapter.setWishlistViewModel(wishlistViewModel);
+
+        categoryAdapter = new CategoryAdapter(getContext(), categoryList);
+
+        // Gọi ViewModel để load data
+        loadCategories();
+    }
+
+    private void loadProducts(int page, int size, String filter) {
+        homeViewModel.getProducts(page, size, filter).observe(getViewLifecycleOwner(), resource -> {
+            switch (resource.status) {
+                case LOADING:
+                    // TODO: Hiển thị loading nếu muốn
+                    break;
+
+                case SUCCESS:
+                    List<Product> products = resource.data;
+                    if (products != null) {
+                        adapter.setProductList(products); // cập nhật danh sách sản phẩm
+                    }
+                    break;
+
+                case ERROR:
+                    Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        });
+    }
+
+    private void loadCategories() {
+        homeViewModel.getAllCategories().observe(getViewLifecycleOwner(), resource -> {
+
+            switch (resource.status){
+                case LOADING:
+                    // TODO: Hiển thị loading nếu muốn
+                    break;
+
+                case SUCCESS:
+                    List<Category> categoryList = resource.data;
+                    categoryAdapter.setCategoryList(categoryList);
+                    categoryAdapter.populateHorizontalLinearLayout(linearCategoryContainer);
+                    for (Category category: categoryList){
+                        addCategoryBlock(category);
+                    }
+                    break;
+                case ERROR:
+                    Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        });
+    }
+    private void addCategoryBlock(Category category) {
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        View categoryView = inflater.inflate(R.layout.item_category_block, linearCategoryBlockContainer, false);
+
+        // Gắn tên và ảnh
+        TextView categoryName = categoryView.findViewById(R.id.category_name);
+        TextView sectionTitle = categoryView.findViewById(R.id.section_title);
+        ImageView categoryImage = categoryView.findViewById(R.id.category_image);
+        RecyclerView recyclerView = categoryView.findViewById(R.id.recyclerView_products);
+        TextView btnViewMore = categoryView.findViewById(R.id.btn_view_more);
+
+        categoryName.setText(category.getName());
+        // Load ảnh bằng Glide/Picasso nếu có URL ảnh
+        Glide.with(this)
+                .load(category.getImageUrl()) // giả sử có thumbnail
+                .placeholder(R.drawable.category_placeholder)
+                .into(categoryImage);
+        sectionTitle.setText(category.getName().toUpperCase());
+
+        // RecyclerView config
+
+
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        recyclerView.setHasFixedSize(true);
+        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin_product_grid);
+        recyclerView.addItemDecoration(new GridSpacingItemDecoration(3, spacingInPixels, true));
+
+        ProductAdapter productAdapter = new ProductAdapter(getContext(), new ArrayList<>(),wishlistViewModel);
+        recyclerView.setAdapter(productAdapter);
+
+        // Gọi API load sản phẩm theo category.slug
+        String filter = "category.slug~'" + category.getSlug() + "'";
+        homeViewModel.getProducts(1, 6, filter).observe(getViewLifecycleOwner(), resource -> {
+            switch (resource.status){
+                case LOADING:
+
+                    break;
+                case SUCCESS:
+                    productAdapter.setProductList(resource.data);
+                    break;
+                case ERROR:
+                    Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        });
+
+        // "Xem thêm" logic
+        btnViewMore.setText("Xem thêm sản phẩm " + category.getName() + " >");
+        btnViewMore.setOnClickListener(v -> {
+            // TODO: Navigate tới ProductListActivityFragment filtered by category
+        });
+
+        // Thêm view vào container
+        linearCategoryBlockContainer.addView(categoryView);
+    }
+
+}

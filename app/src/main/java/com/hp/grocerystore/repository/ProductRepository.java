@@ -9,6 +9,7 @@ import com.hp.grocerystore.model.feedback.Feedback;
 import com.hp.grocerystore.model.product.Product;
 import com.hp.grocerystore.network.api.FeedbackApi;
 import com.hp.grocerystore.network.api.ProductApi;
+import com.hp.grocerystore.utils.PagedResult;
 import com.hp.grocerystore.utils.Resource;
 
 import java.util.List;
@@ -26,6 +27,18 @@ public class ProductRepository {
     private int currentPage;
     private boolean isLoading;
     private boolean hasMoreData;
+
+    public ProductRepository(ProductApi productApi) {
+        this.productApi = productApi;
+        this.feedbackApi = null; // hoặc có thể loại bỏ nếu không dùng
+        this.productLiveData = new MutableLiveData<>();
+        this.feedbackLiveData = new MutableLiveData<>();
+        this.productsLiveData = new MutableLiveData<>();
+        this.currentPage = 1;
+        this.isLoading = false;
+        this.hasMoreData = true;
+    }
+
 
     public ProductRepository(ProductApi productApi, FeedbackApi feedbackApi) {
         this.productApi = productApi;
@@ -143,5 +156,30 @@ public class ProductRepository {
                 productsLiveData.setValue(Resource.error(t.getMessage()));
             }
         });
+    }
+
+
+    public LiveData<Resource<List<Product>>> getHomeProducts(int page, int size, String filter) {
+        MutableLiveData<Resource<List<Product>>> liveData = new MutableLiveData<>();
+        liveData.setValue(Resource.loading());
+
+        productApi.getProductsPaginated(page, size, filter).enqueue(new Callback<ApiResponse<PagedResult<Product>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<PagedResult<Product>>> call, Response<ApiResponse<PagedResult<Product>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Product> products = response.body().getData().getResult();
+                    liveData.setValue(Resource.success(products));
+                } else {
+                    liveData.setValue(Resource.error("Lỗi khi tải danh sách sản phẩm"));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<PagedResult<Product>>> call, Throwable t) {
+                liveData.setValue(Resource.error(t.getMessage()));
+            }
+        });
+
+        return liveData;
     }
 }

@@ -59,7 +59,14 @@ public class ProductDetailActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progress_bar);
         viewModel = new ViewModelProvider(this).get(ProductViewModel.class);
         setupRecyclerView();
-        long productId = 222;
+        Intent intent = getIntent();
+        long productId;
+        if (intent.hasExtra("product_id")){
+            productId = (long) intent.getSerializableExtra("product_id");
+        }else{
+            productId = 222;
+        }
+
         observeProduct(productId);
         observeFeedback(productId);
     }
