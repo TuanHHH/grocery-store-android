@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hp.grocerystore.R;
 import com.hp.grocerystore.application.GRCApplication;
 import com.hp.grocerystore.model.category.Category;
@@ -174,10 +175,18 @@ public class HomeFragment extends Fragment {
 
         categoryName.setText(category.getName());
         // Load ảnh bằng Glide/Picasso nếu có URL ảnh
-        Glide.with(this)
-                .load(category.getImageUrl()) // giả sử có thumbnail
-                .placeholder(R.drawable.category_placeholder)
-                .into(categoryImage);
+        String imageUrl = category.getImageUrl();
+        if (imageUrl != null && (imageUrl.endsWith(".jpg") || imageUrl.endsWith(".png") || imageUrl.endsWith(".jpeg"))) {
+            Glide.with(this)
+                    .load(imageUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
+                    .placeholder(R.drawable.category_placeholder)
+                    .into(categoryImage);
+        } else {
+            // Có thể đặt placeholder mặc định hoặc lấy thumbnail nếu là video
+            categoryImage.setImageResource(R.drawable.category_placeholder);
+        }
         sectionTitle.setText(category.getName().toUpperCase());
 
         // RecyclerView config

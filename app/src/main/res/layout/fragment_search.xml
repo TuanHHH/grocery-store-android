@@ -163,6 +163,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false" />
+            <ProgressBar
+                android:id="@+id/progress_bar_loadmore_view"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:indeterminate="true" />
 
             <TextView
                 android:id="@+id/btn_view_more_product"
@@ -177,13 +184,7 @@
                 android:layout_marginBottom="24dp"
                 android:drawableEnd="@drawable/ic_arrow_down"
                 android:drawablePadding="8dp"/>
-            <ProgressBar
-                android:id="@+id/progress_bar_loadmore_view"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="center"
-                android:visibility="gone"
-                android:indeterminate="true" />
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

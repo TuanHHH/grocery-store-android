@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hp.grocerystore.R;
 //import com.hp.grocerystore.model.product.Product;
 import com.hp.grocerystore.model.product.Product;
@@ -86,11 +87,18 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.Wishli
             tvName.setText(product.getProductName());
             tvPrice.setText(product.getPrice() + "đ");
 
-            Glide.with(itemView.getContext())
-                    .load(product.getImageUrl())
-                    .placeholder(R.drawable.placeholder_product)
-                    .error(R.drawable.placeholder_product)
-                    .into(imgProduct);
+            String imageUrl = product.getImageUrl();
+            if (imageUrl != null && (imageUrl.endsWith(".jpg") || imageUrl.endsWith(".png") || imageUrl.endsWith(".jpeg"))) {
+                Glide.with(itemView.getContext())
+                        .load(imageUrl)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true)
+                        .placeholder(R.drawable.category_placeholder)
+                        .into(imgProduct);
+            } else {
+                // Có thể đặt placeholder mặc định hoặc lấy thumbnail nếu là video
+                imgProduct.setImageResource(R.drawable.category_placeholder);
+            }
         }
     }
 }
