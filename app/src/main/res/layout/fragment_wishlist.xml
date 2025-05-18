@@ -2,7 +2,13 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
+    <ProgressBar
+        android:id="@+id/progress_bar_wishlist_view"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:visibility="visible"
+        android:indeterminate="true" />
     <TextView
         android:id="@+id/tv_title_wishlist"
         android:layout_width="match_parent"
@@ -16,12 +22,51 @@
         android:paddingBottom="12dp"
         android:background="@android:color/white" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_wishlist"
+
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/wislist_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/tv_title_wishlist"
-        android:clipToPadding="false"
-        android:layout_marginBottom="70dp" />
+        android:fillViewport="true"
+        android:layout_marginBottom="42dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_wishlist"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/tv_title_wishlist"
+                android:clipToPadding="false"
+                android:layout_marginBottom="20dp"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/btn_view_more_wishlist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tải thêm"
+                android:textColor="#57606f"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_gravity="center"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="24dp"
+                android:drawableEnd="@drawable/ic_arrow_down"
+                android:drawablePadding="8dp"/>
+            <ProgressBar
+                android:id="@+id/progress_bar_loadmore_view"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:indeterminate="true" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </RelativeLayout>

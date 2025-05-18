@@ -23,15 +23,12 @@ public class WishlistViewModel extends ViewModel {
         return wishlistRepository.getAddWishlistResult();
     }
 
-    public LiveData<Resource<List<Wishlist>>> getWishlistLiveData() {
-        return wishlistRepository.getWishlistLiveData();
+    public LiveData<Resource<List<Wishlist>>> getWishlistLiveData(int page, int size) {
+        return wishlistRepository.getWishlist(page, size);
     }
 
     public void addWishlist(long productId) {
         wishlistRepository.addWishlist(productId);
     }
 
-    public void fetchWishlist(int page, int size) {
-        wishlistRepository.getWishlist(page, size);  // Gọi method void, dữ liệu trả về qua LiveData trong repository
-    }
 }

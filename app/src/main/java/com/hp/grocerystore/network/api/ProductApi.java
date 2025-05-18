@@ -26,4 +26,21 @@ public interface ProductApi {
             @Query("size") int size,
             @Query("filter") String filter
     );
+
+    @GET("products/search")
+    Call<ApiResponse<PagedResult<Product>>> searchProducts(
+            @Query("page") int page,
+            @Query("size") int size,
+            @Query("filter") String filter);
+
+    @GET("products")
+    Call<ApiResponse<PagedResult<Product>>> searchAndFilterProducts(
+            @Query("page") int page,
+            @Query("size") int size,
+            @Query("filter") String filter1,
+            @Query("filter") String filter2,
+            @Query("filter") String filter3,
+            @Query("filter") String filter4,
+            @Query("sort") String sort
+    );
 }

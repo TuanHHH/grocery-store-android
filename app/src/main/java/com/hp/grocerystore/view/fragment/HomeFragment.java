@@ -20,6 +20,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,27 +36,32 @@ import com.hp.grocerystore.repository.ProductRepository;
 import com.hp.grocerystore.repository.WishlistRepository;
 import com.hp.grocerystore.utils.GridSpacingItemDecoration;
 import com.hp.grocerystore.utils.LoadingUtil;
+import com.hp.grocerystore.view.activity.MainActivity;
 import com.hp.grocerystore.view.adapter.CategoryAdapter;
 import com.hp.grocerystore.view.adapter.ProductAdapter;
 import com.hp.grocerystore.view.adapter.WishlistAdapter;
 import com.hp.grocerystore.viewmodel.HomeViewModel;
 import com.hp.grocerystore.viewmodel.ProductViewModel;
+import com.hp.grocerystore.viewmodel.SharedViewModel;
 import com.hp.grocerystore.viewmodel.WishlistViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
-
+    //View Model
     private HomeViewModel homeViewModel;
     private WishlistViewModel wishlistViewModel;
-
+    private SharedViewModel sharedViewModel;
+    //Components
     private RecyclerView recyclerViewProducts;
     private LinearLayout linearCategoryContainer, linearCategoryBlockContainer;
-    private TextView btnViewMore;
+    private ProgressBar progressBarCategoryView;
+    //List
     private List<Category> categoryList = new ArrayList<>();
     private List<Product> productList = new ArrayList<>();
     private List<Wishlist> wishLists = new ArrayList<>();
+    //Adapter
     private ProductAdapter adapter;
     private CategoryAdapter categoryAdapter;
     private WishlistAdapter wishlistAdapter;
@@ -78,7 +84,7 @@ public class HomeFragment extends Fragment {
 //        btnViewMore = view.findViewById(R.id.btn_view_more);
         linearCategoryContainer = view.findViewById(R.id.category_container);
         linearCategoryBlockContainer = view.findViewById(R.id.category_block_container);
-
+        progressBarCategoryView = view.findViewById(R.id.progress_bar_category_view);
 
         // ViewModelProvider có thể được dùng với factory nếu ProductRepository cần context hoặc params
         homeViewModel = new ViewModelProvider(this, new ViewModelProvider.Factory() {
@@ -99,12 +105,12 @@ public class HomeFragment extends Fragment {
                 return (T) new WishlistViewModel(wishlistRepo);
             }
         }).get(WishlistViewModel.class);
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
 
         adapter = new ProductAdapter(getContext(), productList);
-//        adapter.setWishlistViewModel(wishlistViewModel);
-
         categoryAdapter = new CategoryAdapter(getContext(), categoryList);
+        wishlistAdapter = new WishlistAdapter(getContext(), wishLists);
 
         // Gọi ViewModel để load data
         loadCategories();
@@ -130,20 +136,22 @@ public class HomeFragment extends Fragment {
             }
         });
     }
-
     private void loadCategories() {
         homeViewModel.getAllCategories().observe(getViewLifecycleOwner(), resource -> {
 
             switch (resource.status){
                 case LOADING:
-                    // TODO: Hiển thị loading nếu muốn
+                    progressBarCategoryView.setVisibility(View.VISIBLE);
+                    linearCategoryContainer.setVisibility(View.GONE);
                     break;
-
                 case SUCCESS:
-                    List<Category> categoryList = resource.data;
+                    progressBarCategoryView.setVisibility(View.GONE);
+                    linearCategoryContainer.setVisibility(View.VISIBLE);
+
+                    categoryList = resource.data;
                     categoryAdapter.setCategoryList(categoryList);
                     categoryAdapter.populateHorizontalLinearLayout(linearCategoryContainer);
-                    for (Category category: categoryList){
+                    for (Category category : categoryList) {
                         addCategoryBlock(category);
                     }
                     break;
@@ -173,8 +181,6 @@ public class HomeFragment extends Fragment {
         sectionTitle.setText(category.getName().toUpperCase());
 
         // RecyclerView config
-
-
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         recyclerView.setHasFixedSize(true);
         int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin_product_grid);
@@ -188,9 +194,10 @@ public class HomeFragment extends Fragment {
         homeViewModel.getProducts(1, 6, filter).observe(getViewLifecycleOwner(), resource -> {
             switch (resource.status){
                 case LOADING:
-
+                    linearCategoryBlockContainer.setVisibility(View.GONE);
                     break;
                 case SUCCESS:
+                    linearCategoryBlockContainer.setVisibility(View.VISIBLE);
                     productAdapter.setProductList(resource.data);
                     break;
                 case ERROR:
@@ -201,12 +208,45 @@ public class HomeFragment extends Fragment {
 
         // "Xem thêm" logic
         btnViewMore.setText("Xem thêm sản phẩm " + category.getName() + " >");
+        btnViewMore.setTag(category);
         btnViewMore.setOnClickListener(v -> {
-            // TODO: Navigate tới ProductListActivityFragment filtered by category
+            Category selectedCategory = (Category) v.getTag();
+            if(getContext() instanceof MainActivity) {
+                MainActivity mainActivity = (MainActivity) getContext();
+                mainActivity.goToSearchWithCategory(category.getId(),"category.slug~'" + selectedCategory.getSlug() + "'");
+            }
         });
 
         // Thêm view vào container
         linearCategoryBlockContainer.addView(categoryView);
+    }
+    private void loadWishlist(int page, int size, WishlistLoadedCallback callback){
+        // Khởi tạo observer 1 lần (ví dụ trong onViewCreated)
+        wishlistViewModel.getWishlistLiveData(page,size).observe(getViewLifecycleOwner(), resource -> {
+            switch (resource.status) {
+                case SUCCESS:
+                    if (resource.data != null && !resource.data.isEmpty()) {
+                        wishLists = new ArrayList<>(resource.data);
+                        wishlistAdapter.updateData(wishLists);
+                    } else {
+                        Toast.makeText(getContext(), "Danh sách yêu thích trống!", Toast.LENGTH_SHORT).show();
+                    }
+                    if (callback != null) callback.onWishlistLoaded();
+                    break;
+                case ERROR:
+                    Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
+                    if (callback != null) callback.onWishlistLoaded();
+                    break;
+                case LOADING:
+                    // Hiển thị tiến trình nếu cần
+                    break;
+            }
+        });
+        // Khi cần load dữ liệu (ví dụ ở onViewCreated hoặc khi refresh)
+    }
+
+    public interface WishlistLoadedCallback {
+        void onWishlistLoaded();
     }
 
 }

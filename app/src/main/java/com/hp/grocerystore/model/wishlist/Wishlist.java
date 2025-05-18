@@ -16,6 +16,11 @@ public class Wishlist {
     @SerializedName("active")
     private boolean active;
 
+    public Wishlist() {
+    }
+
+
+
     public long getId() {
         return id;
     }

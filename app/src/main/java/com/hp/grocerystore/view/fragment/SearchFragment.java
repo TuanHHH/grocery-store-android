@@ -1,13 +1,13 @@
 package com.hp.grocerystore.view.fragment;
 
-import static android.content.Intent.getIntent;
-
 import androidx.core.content.ContextCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -16,11 +16,14 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,15 +35,18 @@ import com.hp.grocerystore.network.RetrofitClient;
 import com.hp.grocerystore.repository.CategoryRepository;
 import com.hp.grocerystore.repository.ProductRepository;
 import com.hp.grocerystore.repository.WishlistRepository;
+import com.hp.grocerystore.view.activity.FilterActivity;
 import com.hp.grocerystore.view.adapter.CategoryAdapter;
 import com.hp.grocerystore.view.adapter.ProductAdapter;
 import com.hp.grocerystore.viewmodel.HomeViewModel;
 import com.hp.grocerystore.viewmodel.SearchViewModel;
+import com.hp.grocerystore.viewmodel.SharedViewModel;
 import com.hp.grocerystore.viewmodel.WishlistViewModel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SearchFragment extends Fragment {
     // View Model
@@ -48,6 +54,7 @@ public class SearchFragment extends Fragment {
 
     private SearchViewModel mViewModel;
     private WishlistViewModel wishlistViewModel;
+    private SharedViewModel sharedViewModel;
     // List Data
     private List<Product> productList = new ArrayList<>();
     private List<Product> originalProductList = new ArrayList<>();
@@ -57,15 +64,22 @@ public class SearchFragment extends Fragment {
     private CategoryAdapter categoryAdapter;
     // Components
     private RecyclerView recyclerView;
-    private LinearLayout linearCategoryContainer;
+    private LinearLayout linearCategoryContainer, btnFilter;
     private TextView selectedSortView = null;
+    private TextView btnViewMore;
     private TextView[] filters;
+    private ProgressBar progressBarSearchView, progressBarLoadmoreView;
     // Filter Args
     private long selectedCategoryId = -1; // Không lọc
+    private String selectedCategorySlug = "";
     private String selectedSort = "";    // Không sắp xếp
     private int minPrice = 0;
     private int maxPrice = 500000;
-
+    private String searchText = "";
+    // load more product
+    private boolean isLoading, isLastPage, isLoadMore;
+    private int currentPage = 1;
+    private int countLoad = 0;
 
     public static SearchFragment newInstance() {
         return new SearchFragment();
@@ -82,7 +96,11 @@ public class SearchFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         recyclerView = view.findViewById(R.id.search_result_products);
         linearCategoryContainer = view.findViewById(R.id.category_container);
-
+        progressBarSearchView = view.findViewById(R.id.progress_bar_search_view);
+        progressBarLoadmoreView = view.findViewById(R.id.progress_bar_loadmore_view);
+        btnFilter = view.findViewById(R.id.btn_filter);
+        btnViewMore = view.findViewById(R.id.btn_view_more_product);
+        NestedScrollView nestedScrollView = view.findViewById(R.id.search_result_container); // thêm ID nếu cần
         // Danh sách nút sắp xếp sản phẩm
         filters = new TextView[]{
                 view.findViewById(R.id.filter_best_seller),
@@ -91,7 +109,14 @@ public class SearchFragment extends Fragment {
                 view.findViewById(R.id.filter_price_high)
         };
 
-        mViewModel = new ViewModelProvider(this).get(SearchViewModel.class);
+        mViewModel = new ViewModelProvider(this, new ViewModelProvider.Factory() {
+            @NonNull
+            @Override
+            public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+                ProductRepository productRepo = new ProductRepository(RetrofitClient.getProductApi(GRCApplication.getAppContext())); // Đảm bảo constructor đúng
+                return (T) new SearchViewModel(productRepo);
+            }
+        }).get(SearchViewModel.class);
 
         homeViewModel = new ViewModelProvider(this, new ViewModelProvider.Factory() {
             @NonNull
@@ -112,11 +137,67 @@ public class SearchFragment extends Fragment {
             }
         }).get(WishlistViewModel.class);
 
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
         productAdapter = new ProductAdapter(getContext(), productList,wishlistViewModel);
 
 
-        // Test mẫu product results
-        loadProducts(1, 6, "category.slug~'sua'");
+        // Nếu chưa có giá trị được share thì load mặc định
+        if (sharedViewModel.getFilterData().getValue() == null) {
+            searchProducts(1, 10, "");
+        }
+
+        sharedViewModel.getFilterData().observe(getViewLifecycleOwner(), filterData  -> {
+            if (filterData != null) {
+                selectedCategoryId = filterData.getSelectedCategoryId();
+                selectedCategorySlug = filterData.getSelectedCategorySlug();
+                selectedSort = filterData.getSelectedSort() == null ? "": filterData.getSelectedSort();
+                minPrice = filterData.getMinPrice();
+                maxPrice = filterData.getMaxPrice();
+                searchText = filterData.getSearchText() == null ? "": filterData.getSearchText();
+                String sortQuery = getSortQuery(selectedSort);
+                isLoadMore = false;
+                // Cập nhật lại giao diện sort
+                for (TextView filter: filters){
+                    if (filter.getText().equals(selectedSort)){
+                        selectedSortView = filter;
+                        filter.setSelected(true);
+                        filter.setTextColor(ContextCompat.getColor(getContext(), R.color.color_variation));
+                        selectedSort = filter.getText().toString();
+                    }
+                }
+
+                if(selectedCategorySlug != null && selectedCategorySlug.contains("category.slug")
+                && selectedSort.isEmpty() && minPrice == 0 && maxPrice == 0 && searchText.isEmpty()){
+                    // Cập nhật lại giao diện category list
+                    categoryAdapter.setupCategorySelection(linearCategoryContainer, selectedCategoryId, this::onCategoryClick);
+                    addSortOptions();
+                    maxPrice = 500000;
+                    currentPage = 1;
+                    loadProducts(currentPage, 10, selectedCategorySlug, true);
+                }else if(selectedCategorySlug != null && selectedCategorySlug.contains("productName")
+                && selectedSort.isEmpty() && minPrice == 0 && maxPrice == 0 && searchText.isEmpty()){
+                    categoryAdapter.setupCategorySelection(linearCategoryContainer, selectedCategoryId, this::onCategoryClick);
+                    addSortOptions();
+                    maxPrice = 500000;
+                    searchText = selectedCategorySlug;
+                    currentPage = 1;
+                    searchProducts(currentPage, 10, selectedCategorySlug);
+                }else{
+                    if (searchText.contains("productName~")) {
+                        currentPage = 1;
+                        searchAndFilterProducts(currentPage, 10, "category.slug~'" + selectedCategorySlug + "'",
+                                searchText, "price > " + minPrice, "price < " + maxPrice, sortQuery);
+                    } else{
+                        currentPage = 1;
+                        searchAndFilterProducts(1,10, "category.slug~'"+selectedCategorySlug+"'",
+                                "productName~'"+searchText+"'", "price > "+minPrice, "price < "+maxPrice, sortQuery);
+                    }
+                }
+            }
+        });
+
+
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
         recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.setAdapter(productAdapter);
@@ -124,43 +205,215 @@ public class SearchFragment extends Fragment {
         categoryAdapter = new CategoryAdapter(getContext(), categoryList);
         loadCategories();
         addSortOptions();
+        btnViewMore.setOnClickListener(v -> {
+            currentPage++;
+            setSortAndFilterProduct(currentPage);
+        });
 
+        // Biến cờ kiểm soát click
+        AtomicBoolean isCooldown = new AtomicBoolean(false);
+        // Thời gian delay giữa các lần click (ms)
+        int delayMillis = 2000; // 3 giây
+
+
+        nestedScrollView.getViewTreeObserver().addOnScrollChangedListener(() -> {
+            Rect scrollBounds = new Rect();
+            nestedScrollView.getHitRect(scrollBounds);
+
+            if (btnViewMore.getLocalVisibleRect(scrollBounds)) {
+                if (btnViewMore.getVisibility() == View.VISIBLE && !isCooldown.get() && countLoad > 1) {
+                    btnViewMore.postDelayed(() -> {
+                        btnViewMore.performClick();
+                    }, 1000);
+                    isCooldown.set(true);
+
+                    // Đặt lại sau khoảng thời gian delay
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        isCooldown.set(false);
+                    }, delayMillis);
+                }else {
+                    countLoad++;
+                    // Đặt lại sau khoảng thời gian delay
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        isCooldown.set(false);
+                    }, delayMillis);
+                }
+            }
+        });
+
+        //Gửi dữ liệu cho filter activity
+        btnFilter.setOnClickListener(v -> {
+            Intent filterIntent = new Intent(getActivity(), FilterActivity.class);
+            filterIntent.putExtra("selected_categoryId", (Serializable) selectedCategoryId);
+            filterIntent.putExtra("selected_sort", (Serializable) selectedSort);
+            filterIntent.putExtra("min_price", (Serializable) minPrice);
+            filterIntent.putExtra("max_price", (Serializable) maxPrice);
+            filterIntent.putExtra("search_text", (Serializable) searchText);
+            startActivity(filterIntent);
+        });
     }
 
 
-    private void loadProducts(int page, int size, String filter) {
+    private void loadProducts(int page, int size, String filter, boolean hasFilterCategory) {
         homeViewModel.getProducts(page, size, filter).observe(getViewLifecycleOwner(), resource -> {
             switch (resource.status) {
                 case LOADING:
-                    // TODO: Hiển thị loading nếu muốn
+                    if(page==1){
+                        progressBarSearchView.setVisibility(View.VISIBLE);
+                        recyclerView.setVisibility(View.GONE);
+                    } else{
+                        progressBarLoadmoreView.setVisibility(View.VISIBLE);
+                    }
                     break;
 
                 case SUCCESS:
-                    productList = resource.data;
-                    if (originalProductList.size() == 0) {
-                        originalProductList = new ArrayList<>(productList);
+                    progressBarSearchView.setVisibility(View.GONE);
+                    progressBarLoadmoreView.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+
+                    if (resource.data != null && !resource.data.isEmpty()) {
+
+                        if (page == 1) {
+                            productList = new ArrayList<>(resource.data);
+                        } else {
+                            // Load thêm -> nối thêm vào danh sách cũ
+                            productList.addAll(resource.data);
+                        }
+                        productAdapter.setProductList(productList);
                     }
-                    if (productList != null) {
-                        productAdapter.setProductList(productList); // cập nhật danh sách sản phẩm
+
+                    if (resource.data == null || resource.data.size() < size) {
+                        btnViewMore.setVisibility(View.GONE);
+                    } else {
+                        btnViewMore.setVisibility(View.VISIBLE);
                     }
                     break;
 
                 case ERROR:
+                    progressBarSearchView.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
                     Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
                     break;
             }
         });
     }
 
+    private void searchProducts(int page, int size, String filter) {
+        mViewModel.searchProducts(page, size, filter).observe(getViewLifecycleOwner(), resource -> {
+            switch (resource.status) {
+                case LOADING:
+                    if(page==1){
+                        progressBarSearchView.setVisibility(View.VISIBLE);
+                        recyclerView.setVisibility(View.GONE);
+                    } else{
+                        progressBarLoadmoreView.setVisibility(View.VISIBLE);
+                    }
+                    break;
+
+                case SUCCESS:
+                    progressBarSearchView.setVisibility(View.GONE);
+                    progressBarLoadmoreView.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                    //  productList = resource.data;
+//                    if (originalProductList.size() == 0) {
+//                        originalProductList = new ArrayList<>(productList);
+//                    }
+//                    if (productList != null) {
+//                        productAdapter.setProductList(productList); // cập nhật danh sách sản phẩm
+//                    }
+//                    if (resource.data != null && !resource.data.isEmpty()) {
+//                        productList = resource.data;
+//                        productAdapter.setProductList(productList);
+//                    }
+
+                    if (resource.data != null && !resource.data.isEmpty()) {
+                        if (page == 1) {
+                            productList = new ArrayList<>(resource.data);
+                        } else {
+                            // Load thêm -> nối thêm vào danh sách cũ
+                            productList.addAll(resource.data);
+                        }
+                        productAdapter.setProductList(productList);
+                    }
+
+                    if (resource.data == null || resource.data.size() < size) {
+                        btnViewMore.setVisibility(View.GONE);
+                    } else {
+                        btnViewMore.setVisibility(View.VISIBLE);
+                    }
+                    break;
+
+                case ERROR:
+                    progressBarSearchView.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                    Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        });
+    }
+
+    private void searchAndFilterProducts(int page, int size,
+                                         String filter1, String filter2,
+                                         String filter3, String filter4,String sort) {
+        mViewModel.searchAndFilterProducts(page, size, filter1, filter2, filter3, filter4, sort)
+                .observe(getViewLifecycleOwner(), resource -> {
+                    switch (resource.status) {
+                        case LOADING:
+                            if(page==1){
+                                progressBarSearchView.setVisibility(View.VISIBLE);
+                                recyclerView.setVisibility(View.GONE);
+                            } else{
+                                progressBarLoadmoreView.setVisibility(View.VISIBLE);
+                            }
+                            break;
+
+                        case SUCCESS:
+                            progressBarSearchView.setVisibility(View.GONE);
+                            progressBarLoadmoreView.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
+
+                            if (resource.data != null && !resource.data.isEmpty()) {
+//                                 Nếu đang load trang đầu -> khởi tạo
+                                if (page == 1) {
+                                    productList = new ArrayList<>(resource.data);
+                                } else {
+                                    // Load thêm -> nối thêm vào danh sách cũ
+                                    productList.addAll(resource.data);
+                                }
+//                                productList = resource.data;
+                                productAdapter.setProductList(productList);
+                            }
+
+//                            // Ẩn nút nếu số sản phẩm trả về < size mỗi trang (không còn để load)
+                            if (resource.data == null || resource.data.size() < size) {
+                                btnViewMore.setVisibility(View.GONE);
+                            } else {
+                                btnViewMore.setVisibility(View.VISIBLE);
+                            }
+                            break;
+
+                        case ERROR:
+                            progressBarSearchView.setVisibility(View.GONE);
+                            progressBarLoadmoreView.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
+                            Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
+                            break;
+                    }
+                });
+    }
     private void loadCategories() {
         homeViewModel.getAllCategories().observe(getViewLifecycleOwner(), resource -> {
 
             switch (resource.status){
                 case LOADING:
-                    // TODO: Hiển thị loading nếu muốn
+                    progressBarSearchView.setVisibility(View.VISIBLE);
+                    linearCategoryContainer.setVisibility(View.GONE);
                     break;
 
                 case SUCCESS:
+                    progressBarSearchView.setVisibility(View.GONE);
+                    linearCategoryContainer.setVisibility(View.VISIBLE);
+
                     categoryList = resource.data;
                     categoryAdapter.setCategoryList(categoryList);
                     categoryAdapter.populateHorizontalLinearLayout(linearCategoryContainer);
@@ -192,7 +445,6 @@ public class SearchFragment extends Fragment {
                             }
                         }
                     });
-
                     break;
                 case ERROR:
                     Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
@@ -202,18 +454,41 @@ public class SearchFragment extends Fragment {
     }
 
     private void onCategoryClick(Category category) {
+        selectedCategorySlug = "";
         if (selectedCategoryId == category.getId()) {
             // Nếu click lại category đang chọn thì bỏ lọc
             selectedCategoryId = -1;
+            selectedCategorySlug = "";
             categoryAdapter.setSelectedCategoryId(-1);
         } else {
             // Cập nhật category mới được chọn
             selectedCategoryId = category.getId();
+            selectedCategorySlug = category.getSlug();
             categoryAdapter.setSelectedCategoryId(selectedCategoryId);
         }
 
-        // Lọc lại danh sách sản phẩm
-        filterProducts();
+        if (searchText.contains("productName~"))
+            if((minPrice > 0 || maxPrice < 500000) & maxPrice!=0 & minPrice != 0){
+                currentPage = 1;
+                searchAndFilterProducts(currentPage,10, "category.slug~'"+selectedCategorySlug+"'",
+                        searchText, "price > "+minPrice, "price < "+maxPrice, getSortQuery(selectedSort));
+            }else {
+                currentPage = 1;
+                searchAndFilterProducts(currentPage,10, "category.slug~'"+selectedCategorySlug+"'",
+                        searchText, "", "", getSortQuery(selectedSort));
+            }
+        else
+        {
+            if((minPrice > 0 || maxPrice < 500000) & maxPrice!=0 & minPrice != 0){
+                currentPage = 1;
+                searchAndFilterProducts(currentPage,10, "category.slug~'"+selectedCategorySlug+"'",
+                        "productName~'"+searchText+"'", "price > "+minPrice, "price < "+maxPrice, getSortQuery(selectedSort));
+            }else {
+                currentPage = 1;
+                searchAndFilterProducts(currentPage,10, "category.slug~'"+selectedCategorySlug+"'",
+                        "productName~'"+searchText+"'", "", "", getSortQuery(selectedSort));
+            }
+        }
 
         // Cập nhật giao diện selection
         categoryAdapter.setupCategorySelection(
@@ -233,10 +508,16 @@ public class SearchFragment extends Fragment {
                     filter.setSelected(true);
                     filter.setTextColor(ContextCompat.getColor(getContext(), R.color.color_variation));
                 }
+            }else{
+                if (selectedSortView!=null){
+                    selectedSortView.setSelected(false);
+                    selectedSortView.setTextColor(Color.BLACK);
+                    selectedSortView = null;
+                }
             }
             filter.setOnClickListener(v -> {
                 TextView clickedFilter = (TextView) v;
-
+                isLoadMore = false;
                 // Nếu click lại chính filter đang chọn => hủy sắp xếp
                 if (selectedSortView == clickedFilter) {
                     selectedSortView.setSelected(false);
@@ -256,47 +537,67 @@ public class SearchFragment extends Fragment {
                     clickedFilter.setTextColor(ContextCompat.getColor(getContext(), R.color.color_variation));
                     selectedSort = clickedFilter.getText().toString();
                 }
-                filterProducts();
+                //Sắp xếp sản phẩm
+                if (searchText.contains("productName~"))
+                    if((minPrice > 0 || maxPrice < 500000) & maxPrice!=0 & minPrice != 0){
+                        searchAndFilterProducts(1,10, "category.slug~'"+selectedCategorySlug+"'",
+                                searchText, "price > "+minPrice, "price < "+maxPrice, getSortQuery(selectedSort));
+                    }else {
+                        searchAndFilterProducts(1,10, "category.slug~'"+selectedCategorySlug+"'",
+                                searchText, "", "", getSortQuery(selectedSort));
+                    }
+                else
+                {
+                    if((minPrice > 0 || maxPrice < 500000) & maxPrice!=0 & minPrice != 0){
+                        searchAndFilterProducts(1,10, "category.slug~'"+selectedCategorySlug+"'",
+                                "productName~'"+searchText+"'", "price > "+minPrice, "price < "+maxPrice, getSortQuery(selectedSort));
+                    }else {
+                        searchAndFilterProducts(1,10, "category.slug~'"+selectedCategorySlug+"'",
+                                "productName~'"+searchText+"'", "", "", getSortQuery(selectedSort));
+                    }
+                }
             });
         }
     }
 
-    private void filterProducts() {
-        List<Product> filtered = new ArrayList<>(originalProductList);
 
-//         Sửa thêm
-        if (selectedCategoryId != -1) {
-
-            Category selectedCategory = null;
-            for (Category c : categoryList) {
-                if (c.getId() == selectedCategoryId) {
-                    selectedCategory = c;
-                    break;
-                }
-            }
-
-            if (selectedCategory != null) {
-                String selectedSlug = selectedCategory.getSlug();
-                filtered.removeIf(p -> !p.getCategory().equals(selectedSlug));
-            }
-
-        }
-        if(minPrice != 0 || maxPrice != 500000){
-            filtered.removeIf(p -> p.getPrice() < minPrice || p.getPrice() > maxPrice);
-        }
-
+    private String getSortQuery(String selectedSort){
+        String sortQuery = "";
         switch (selectedSort) {
+            case "Bán chạy":
+                sortQuery = "sold,desc";
+                break;
             case "Tên sản phẩm":
-                filtered.sort(Comparator.comparing(Product::getProductName));
+                sortQuery = "productName,asc";
                 break;
             case "Giá thấp đến cao":
-                filtered.sort(Comparator.comparingDouble(Product::getPrice));
+                sortQuery = "price,asc";
                 break;
             case "Giá cao đến thấp":
-                filtered.sort((p1, p2) -> Double.compare(p2.getPrice(), p1.getPrice()));
+                sortQuery = "price,desc";
+                break;
+            default:
+                sortQuery = "";
                 break;
         }
+        return sortQuery;
+    }
+    private void setSortAndFilterProduct(int page){
+        // Lọc lại danh sách sản phẩm
+        if(selectedCategorySlug != null && selectedCategorySlug.contains("category.slug")
+                && selectedSort.isEmpty() &&  searchText.isEmpty()){
+            loadProducts(page, 10, selectedCategorySlug, true);
+        }else if(selectedCategorySlug != null && selectedCategorySlug.contains("productName")
+                && selectedSort.isEmpty()){
+            searchProducts(currentPage, 10, searchText);
+        }else{
+            if (searchText.contains("productName~"))
+                searchAndFilterProducts(page,10, "category.slug~'"+selectedCategorySlug+"'",
+                        searchText, "price > " + minPrice, "price < "+maxPrice, getSortQuery(selectedSort));
+            else
+                searchAndFilterProducts(page,10, "category.slug~'"+selectedCategorySlug+"'",
+                        "productName~'"+searchText+"'", "price > "+minPrice, "price < "+maxPrice, getSortQuery(selectedSort));
+        }
 
-        productAdapter.updateData(filtered);
     }
 }
