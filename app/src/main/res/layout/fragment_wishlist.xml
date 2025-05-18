@@ -9,20 +9,6 @@
         android:layout_gravity="center"
         android:visibility="visible"
         android:indeterminate="true" />
-    <TextView
-        android:id="@+id/tv_title_wishlist"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Yêu thích"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="#0DA55A"
-        android:gravity="center"
-        android:paddingTop="16dp"
-        android:paddingBottom="12dp"
-        android:background="@android:color/white" />
-
-
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/wislist_container"
@@ -36,6 +22,18 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
+            <TextView
+                android:id="@+id/tv_title_wishlist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Yêu thích"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="#0DA55A"
+                android:gravity="center"
+                android:paddingTop="16dp"
+                android:layout_marginBottom="20dp"
+                android:background="@android:color/white" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_wishlist"
@@ -45,6 +43,14 @@
                 android:clipToPadding="false"
                 android:layout_marginBottom="20dp"
                 android:visibility="gone"/>
+
+            <ProgressBar
+                android:id="@+id/progress_bar_loadmore_view"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:indeterminate="true" />
 
             <TextView
                 android:id="@+id/btn_view_more_wishlist"
@@ -59,13 +65,7 @@
                 android:layout_marginBottom="24dp"
                 android:drawableEnd="@drawable/ic_arrow_down"
                 android:drawablePadding="8dp"/>
-            <ProgressBar
-                android:id="@+id/progress_bar_loadmore_view"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="center"
-                android:visibility="gone"
-                android:indeterminate="true" />
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

@@ -20,6 +20,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hp.grocerystore.R;
 import com.hp.grocerystore.model.category.Category;
 import com.hp.grocerystore.view.activity.MainActivity;
@@ -74,10 +75,23 @@ public class CategoryAdapter {
 
             name.setText(category.getName());
 
-            Glide.with(context)
-                    .load(category.getImageUrl())
-                    .placeholder(R.drawable.category_placeholder)
-                    .into(img);
+//            Glide.with(context)
+//                    .load(category.getImageUrl())
+//                    .placeholder(R.drawable.category_placeholder)
+//                    .into(img);
+
+            String imageUrl = category.getImageUrl();
+            if (imageUrl != null && (imageUrl.endsWith(".jpg") || imageUrl.endsWith(".png") || imageUrl.endsWith(".jpeg"))) {
+                Glide.with(context)
+                        .load(imageUrl)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true)
+                        .placeholder(R.drawable.category_placeholder)
+                        .into(img);
+            } else {
+                // Có thể đặt placeholder mặc định hoặc lấy thumbnail nếu là video
+                img.setImageResource(R.drawable.category_placeholder);
+            }
 
             LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
                     (int) (context.getResources().getDisplayMetrics().density * 100),

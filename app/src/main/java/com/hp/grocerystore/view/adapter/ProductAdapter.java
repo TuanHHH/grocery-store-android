@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hp.grocerystore.R;
 import com.hp.grocerystore.model.product.Product;
 import com.hp.grocerystore.model.wishlist.Wishlist;
@@ -155,10 +156,18 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.tvProductName.setText(product.getProductName());
         holder.tvProductPrice.setText(String.format("%,.0f đ", product.getPrice()));
 
-        Glide.with(context)
-                .load(product.getImageUrl())
-                .placeholder(R.drawable.placeholder_product)
-                .into(holder.imgProduct);
+        String imageUrl = product.getImageUrl();
+        if (imageUrl != null && (imageUrl.endsWith(".jpg") || imageUrl.endsWith(".png") || imageUrl.endsWith(".jpeg"))) {
+            Glide.with(context)
+                    .load(imageUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
+                    .placeholder(R.drawable.placeholder_product)
+                    .into(holder.imgProduct);
+        } else {
+            // Có thể đặt placeholder mặc định hoặc lấy thumbnail nếu là video
+            holder.imgProduct.setImageResource(R.drawable.placeholder_product);
+        }
 
         // Gợi ý: Có thể set sự kiện cho nút MUA và icon trái tim tại đây nếu cần
         holder.btnBuy.setOnClickListener(v -> {
