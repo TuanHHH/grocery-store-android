@@ -1,13 +1,13 @@
 package com.hp.grocerystore.view.fragment;
 
-import static android.content.Intent.getIntent;
-
 import androidx.core.content.ContextCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -16,13 +16,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -46,8 +45,8 @@ import com.hp.grocerystore.viewmodel.WishlistViewModel;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SearchFragment extends Fragment {
     // View Model
@@ -67,15 +66,20 @@ public class SearchFragment extends Fragment {
     private RecyclerView recyclerView;
     private LinearLayout linearCategoryContainer, btnFilter;
     private TextView selectedSortView = null;
+    private TextView btnViewMore;
     private TextView[] filters;
-    private ProgressBar progressBarSearchView;
+    private ProgressBar progressBarSearchView, progressBarLoadmoreView;
     // Filter Args
     private long selectedCategoryId = -1; // Không lọc
+    private String selectedCategorySlug = "";
     private String selectedSort = "";    // Không sắp xếp
     private int minPrice = 0;
     private int maxPrice = 500000;
     private String searchText = "";
-
+    // load more product
+    private boolean isLoading, isLastPage, isLoadMore;
+    private int currentPage = 1;
+    private int countLoad = 0;
 
     public static SearchFragment newInstance() {
         return new SearchFragment();
@@ -93,7 +97,10 @@ public class SearchFragment extends Fragment {
         recyclerView = view.findViewById(R.id.search_result_products);
         linearCategoryContainer = view.findViewById(R.id.category_container);
         progressBarSearchView = view.findViewById(R.id.progress_bar_search_view);
+        progressBarLoadmoreView = view.findViewById(R.id.progress_bar_loadmore_view);
         btnFilter = view.findViewById(R.id.btn_filter);
+        btnViewMore = view.findViewById(R.id.btn_view_more_product);
+        NestedScrollView nestedScrollView = view.findViewById(R.id.search_result_container); // thêm ID nếu cần
         // Danh sách nút sắp xếp sản phẩm
         filters = new TextView[]{
                 view.findViewById(R.id.filter_best_seller),
@@ -140,34 +147,17 @@ public class SearchFragment extends Fragment {
             searchProducts(1, 10, "");
         }
 
-
-//        sharedViewModel.getSharedText().observe(getViewLifecycleOwner(), slug -> {
-//            if (slug != null && slug.contains("category.slug")) {
-//                loadProducts(1, 10, slug, true);
-//            }
-//            else if(slug != null && slug.contains("productName")){
-//                searchText = slug;
-//                searchProducts(1, 10, slug);
-//            }
-//            if(selectedSortView != null){
-//                for (TextView filter: filters){
-//                    selectedSortView.setSelected(false);
-//                    selectedSortView.setTextColor(Color.BLACK);
-//                }
-//                selectedSortView = null;
-//                selectedSort = "";
-//            }
-//        });
-
         sharedViewModel.getFilterData().observe(getViewLifecycleOwner(), filterData  -> {
             if (filterData != null) {
                 selectedCategoryId = filterData.getSelectedCategoryId();
-                String selectedCategorySlug = filterData.getSelectedCategorySlug();
+                selectedCategorySlug = filterData.getSelectedCategorySlug();
                 selectedSort = filterData.getSelectedSort() == null ? "": filterData.getSelectedSort();
                 minPrice = filterData.getMinPrice();
                 maxPrice = filterData.getMaxPrice();
                 searchText = filterData.getSearchText() == null ? "": filterData.getSearchText();
-                String sortQuery = "";
+                String sortQuery = getSortQuery(selectedSort);
+                isLoadMore = false;
+                // Cập nhật lại giao diện sort
                 for (TextView filter: filters){
                     if (filter.getText().equals(selectedSort)){
                         selectedSortView = filter;
@@ -176,44 +166,36 @@ public class SearchFragment extends Fragment {
                         selectedSort = filter.getText().toString();
                     }
                 }
-                switch (selectedSort) {
-                    case "Tên sản phẩm":
-                        sortQuery = "productName,asc";
-                        break;
-                    case "Giá thấp đến cao":
-                        sortQuery = "price,asc";
-                        break;
-                    case "Giá cao đến thấp":
-                        sortQuery = "price,desc";
-                        break;
-                    default:
-                        sortQuery = "";
-                        break;
-                }
 
                 if(selectedCategorySlug != null && selectedCategorySlug.contains("category.slug")
                 && selectedSort.isEmpty() && minPrice == 0 && maxPrice == 0 && searchText.isEmpty()){
                     // Cập nhật lại giao diện category list
                     categoryAdapter.setupCategorySelection(linearCategoryContainer, selectedCategoryId, this::onCategoryClick);
                     addSortOptions();
-                    loadProducts(1, 10, selectedCategorySlug, true);
+                    maxPrice = 500000;
+                    currentPage = 1;
+                    loadProducts(currentPage, 10, selectedCategorySlug, true);
                 }else if(selectedCategorySlug != null && selectedCategorySlug.contains("productName")
                 && selectedSort.isEmpty() && minPrice == 0 && maxPrice == 0 && searchText.isEmpty()){
-                    searchText = selectedCategorySlug;
                     categoryAdapter.setupCategorySelection(linearCategoryContainer, selectedCategoryId, this::onCategoryClick);
                     addSortOptions();
-                    searchProducts(1, 10, selectedCategorySlug);
+                    maxPrice = 500000;
+                    searchText = selectedCategorySlug;
+                    currentPage = 1;
+                    searchProducts(currentPage, 10, selectedCategorySlug);
                 }else{
-                    if (searchText.contains("productName~"))
+                    if (searchText.contains("productName~")) {
+                        currentPage = 1;
+                        searchAndFilterProducts(currentPage, 10, "category.slug~'" + selectedCategorySlug + "'",
+                                searchText, "price > " + minPrice, "price < " + maxPrice, sortQuery);
+                    } else{
+                        currentPage = 1;
                         searchAndFilterProducts(1,10, "category.slug~'"+selectedCategorySlug+"'",
-                                searchText, "price > " + minPrice, "price < "+maxPrice, sortQuery);
-                    else
-                        searchAndFilterProducts(1,10, "category.slug~'"+selectedCategorySlug+"'",
-                            "productName~'"+searchText+"'", "price > "+minPrice, "price < "+maxPrice, sortQuery);
+                                "productName~'"+searchText+"'", "price > "+minPrice, "price < "+maxPrice, sortQuery);
+                    }
                 }
             }
         });
-
 
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
@@ -223,7 +205,43 @@ public class SearchFragment extends Fragment {
         categoryAdapter = new CategoryAdapter(getContext(), categoryList);
         loadCategories();
         addSortOptions();
+        btnViewMore.setOnClickListener(v -> {
+            currentPage++;
+            setSortAndFilterProduct(currentPage);
+        });
 
+        // Biến cờ kiểm soát click
+        AtomicBoolean isCooldown = new AtomicBoolean(false);
+        // Thời gian delay giữa các lần click (ms)
+        int delayMillis = 2000; // 3 giây
+
+
+        nestedScrollView.getViewTreeObserver().addOnScrollChangedListener(() -> {
+            Rect scrollBounds = new Rect();
+            nestedScrollView.getHitRect(scrollBounds);
+
+            if (btnViewMore.getLocalVisibleRect(scrollBounds)) {
+                if (btnViewMore.getVisibility() == View.VISIBLE && !isCooldown.get() && countLoad > 1) {
+                    btnViewMore.postDelayed(() -> {
+                        btnViewMore.performClick();
+                    }, 1000);
+                    isCooldown.set(true);
+
+                    // Đặt lại sau khoảng thời gian delay
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        isCooldown.set(false);
+                    }, delayMillis);
+                }else {
+                    countLoad++;
+                    // Đặt lại sau khoảng thời gian delay
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        isCooldown.set(false);
+                    }, delayMillis);
+                }
+            }
+        });
+
+        //Gửi dữ liệu cho filter activity
         btnFilter.setOnClickListener(v -> {
             Intent filterIntent = new Intent(getActivity(), FilterActivity.class);
             filterIntent.putExtra("selected_categoryId", (Serializable) selectedCategoryId);
@@ -240,27 +258,40 @@ public class SearchFragment extends Fragment {
         homeViewModel.getProducts(page, size, filter).observe(getViewLifecycleOwner(), resource -> {
             switch (resource.status) {
                 case LOADING:
-                    progressBarSearchView.setVisibility(View.VISIBLE);
-                    recyclerView.setVisibility(View.GONE);
+                    if(page==1){
+                        progressBarSearchView.setVisibility(View.VISIBLE);
+                        recyclerView.setVisibility(View.GONE);
+                    } else{
+                        progressBarLoadmoreView.setVisibility(View.VISIBLE);
+                    }
                     break;
 
                 case SUCCESS:
                     progressBarSearchView.setVisibility(View.GONE);
+                    progressBarLoadmoreView.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.VISIBLE);
 
-                    productList = resource.data;
-                    if (!hasFilterCategory && originalProductList.size() == 0) {
-                        originalProductList = new ArrayList<>(productList);
+                    if (resource.data != null && !resource.data.isEmpty()) {
+
+                        if (page == 1) {
+                            productList = new ArrayList<>(resource.data);
+                        } else {
+                            // Load thêm -> nối thêm vào danh sách cũ
+                            productList.addAll(resource.data);
+                        }
+                        productAdapter.setProductList(productList);
                     }
-                    if (hasFilterCategory && originalProductList.size() != 0){
-                        originalProductList.clear();
-                    }
-                    if (productList != null) {
-                        productAdapter.setProductList(productList); // cập nhật danh sách sản phẩm
+
+                    if (resource.data == null || resource.data.size() < size) {
+                        btnViewMore.setVisibility(View.GONE);
+                    } else {
+                        btnViewMore.setVisibility(View.VISIBLE);
                     }
                     break;
 
                 case ERROR:
+                    progressBarSearchView.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
                     Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
                     break;
             }
@@ -271,23 +302,50 @@ public class SearchFragment extends Fragment {
         mViewModel.searchProducts(page, size, filter).observe(getViewLifecycleOwner(), resource -> {
             switch (resource.status) {
                 case LOADING:
-                    progressBarSearchView.setVisibility(View.VISIBLE);
-                    recyclerView.setVisibility(View.GONE);
+                    if(page==1){
+                        progressBarSearchView.setVisibility(View.VISIBLE);
+                        recyclerView.setVisibility(View.GONE);
+                    } else{
+                        progressBarLoadmoreView.setVisibility(View.VISIBLE);
+                    }
                     break;
 
                 case SUCCESS:
                     progressBarSearchView.setVisibility(View.GONE);
+                    progressBarLoadmoreView.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.VISIBLE);
-                    productList = resource.data;
+                    //  productList = resource.data;
 //                    if (originalProductList.size() == 0) {
-                        originalProductList = new ArrayList<>(productList);
+//                        originalProductList = new ArrayList<>(productList);
 //                    }
-                    if (productList != null) {
-                        productAdapter.setProductList(productList); // cập nhật danh sách sản phẩm
+//                    if (productList != null) {
+//                        productAdapter.setProductList(productList); // cập nhật danh sách sản phẩm
+//                    }
+//                    if (resource.data != null && !resource.data.isEmpty()) {
+//                        productList = resource.data;
+//                        productAdapter.setProductList(productList);
+//                    }
+
+                    if (resource.data != null && !resource.data.isEmpty()) {
+                        if (page == 1) {
+                            productList = new ArrayList<>(resource.data);
+                        } else {
+                            // Load thêm -> nối thêm vào danh sách cũ
+                            productList.addAll(resource.data);
+                        }
+                        productAdapter.setProductList(productList);
+                    }
+
+                    if (resource.data == null || resource.data.size() < size) {
+                        btnViewMore.setVisibility(View.GONE);
+                    } else {
+                        btnViewMore.setVisibility(View.VISIBLE);
                     }
                     break;
 
                 case ERROR:
+                    progressBarSearchView.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
                     Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
                     break;
             }
@@ -297,33 +355,52 @@ public class SearchFragment extends Fragment {
     private void searchAndFilterProducts(int page, int size,
                                          String filter1, String filter2,
                                          String filter3, String filter4,String sort) {
-        mViewModel.searchAndFilterProducts(page, size, filter1, filter2, filter3, filter4,sort)
+        mViewModel.searchAndFilterProducts(page, size, filter1, filter2, filter3, filter4, sort)
                 .observe(getViewLifecycleOwner(), resource -> {
-            switch (resource.status) {
-                case LOADING:
-                    progressBarSearchView.setVisibility(View.VISIBLE);
-                    recyclerView.setVisibility(View.GONE);
-                    break;
+                    switch (resource.status) {
+                        case LOADING:
+                            if(page==1){
+                                progressBarSearchView.setVisibility(View.VISIBLE);
+                                recyclerView.setVisibility(View.GONE);
+                            } else{
+                                progressBarLoadmoreView.setVisibility(View.VISIBLE);
+                            }
+                            break;
 
-                case SUCCESS:
-                    progressBarSearchView.setVisibility(View.GONE);
-                    recyclerView.setVisibility(View.VISIBLE);
-                    productList = resource.data;
-//                    if (originalProductList.size() == 0) {
-//                        originalProductList = new ArrayList<>(productList);
-//                    }
-                    if (productList != null) {
-                        productAdapter.setProductList(productList); // cập nhật danh sách sản phẩm
+                        case SUCCESS:
+                            progressBarSearchView.setVisibility(View.GONE);
+                            progressBarLoadmoreView.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
+
+                            if (resource.data != null && !resource.data.isEmpty()) {
+//                                 Nếu đang load trang đầu -> khởi tạo
+                                if (page == 1) {
+                                    productList = new ArrayList<>(resource.data);
+                                } else {
+                                    // Load thêm -> nối thêm vào danh sách cũ
+                                    productList.addAll(resource.data);
+                                }
+//                                productList = resource.data;
+                                productAdapter.setProductList(productList);
+                            }
+
+//                            // Ẩn nút nếu số sản phẩm trả về < size mỗi trang (không còn để load)
+                            if (resource.data == null || resource.data.size() < size) {
+                                btnViewMore.setVisibility(View.GONE);
+                            } else {
+                                btnViewMore.setVisibility(View.VISIBLE);
+                            }
+                            break;
+
+                        case ERROR:
+                            progressBarSearchView.setVisibility(View.GONE);
+                            progressBarLoadmoreView.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
+                            Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
+                            break;
                     }
-                    break;
-
-                case ERROR:
-                    Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
-                    break;
-            }
-        });
+                });
     }
-
     private void loadCategories() {
         homeViewModel.getAllCategories().observe(getViewLifecycleOwner(), resource -> {
 
@@ -377,18 +454,41 @@ public class SearchFragment extends Fragment {
     }
 
     private void onCategoryClick(Category category) {
+        selectedCategorySlug = "";
         if (selectedCategoryId == category.getId()) {
             // Nếu click lại category đang chọn thì bỏ lọc
             selectedCategoryId = -1;
+            selectedCategorySlug = "";
             categoryAdapter.setSelectedCategoryId(-1);
         } else {
             // Cập nhật category mới được chọn
             selectedCategoryId = category.getId();
+            selectedCategorySlug = category.getSlug();
             categoryAdapter.setSelectedCategoryId(selectedCategoryId);
         }
 
-        // Lọc lại danh sách sản phẩm
-        filterProducts();
+        if (searchText.contains("productName~"))
+            if((minPrice > 0 || maxPrice < 500000) & maxPrice!=0 & minPrice != 0){
+                currentPage = 1;
+                searchAndFilterProducts(currentPage,10, "category.slug~'"+selectedCategorySlug+"'",
+                        searchText, "price > "+minPrice, "price < "+maxPrice, getSortQuery(selectedSort));
+            }else {
+                currentPage = 1;
+                searchAndFilterProducts(currentPage,10, "category.slug~'"+selectedCategorySlug+"'",
+                        searchText, "", "", getSortQuery(selectedSort));
+            }
+        else
+        {
+            if((minPrice > 0 || maxPrice < 500000) & maxPrice!=0 & minPrice != 0){
+                currentPage = 1;
+                searchAndFilterProducts(currentPage,10, "category.slug~'"+selectedCategorySlug+"'",
+                        "productName~'"+searchText+"'", "price > "+minPrice, "price < "+maxPrice, getSortQuery(selectedSort));
+            }else {
+                currentPage = 1;
+                searchAndFilterProducts(currentPage,10, "category.slug~'"+selectedCategorySlug+"'",
+                        "productName~'"+searchText+"'", "", "", getSortQuery(selectedSort));
+            }
+        }
 
         // Cập nhật giao diện selection
         categoryAdapter.setupCategorySelection(
@@ -417,7 +517,7 @@ public class SearchFragment extends Fragment {
             }
             filter.setOnClickListener(v -> {
                 TextView clickedFilter = (TextView) v;
-
+                isLoadMore = false;
                 // Nếu click lại chính filter đang chọn => hủy sắp xếp
                 if (selectedSortView == clickedFilter) {
                     selectedSortView.setSelected(false);
@@ -437,51 +537,67 @@ public class SearchFragment extends Fragment {
                     clickedFilter.setTextColor(ContextCompat.getColor(getContext(), R.color.color_variation));
                     selectedSort = clickedFilter.getText().toString();
                 }
-                filterProducts();
+                //Sắp xếp sản phẩm
+                if (searchText.contains("productName~"))
+                    if((minPrice > 0 || maxPrice < 500000) & maxPrice!=0 & minPrice != 0){
+                        searchAndFilterProducts(1,10, "category.slug~'"+selectedCategorySlug+"'",
+                                searchText, "price > "+minPrice, "price < "+maxPrice, getSortQuery(selectedSort));
+                    }else {
+                        searchAndFilterProducts(1,10, "category.slug~'"+selectedCategorySlug+"'",
+                                searchText, "", "", getSortQuery(selectedSort));
+                    }
+                else
+                {
+                    if((minPrice > 0 || maxPrice < 500000) & maxPrice!=0 & minPrice != 0){
+                        searchAndFilterProducts(1,10, "category.slug~'"+selectedCategorySlug+"'",
+                                "productName~'"+searchText+"'", "price > "+minPrice, "price < "+maxPrice, getSortQuery(selectedSort));
+                    }else {
+                        searchAndFilterProducts(1,10, "category.slug~'"+selectedCategorySlug+"'",
+                                "productName~'"+searchText+"'", "", "", getSortQuery(selectedSort));
+                    }
+                }
             });
         }
     }
 
-    private void filterProducts() {
-        List<Product> filtered;
-        if (originalProductList.size() != 0){
-            filtered = new ArrayList<>(originalProductList);
-        }else {
-            filtered = new ArrayList<>(productList);
-        }
-//         Sửa thêm
-        if (selectedCategoryId != -1) {
 
-            Category selectedCategory = null;
-            for (Category c : categoryList) {
-                if (c.getId() == selectedCategoryId) {
-                    selectedCategory = c;
-                    break;
-                }
-            }
-
-            if (selectedCategory != null) {
-                String selectedSlug = selectedCategory.getSlug();
-                filtered.removeIf(p -> !p.getCategory().equals(selectedSlug));
-            }
-
-        }
-        if((minPrice > 0 || maxPrice < 500000) & maxPrice!=0 & minPrice != 0){
-            filtered.removeIf(p -> p.getPrice() < minPrice || p.getPrice() > maxPrice);
-        }
-
+    private String getSortQuery(String selectedSort){
+        String sortQuery = "";
         switch (selectedSort) {
+            case "Bán chạy":
+                sortQuery = "sold,desc";
+                break;
             case "Tên sản phẩm":
-                filtered.sort(Comparator.comparing(Product::getProductName));
+                sortQuery = "productName,asc";
                 break;
             case "Giá thấp đến cao":
-                filtered.sort(Comparator.comparingDouble(Product::getPrice));
+                sortQuery = "price,asc";
                 break;
             case "Giá cao đến thấp":
-                filtered.sort((p1, p2) -> Double.compare(p2.getPrice(), p1.getPrice()));
+                sortQuery = "price,desc";
+                break;
+            default:
+                sortQuery = "";
                 break;
         }
+        return sortQuery;
+    }
+    private void setSortAndFilterProduct(int page){
+        // Lọc lại danh sách sản phẩm
+        if(selectedCategorySlug != null && selectedCategorySlug.contains("category.slug")
+                && selectedSort.isEmpty() &&  searchText.isEmpty()){
+            loadProducts(page, 10, selectedCategorySlug, true);
+        }else if(selectedCategorySlug != null && selectedCategorySlug.contains("productName")
+                && selectedSort.isEmpty()){
+            searchProducts(currentPage, 10, searchText);
+        }else{
+            if (searchText.contains("productName~"))
+                searchAndFilterProducts(page,10, "category.slug~'"+selectedCategorySlug+"'",
+                        searchText, "price > " + minPrice, "price < "+maxPrice, getSortQuery(selectedSort));
+            else
+                searchAndFilterProducts(page,10, "category.slug~'"+selectedCategorySlug+"'",
+                        "productName~'"+searchText+"'", "price > "+minPrice, "price < "+maxPrice, getSortQuery(selectedSort));
+        }
 
-        productAdapter.updateData(filtered);
     }
 }

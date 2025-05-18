@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.hp.grocerystore.model.base.ApiResponse;
+import com.hp.grocerystore.model.product.Product;
 import com.hp.grocerystore.model.wishlist.Wishlist;
 import com.hp.grocerystore.network.api.WishlistApi;
 import com.hp.grocerystore.utils.PagedResult;
@@ -63,25 +64,27 @@ public class WishlistRepository {
      * @return LiveData<ApiResponse<PagedResult<Product>>>
      */
 
-        public void getWishlist(int page, int size) {
-            wishlistLiveData.postValue(Resource.loading());
+        public LiveData<Resource<List<Wishlist>>> getWishlist(int page, int size) {
+            MutableLiveData<Resource<List<Wishlist>>> liveData = new MutableLiveData<>();
+            liveData.setValue(Resource.loading(null));
 
             wishlistApi.getProductsInWishlist(page, size).enqueue(new Callback<ApiResponse<PagedResult<Wishlist>>>() {
                 @Override
                 public void onResponse(Call<ApiResponse<PagedResult<Wishlist>>> call, Response<ApiResponse<PagedResult<Wishlist>>> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         List<Wishlist> wishlistItems = response.body().getData().getResult();
-                        wishlistLiveData.postValue(Resource.success(wishlistItems));
+                        liveData.setValue(Resource.success(wishlistItems));
                     } else {
-                        wishlistLiveData.postValue(Resource.error("Lỗi khi tải danh sách yêu thích"));
+                        liveData.setValue(Resource.error("Lỗi khi tải danh sách yêu thích"));
                     }
                 }
 
                 @Override
                 public void onFailure(Call<ApiResponse<PagedResult<Wishlist>>> call, Throwable t) {
-                    wishlistLiveData.postValue(Resource.error(t.getMessage()));
+                    liveData.setValue(Resource.error(t.getMessage()));
                 }
             });
+            return liveData;
         }
 
         // Getter LiveData cho ViewModel hoặc UI quan sát

@@ -222,7 +222,7 @@ public class HomeFragment extends Fragment {
     }
     private void loadWishlist(int page, int size, WishlistLoadedCallback callback){
         // Khởi tạo observer 1 lần (ví dụ trong onViewCreated)
-        wishlistViewModel.getWishlistLiveData().observe(getViewLifecycleOwner(), resource -> {
+        wishlistViewModel.getWishlistLiveData(page,size).observe(getViewLifecycleOwner(), resource -> {
             switch (resource.status) {
                 case SUCCESS:
                     if (resource.data != null && !resource.data.isEmpty()) {
@@ -243,7 +243,6 @@ public class HomeFragment extends Fragment {
             }
         });
         // Khi cần load dữ liệu (ví dụ ở onViewCreated hoặc khi refresh)
-        wishlistViewModel.fetchWishlist(page, size);
     }
 
     public interface WishlistLoadedCallback {

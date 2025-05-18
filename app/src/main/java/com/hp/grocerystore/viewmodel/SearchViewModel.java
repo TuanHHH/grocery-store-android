@@ -1,12 +1,15 @@
 package com.hp.grocerystore.viewmodel;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.hp.grocerystore.model.product.Product;
+import com.hp.grocerystore.network.api.ProductApi;
 import com.hp.grocerystore.repository.ProductRepository;
 import com.hp.grocerystore.utils.Resource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SearchViewModel extends ViewModel {
@@ -23,4 +26,6 @@ public class SearchViewModel extends ViewModel {
                                                                      String filter3, String filter4,String sort) {
         return productRepository.searchAndFilterProducts(page, size, filter1, filter2, filter3, filter4,sort);
     }
+
+
 }

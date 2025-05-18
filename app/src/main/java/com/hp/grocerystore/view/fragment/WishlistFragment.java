@@ -1,12 +1,10 @@
 package com.hp.grocerystore.view.fragment;
 
-import static android.content.Context.MODE_PRIVATE;
-
+import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.graphics.Rect;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -15,16 +13,17 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hp.grocerystore.R;
 import com.hp.grocerystore.application.GRCApplication;
-import com.hp.grocerystore.model.product.Product;
 import com.hp.grocerystore.model.wishlist.Wishlist;
 import com.hp.grocerystore.network.RetrofitClient;
 import com.hp.grocerystore.repository.WishlistRepository;
@@ -33,14 +32,19 @@ import com.hp.grocerystore.viewmodel.WishlistViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class WishlistFragment extends Fragment {
 
     private WishlistViewModel mViewModel;
     private RecyclerView recyclerView;
     private WishlistAdapter adapter;
-    private ProgressBar progressBar;
+    private ProgressBar progressBar,progressBarLoadmoreView;
+    private NestedScrollView nestedScrollView;
+    private TextView btnViewMore;
     private List<Wishlist> wishlist = new ArrayList<>();
+    private int currentPage = 1;
+    private int countLoad = 0;
 
 
     public static WishlistFragment newInstance() {
@@ -63,6 +67,10 @@ public class WishlistFragment extends Fragment {
         adapter = new WishlistAdapter(getContext(), wishlist);
         recyclerView.setAdapter(adapter);
         progressBar = view.findViewById(R.id.progress_bar_wishlist_view);
+        progressBarLoadmoreView = view.findViewById(R.id.progress_bar_loadmore_view);
+        btnViewMore = view.findViewById(R.id.btn_view_more_wishlist);
+        nestedScrollView = view.findViewById(R.id.wislist_container);
+
 
         // Khởi tạo ViewModel
         mViewModel = new ViewModelProvider(this, new ViewModelProvider.Factory() {
@@ -80,33 +88,86 @@ public class WishlistFragment extends Fragment {
         // Load dữ liệu wishlist từ view model
         loadWishlist(1,10);
 
+        btnViewMore.setOnClickListener(v -> {
+            currentPage++;
+            loadWishlist(currentPage,10);
+        });
+
+        // Biến cờ kiểm soát click
+        AtomicBoolean isCooldown = new AtomicBoolean(false);
+        // Thời gian delay giữa các lần click (ms)
+        int delayMillis = 3000; // 3 giây
+
+
+        nestedScrollView.getViewTreeObserver().addOnScrollChangedListener(() -> {
+            Rect scrollBounds = new Rect();
+            nestedScrollView.getHitRect(scrollBounds);
+
+            if (btnViewMore.getLocalVisibleRect(scrollBounds)) {
+                if (btnViewMore.getVisibility() == View.VISIBLE && !isCooldown.get() && countLoad > 1) {
+                    btnViewMore.postDelayed(() -> {
+                        btnViewMore.performClick();
+                    }, 1000);
+                    isCooldown.set(true);
+
+                    // Đặt lại sau khoảng thời gian delay
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        isCooldown.set(false);
+                    }, delayMillis);
+                }else {
+                    countLoad++;
+                    // Đặt lại sau khoảng thời gian delay
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        isCooldown.set(false);
+                    }, delayMillis);
+                }
+            }
+        });
+
+
     }
     private void loadWishlist(int page, int size){
         // Khởi tạo observer 1 lần (ví dụ trong onViewCreated)
-        mViewModel.getWishlistLiveData().observe(getViewLifecycleOwner(), resource -> {
+        mViewModel.getWishlistLiveData(page,size).observe(getViewLifecycleOwner(), resource -> {
             switch (resource.status) {
+                case LOADING:
+                    if(page==1){
+                        progressBar.setVisibility(View.VISIBLE);
+                        recyclerView.setVisibility(View.GONE);
+                    } else{
+                        progressBar.setVisibility(View.VISIBLE);
+                    }
+                    break;
                 case SUCCESS:
                     progressBar.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.VISIBLE);
+
                     if (resource.data != null && !resource.data.isEmpty()) {
-                        adapter.updateData(resource.data);
+
+                        if (page == 1) {
+                            wishlist = new ArrayList<>(resource.data);
+                        } else {
+                            // Load thêm -> nối thêm vào danh sách cũ
+                            wishlist.addAll(resource.data);
+                        }
+                        adapter.updateData(wishlist);
+                    }
+
+                    if (resource.data == null || resource.data.size() < size) {
+                        btnViewMore.setVisibility(View.GONE);
                     } else {
-                        Toast.makeText(getContext(), "Danh sách yêu thích trống!", Toast.LENGTH_SHORT).show();
+                        btnViewMore.setVisibility(View.VISIBLE);
                     }
                     break;
 
                 case ERROR:
+                    progressBar.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
                     Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
                     break;
 
-                case LOADING:
-                    progressBar.setVisibility(View.VISIBLE);
-                    recyclerView.setVisibility(View.GONE);
-                    break;
             }
         });
 
-        // Khi cần load dữ liệu (ví dụ ở onViewCreated hoặc khi refresh)
-        mViewModel.fetchWishlist(page, size);
     }
 }

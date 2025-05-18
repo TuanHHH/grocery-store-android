@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            v.setPadding(0, systemBars.top, 0, 0);
             return insets;
         });
         toolbar = findViewById(R.id.toolbar);
@@ -139,6 +139,8 @@ public class MainActivity extends AppCompatActivity {
         }
         if (intent.hasExtra("search_text")){
             searchText = (String) intent.getSerializableExtra("search_text");
+            String searchBarText = searchText.replace("productName~'", "");
+            searchBar.setText(searchBarText.subSequence(0,searchBarText.length()-1));
         }
 
         if((intent.hasExtra("selected_categorySlug") && intent.hasExtra("selected_categoryId"))
