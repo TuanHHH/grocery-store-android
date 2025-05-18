@@ -44,6 +44,7 @@ public class ProductDetailActivity extends AppCompatActivity {
     private List<Feedback> feedbackList;
     private FrameLayout loadingOverlay;
     private ProgressBar progressBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
@@ -59,17 +60,26 @@ public class ProductDetailActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progress_bar);
         viewModel = new ViewModelProvider(this).get(ProductViewModel.class);
         setupRecyclerView();
-        Intent intent = getIntent();
-        long productId;
-        if (intent.hasExtra("product_id")){
-            productId = (long) intent.getSerializableExtra("product_id");
-        }else{
-            productId = 222;
-        }
 
+        Intent intent = getIntent();
+        long productId = -1;
+
+        if (intent.hasExtra("product_id")) {
+            Object extra = intent.getSerializableExtra("product_id");
+            if (extra != null) {
+                productId = (long) extra;
+            } else {
+                Toast.makeText(this, "Không tìm thấy sản phẩm", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } else {
+            Toast.makeText(this, "Không tìm thấy sản phẩm", Toast.LENGTH_SHORT).show();
+            return;
+        }
         observeProduct(productId);
         observeFeedback(productId);
     }
+
 
     private void observeProduct(long productId) {
         viewModel.getProduct(productId).observe(this, resource -> {
