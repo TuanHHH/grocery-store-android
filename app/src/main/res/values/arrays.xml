@@ -4,4 +4,8 @@
         <item>0</item>
         <item>500000</item>
     </array>
+    <array name="default_rating_range">
+        <item>0</item>
+        <item>5</item>
+    </array>
 </resources>

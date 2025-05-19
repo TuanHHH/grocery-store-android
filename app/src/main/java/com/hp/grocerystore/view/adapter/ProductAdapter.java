@@ -172,6 +172,21 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             holder.imgProduct.setImageResource(R.drawable.placeholder_product);
         }
 
+        float rating = product.getRating();
+        int fullStars = (int) rating;
+        boolean hasHalfStar = (rating - fullStars) >= 0.5f;
+
+        for (int i = 0; i < 5; i++) {
+            if (i < fullStars) {
+                holder.stars[i].setImageResource(R.drawable.ic_star_yellow);
+            } else if (i == fullStars && hasHalfStar) {
+                holder.stars[i].setImageResource(R.drawable.ic_star_half); // nửa sao
+            } else {
+                holder.stars[i].setImageResource(R.drawable.ic_star_gray);
+            }
+        }
+
+
         // Gợi ý: Có thể set sự kiện cho nút MUA và icon trái tim tại đây nếu cần
         holder.btnBuy.setOnClickListener(v -> {
             // TODO: xử lý mua hàng
@@ -199,19 +214,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             });
 
         });
-//        holder.imgFavorite.setOnClickListener(v -> {
-//            wishlistViewModel.addWishlist(product.getId());
-//
-//            wishlistViewModel.getAddWishlistResult().observeForever(response -> {
-//                if (response.getMessage() != null) {
-//                    Toast.makeText(context, response.getMessage(), Toast.LENGTH_SHORT).show();
-////                    holder.imgFavorite.setImageResource(R.drawable.ic_heart_filled);
-//                }
-//            });
-//
-//
-//        });
-
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ProductDetailActivity.class);
@@ -228,6 +230,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     public static class ProductViewHolder extends RecyclerView.ViewHolder {
         ImageView imgProduct, imgFavorite;
         TextView tvProductName, tvProductPrice, btnBuy;
+        ImageView[] stars = new ImageView[5];
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -236,6 +239,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             tvProductName = itemView.findViewById(R.id.tv_product_name);
             tvProductPrice = itemView.findViewById(R.id.tv_product_price);
             btnBuy = itemView.findViewById(R.id.btn_buy);
+
+            stars[0] = itemView.findViewById(R.id.star_1);
+            stars[1] = itemView.findViewById(R.id.star_2);
+            stars[2] = itemView.findViewById(R.id.star_3);
+            stars[3] = itemView.findViewById(R.id.star_4);
+            stars[4] = itemView.findViewById(R.id.star_5);
 
         }
     }

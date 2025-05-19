@@ -50,9 +50,13 @@ public class FilterActivity extends AppCompatActivity {
             "Bán chạy",
             "Tên sản phẩm",
             "Giá thấp đến cao",
-            "Giá cao đến thấp"
+            "Giá cao đến thấp",
+            "Rating thấp đến cao",
+            "Rating cao đến thấp"
     };
     private ProgressBar progressBar;
+    private RangeSlider priceRangeSlider, ratingRangeSlider;
+    private TextView tvMinPrice, tvMaxPrice, tvMinRating, tvMaxRating;
     private List<Category> categoryList = new ArrayList<>();
     private List<Product> productList = new ArrayList<>();
     private long selectedCategoryId = -1; // Không lọc
@@ -60,6 +64,8 @@ public class FilterActivity extends AppCompatActivity {
     private String selectedSort = "";    // Không sắp xếp
     private int minPrice = 0;
     private int maxPrice = 500000;
+    private float minRating = 0;
+    private float maxRating = 5;
     private String searchText = "";
 
     @SuppressLint("MissingInflatedId")
@@ -73,9 +79,12 @@ public class FilterActivity extends AppCompatActivity {
         sortGrid = findViewById(R.id.sortGrid);
         sortFilterCategoryGrid = findViewById(R.id.filterCategoryGrid);
         btnApply = findViewById(R.id.btnApply);
-        RangeSlider priceRangeSlider = findViewById(R.id.priceRangeSlider);
-        TextView tvMinPrice = findViewById(R.id.tvMinPrice);
-        TextView tvMaxPrice = findViewById(R.id.tvMaxPrice);
+        priceRangeSlider = findViewById(R.id.priceRangeSlider);
+        ratingRangeSlider = findViewById(R.id.ratingRangeSlider);
+        tvMinPrice = findViewById(R.id.tvMinPrice);
+        tvMaxPrice = findViewById(R.id.tvMaxPrice);
+        tvMinRating = findViewById(R.id.tvMinRating);
+        tvMaxRating = findViewById(R.id.tvMaxRating);
         progressBar = findViewById(R.id.progress_bar_category_view_filter);
 
         homeViewModel = new ViewModelProvider(this, new ViewModelProvider.Factory() {
@@ -111,6 +120,12 @@ public class FilterActivity extends AppCompatActivity {
         if (intent.hasExtra("max_price")){
             maxPrice = (int) intent.getSerializableExtra("max_price");
         }
+        if (intent.hasExtra("min_rating")){
+            minRating = (float) intent.getSerializableExtra("min_rating");
+        }
+        if (intent.hasExtra("max_rating")){
+            maxRating = (float) intent.getSerializableExtra("max_rating");
+        }
         if (intent.hasExtra("search_text")){
             searchText = (String) intent.getSerializableExtra("search_text");
         }
@@ -128,14 +143,28 @@ public class FilterActivity extends AppCompatActivity {
         priceRangeSlider.setTrackHeight(12);
         priceRangeSlider.setThumbRadius(24);
 
-        float sliderMin = priceRangeSlider.getValueFrom(); // 0
-        float sliderMax = priceRangeSlider.getValueTo();   // 500000
+        ratingRangeSlider.setCustomThumbDrawable(customThumb);
+        ratingRangeSlider.setHaloRadius(6);
+        ratingRangeSlider.setTrackHeight(12);
+        ratingRangeSlider.setThumbRadius(24);
 
-        float leftThumb = Math.max(sliderMin, Math.min(minPrice, maxPrice));
-        float rightThumb = Math.min(sliderMax, Math.max(minPrice, maxPrice));
+        float sliderPriceMin = priceRangeSlider.getValueFrom(); // 0
+        float sliderPriceMax = priceRangeSlider.getValueTo();   // 500000
+
+        float sliderRatingMin = ratingRangeSlider.getValueFrom(); // 0
+        float sliderRatingMax = ratingRangeSlider.getValueTo();   // 5
+
+        float leftThumbPrice = Math.max(sliderPriceMin, Math.min(minPrice, maxPrice));
+        float rightThumbPrice = Math.min(sliderPriceMax, Math.max(minPrice, maxPrice));
         tvMinPrice.setText(String.valueOf(minPrice));
         tvMaxPrice.setText(String.valueOf(maxPrice));
-        priceRangeSlider.setValues(leftThumb, rightThumb);
+        priceRangeSlider.setValues(leftThumbPrice, rightThumbPrice);
+
+        float leftThumbRating = Math.max(sliderRatingMin, Math.min(minRating, maxRating));
+        float rightThumbRating = Math.min(sliderRatingMax, Math.max(minRating, maxRating));
+        tvMinRating.setText(String.valueOf(minRating));
+        tvMaxRating.setText(String.valueOf(maxRating));
+        ratingRangeSlider.setValues(leftThumbRating, rightThumbRating);
 
         priceRangeSlider.addOnChangeListener((slider, value, fromUser) -> {
             List<Float> values = slider.getValues();
@@ -144,6 +173,16 @@ public class FilterActivity extends AppCompatActivity {
             tvMinPrice.setText(String.valueOf(minPrice));
             tvMaxPrice.setText(String.valueOf(maxPrice));
         });
+
+        ratingRangeSlider.addOnChangeListener((slider, value, fromUser) -> {
+            List<Float> values = slider.getValues();
+            minRating = values.get(0);
+            maxRating = values.get(1);
+            tvMinRating.setText(String.valueOf(minRating));
+            tvMaxRating.setText(String.valueOf(maxRating));
+        });
+
+
 
 
         btnClose.setOnClickListener(v -> finish()); // hoặc dismiss() nếu là dialog
@@ -154,11 +193,17 @@ public class FilterActivity extends AppCompatActivity {
             selectedSort = "";
             minPrice = 0;
             maxPrice = 500000;
+            minRating = 0;
+            maxRating = 5;
 
             // 2. Reset RangeSlider
             priceRangeSlider.setValues((float) minPrice, (float) maxPrice);
             tvMinPrice.setText(String.valueOf(minPrice));
             tvMaxPrice.setText(String.valueOf(maxPrice));
+
+            ratingRangeSlider.setValues((float) minRating, (float) maxRating);
+            tvMinRating.setText(String.valueOf(minRating));
+            tvMaxRating.setText(String.valueOf(maxRating));
 
             // 3. Bỏ chọn các sort option
             for (int i = 0; i < sortGrid.getChildCount(); i++) {
@@ -179,6 +224,8 @@ public class FilterActivity extends AppCompatActivity {
             filterIntent.putExtra("selected_sort", (Serializable) selectedSort);
             filterIntent.putExtra("min_price", (Serializable) minPrice);
             filterIntent.putExtra("max_price", (Serializable) maxPrice);
+            filterIntent.putExtra("min_rating", (Serializable) minRating);
+            filterIntent.putExtra("max_rating", (Serializable) maxRating);
             filterIntent.putExtra("search_text", (Serializable) searchText);
             startActivity(filterIntent);
         });
@@ -191,6 +238,7 @@ public class FilterActivity extends AppCompatActivity {
                     progressBar.setVisibility(View.VISIBLE);
                     sortFilterCategoryGrid.setVisibility(View.GONE);
                     break;
+
 
                 case SUCCESS:
                     progressBar.setVisibility(View.GONE);

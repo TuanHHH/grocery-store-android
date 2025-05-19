@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="#FFFFFF"
+    android:scrollbars="none"
     android:padding="16dp">
 
     <LinearLayout
@@ -130,6 +131,50 @@
             app:thumbColor="#4CAF50"
             app:haloColor="#4CAF50" />
 
+        <!-- Lọc theo rating -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Lọc theo giá"
+            android:textStyle="bold"
+            android:paddingTop="16dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="8dp"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:id="@+id/tvMinRating"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="0" />
+
+            <TextView
+                android:id="@+id/tvMaxRating"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="5" />
+        </LinearLayout>
+
+        <com.google.android.material.slider.RangeSlider
+            android:id="@+id/ratingRangeSlider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:valueFrom="0"
+            android:valueTo="5"
+            android:stepSize="0.5"
+            app:values="@array/default_rating_range"
+            app:labelBehavior="gone"
+            app:trackColorActive="#4CAF50"
+            app:thumbColor="#4CAF50"
+            app:haloColor="#4CAF50"
+            app:tickColor="@android:color/transparent"/>
 
         <!-- Nút chọn lại / áp dụng -->
         <LinearLayout
