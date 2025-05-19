@@ -109,7 +109,7 @@ public class HomeFragment extends Fragment {
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
 
-        adapter = new ProductAdapter(getContext(), productList);
+        adapter = new ProductAdapter(getContext(), productList, getViewLifecycleOwner());
         categoryAdapter = new CategoryAdapter(getContext(), categoryList);
         wishlistAdapter = new WishlistAdapter(getContext(), wishLists);
 
@@ -195,7 +195,7 @@ public class HomeFragment extends Fragment {
         int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin_product_grid);
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(3, spacingInPixels, true));
 
-        ProductAdapter productAdapter = new ProductAdapter(getContext(), new ArrayList<>(),wishlistViewModel);
+        ProductAdapter productAdapter = new ProductAdapter(getContext(), new ArrayList<>(),wishlistViewModel,getViewLifecycleOwner());
         recyclerView.setAdapter(productAdapter);
 
         // Gọi API load sản phẩm theo category.slug

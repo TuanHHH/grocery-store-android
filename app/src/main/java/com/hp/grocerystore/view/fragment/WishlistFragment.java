@@ -12,12 +12,14 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,6 +43,7 @@ public class WishlistFragment extends Fragment {
     private WishlistAdapter adapter;
     private ProgressBar progressBar,progressBarLoadmoreView;
     private NestedScrollView nestedScrollView;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private TextView btnViewMore;
     private List<Wishlist> wishlist = new ArrayList<>();
     private int currentPage = 1;
@@ -70,6 +73,12 @@ public class WishlistFragment extends Fragment {
         progressBarLoadmoreView = view.findViewById(R.id.progress_bar_loadmore_view);
         btnViewMore = view.findViewById(R.id.btn_view_more_wishlist);
         nestedScrollView = view.findViewById(R.id.wislist_container);
+        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_wishlist);
+
+
+        adapter.setOnWishlistItemClickListener(position -> {
+            deleteWishlistItem(position); // ← gọi hàm bạn đã viết
+        });
 
 
         // Khởi tạo ViewModel
@@ -87,11 +96,18 @@ public class WishlistFragment extends Fragment {
 
         // Load dữ liệu wishlist từ view model
         loadWishlist(1,10);
+        // Thiết lập lắng nghe pull-to-refresh
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            currentPage = 1;
+            countLoad = 0;
+            loadWishlist(currentPage, 10);
+        });
 
         btnViewMore.setOnClickListener(v -> {
             currentPage++;
             loadWishlist(currentPage,10);
         });
+
 
         // Biến cờ kiểm soát click
         AtomicBoolean isCooldown = new AtomicBoolean(false);
@@ -131,17 +147,18 @@ public class WishlistFragment extends Fragment {
         mViewModel.getWishlistLiveData(page,size).observe(getViewLifecycleOwner(), resource -> {
             switch (resource.status) {
                 case LOADING:
-                    if(page==1){
+                    if (page == 1 && !swipeRefreshLayout.isRefreshing()) {
                         progressBar.setVisibility(View.VISIBLE);
                         recyclerView.setVisibility(View.GONE);
-                    } else{
-                        progressBar.setVisibility(View.VISIBLE);
+                    } else if (page > 1) {
+                        progressBarLoadmoreView.setVisibility(View.VISIBLE);
                     }
                     break;
                 case SUCCESS:
+                    swipeRefreshLayout.setRefreshing(false); // Dừng refresh
                     progressBar.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.VISIBLE);
-
+                    progressBarLoadmoreView.setVisibility(View.GONE);
                     if (resource.data != null && !resource.data.isEmpty()) {
 
                         if (page == 1) {
@@ -161,13 +178,43 @@ public class WishlistFragment extends Fragment {
                     break;
 
                 case ERROR:
+                    swipeRefreshLayout.setRefreshing(false); // Dừng refresh
                     progressBar.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.VISIBLE);
+                    progressBarLoadmoreView.setVisibility(View.GONE);
                     Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
                     break;
-
             }
         });
 
     }
+
+    private void deleteWishlistItem(int position) {
+        if (position < 0 || position >= wishlist.size()) return;
+
+        Long wishlistId = wishlist.get(position).getId();
+
+        mViewModel.deleteWishlist(wishlistId).observe(getViewLifecycleOwner(), resource -> {
+            switch (resource.status) {
+                case LOADING:
+                    break;
+
+                case SUCCESS:
+                    Toast.makeText(getContext(), "Đã xóa khỏi danh sách yêu thích", Toast.LENGTH_SHORT).show();
+                    wishlist.remove(position);
+                    adapter.updateData(wishlist);
+
+                    if (wishlist.isEmpty()) {
+                        btnViewMore.setVisibility(View.GONE);
+                    }
+
+                    break;
+
+                case ERROR:
+                    Toast.makeText(getContext(), "Xóa thất bại: " + resource.message, Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        });
+    }
+
 }
