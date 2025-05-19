@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -24,6 +25,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hp.grocerystore.R;
 import com.hp.grocerystore.model.product.Product;
 import com.hp.grocerystore.model.wishlist.Wishlist;
+import com.hp.grocerystore.utils.LiveDataUtils;
 import com.hp.grocerystore.view.activity.ProductDetailActivity;
 import com.hp.grocerystore.viewmodel.SharedViewModel;
 import com.hp.grocerystore.viewmodel.WishlistViewModel;
@@ -107,23 +109,26 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     private List<Product> productList;
     private static List<Wishlist> wishlistList = new ArrayList<>();
     private WishlistViewModel wishlistViewModel;
+    private LifecycleOwner lifecycleOwner;
 
 
 
-    public ProductAdapter(Context context, List<Product> productList) {
+    public ProductAdapter(Context context, List<Product> productList,LifecycleOwner lifecycleOwner) {
         this.context = context;
         this.productList = productList;
+        this.lifecycleOwner = lifecycleOwner;
     }
-    public ProductAdapter(Context context, List<Product> productList, List<Wishlist> wishlistList) {
-        this.context = context;
-        this.productList = productList;
-        this.wishlistList = wishlistList;
-    }
+//    public ProductAdapter(Context context, List<Product> productList, List<Wishlist> wishlistList) {
+//        this.context = context;
+//        this.productList = productList;
+//        this.wishlistList = wishlistList;
+//    }
 
-    public ProductAdapter(Context context, List<Product> productList, WishlistViewModel wishlistViewModel) {
+    public ProductAdapter(Context context, List<Product> productList, WishlistViewModel wishlistViewModel,LifecycleOwner lifecycleOwner) {
         this.context = context;
         this.productList = productList;
         this.wishlistViewModel = wishlistViewModel;
+        this.lifecycleOwner = lifecycleOwner;
     }
 
     public void setWishlistViewModel(WishlistViewModel wishlistViewModel) {
@@ -160,8 +165,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         if (imageUrl != null && (imageUrl.endsWith(".jpg") || imageUrl.endsWith(".png") || imageUrl.endsWith(".jpeg"))) {
             Glide.with(context)
                     .load(imageUrl)
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true)
                     .placeholder(R.drawable.placeholder_product)
                     .into(holder.imgProduct);
         } else {
@@ -177,16 +180,38 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.imgFavorite.setOnClickListener(v -> {
             wishlistViewModel.addWishlist(product.getId());
 
-            wishlistViewModel.getAddWishlistResult().observeForever(response -> {
-                if (response.getMessage() != null) {
-                    Toast.makeText(context, response.getMessage(), Toast.LENGTH_SHORT).show();
-                    holder.imgFavorite.setImageResource(R.drawable.ic_heart_filled);
-                } else {
-                    Toast.makeText(context, "Đã thêm vào yêu thích!", Toast.LENGTH_SHORT).show();
-                     // icon trái tim đầy
+            LiveDataUtils.observeOnce(wishlistViewModel.getAddWishlistResult(), lifecycleOwner, response -> {
+                if (response != null) {
+                    int statusCode = response.getStatusCode();
+                    switch (statusCode) {
+                        case 201:
+                            Toast.makeText(context, "Đã thêm vào danh sách yêu thích", Toast.LENGTH_SHORT).show();
+//                            holder.imgFavorite.setImageResource(R.drawable.ic_heart_filled);
+                            break;
+                        case -10:
+                            Toast.makeText(context, "Sản phẩm không tồn tại hoặc đã ngừng kinh doanh", Toast.LENGTH_SHORT).show();
+                            break;
+                        default:
+                            Toast.makeText(context, "Thêm vào danh sách yêu thích thất bại", Toast.LENGTH_SHORT).show();
+                            break;
+                    }
                 }
             });
+
         });
+//        holder.imgFavorite.setOnClickListener(v -> {
+//            wishlistViewModel.addWishlist(product.getId());
+//
+//            wishlistViewModel.getAddWishlistResult().observeForever(response -> {
+//                if (response.getMessage() != null) {
+//                    Toast.makeText(context, response.getMessage(), Toast.LENGTH_SHORT).show();
+////                    holder.imgFavorite.setImageResource(R.drawable.ic_heart_filled);
+//                }
+//            });
+//
+//
+//        });
+
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ProductDetailActivity.class);

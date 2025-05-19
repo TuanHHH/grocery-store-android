@@ -6,9 +6,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:background="#FFFFFF"
-    tools:context=".view.fragment.SearchFragment"
     android:layout_marginBottom="20dp"
-    >
+    tools:context=".view.fragment.SearchFragment">
+
+
 
     <!-- Danh mục nhỏ -->
     <HorizontalScrollView
@@ -145,12 +146,23 @@
         android:visibility="visible"
         android:indeterminate="true" />
 
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/search_swipe_refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="42dp">
+<!--    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout-->
+<!--        android:id="@+id/search_swipe_refresh_layout"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:layout_marginBottom="42dp">-->
+        <!-- Wrapper layout: chứa toàn bộ UI bên trong -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/search_result_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
-        android:layout_marginBottom="42dp">
+        >
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -187,5 +199,5 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

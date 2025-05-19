@@ -2,20 +2,22 @@ package com.hp.grocerystore.view.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hp.grocerystore.R;
-//import com.hp.grocerystore.model.product.Product;
-import com.hp.grocerystore.model.product.Product;
 import com.hp.grocerystore.model.wishlist.Wishlist;
 
 import java.util.ArrayList;
@@ -23,23 +25,17 @@ import java.util.List;
 
 public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.WishlistViewHolder> {
 
-    private Context context;
+    private final Context context;
     private List<Wishlist> wishList = new ArrayList<>();
-//    private OnWishlistItemClickListener listener;
+    private OnWishlistItemClickListener listener;
 
-//    public interface OnWishlistItemClickListener {
-//        void onRemoveClick(Product product);
-//    }
+    public void setOnWishlistItemClickListener(OnWishlistItemClickListener listener) {
+        this.listener = listener;
+    }
 
     public WishlistAdapter(Context context, List<Wishlist> wishList) {
         this.context = context;
         this.wishList = wishList;
-    }
-    @SuppressLint("NotifyDataSetChanged")
-    public void setWishList(List<Wishlist> wishList) {
-        this.wishList.clear();
-        this.wishList.addAll(wishList);
-        notifyDataSetChanged();
     }
 
     @NonNull
@@ -54,9 +50,7 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.Wishli
         Wishlist product = wishList.get(position);
         holder.bind(product);
 
-        holder.imgFavorite.setOnClickListener(v -> {
-//            listener.onRemoveClick(product);
-        });
+        holder.imgFavorite.setOnClickListener(v -> showDeleteDialog(holder.itemView.getContext(), holder.getAdapterPosition()));
     }
 
     @Override
@@ -83,11 +77,10 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.Wishli
             tvPrice = itemView.findViewById(R.id.tv_product_price);
         }
 
-        public void bind(Wishlist product) {
-            tvName.setText(product.getProductName());
-            tvPrice.setText(product.getPrice() + "đ");
-
-            String imageUrl = product.getImageUrl();
+        public void bind(Wishlist wishlist) {
+            tvName.setText(wishlist.getProductName());
+            tvPrice.setText(wishlist.getPrice() + "đ");
+            String imageUrl = wishlist.getImageUrl();
             if (imageUrl != null && (imageUrl.endsWith(".jpg") || imageUrl.endsWith(".png") || imageUrl.endsWith(".jpeg"))) {
                 Glide.with(itemView.getContext())
                         .load(imageUrl)
@@ -96,9 +89,36 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.Wishli
                         .placeholder(R.drawable.category_placeholder)
                         .into(imgProduct);
             } else {
-                // Có thể đặt placeholder mặc định hoặc lấy thumbnail nếu là video
                 imgProduct.setImageResource(R.drawable.category_placeholder);
             }
         }
     }
+
+    public interface OnWishlistItemClickListener {
+        void onRemoveClick(int position);
+    }
+    private void showDeleteDialog(Context context, int position) {
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_confirm_delete, null);
+        AlertDialog dialog = new AlertDialog.Builder(context)
+                .setView(dialogView)
+                .create();
+
+        Button btnCancel = dialogView.findViewById(R.id.btnCancel);
+        Button btnDelete = dialogView.findViewById(R.id.btnDelete);
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnDelete.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onRemoveClick(position);
+            }
+            dialog.dismiss();
+        });
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+        dialog.show();
+    }
+
 }
