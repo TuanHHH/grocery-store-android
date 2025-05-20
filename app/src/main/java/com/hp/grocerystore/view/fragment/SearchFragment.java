@@ -109,6 +109,7 @@ public class SearchFragment extends Fragment {
         swipeRefreshLayout = view.findViewById(R.id.search_swipe_refresh_layout);
         // Danh sách nút sắp xếp sản phẩm
         filters = new TextView[]{
+                view.findViewById(R.id.filter_newest),
                 view.findViewById(R.id.filter_best_seller),
                 view.findViewById(R.id.filter_name),
                 view.findViewById(R.id.filter_price_low),
@@ -558,6 +559,9 @@ public class SearchFragment extends Fragment {
     private String getSortQuery(String selectedSort){
         String sortQuery = "";
         switch (selectedSort) {
+            case "Mới nhất":
+                sortQuery = "createdAt,desc";
+                break;
             case "Bán chạy":
                 sortQuery = "sold,desc";
                 break;

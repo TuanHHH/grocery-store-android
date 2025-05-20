@@ -66,7 +66,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Lọc theo Ngành hàng"
+            android:text="Lọc theo danh mục"
             android:textStyle="bold"
             android:paddingTop="16dp" />
         <ProgressBar
@@ -135,7 +135,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Lọc theo giá"
+            android:text="Lọc theo rating"
             android:textStyle="bold"
             android:paddingTop="16dp" />
 

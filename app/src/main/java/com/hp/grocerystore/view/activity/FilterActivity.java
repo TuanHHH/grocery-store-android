@@ -47,6 +47,7 @@ public class FilterActivity extends AppCompatActivity {
     private GridLayout sortGrid, sortFilterCategoryGrid;
     private Button btnApply,btnReset;
     private String[] sortOptions = {
+            "Mới nhất",
             "Bán chạy",
             "Tên sản phẩm",
             "Giá thấp đến cao",

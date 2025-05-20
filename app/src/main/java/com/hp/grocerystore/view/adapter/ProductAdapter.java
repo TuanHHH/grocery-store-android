@@ -160,6 +160,18 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
         holder.tvProductName.setText(product.getProductName());
         holder.tvProductPrice.setText(String.format("%,.0f đ", product.getPrice()));
+        if (product.getQuantity() < 40 && product.getQuantity() > 0){
+            holder.tvQuantity.setVisibility(View.VISIBLE);
+            holder.tvQuantity.setText("Còn " + product.getQuantity() +" " + (product.getUnit() != null ? product.getUnit(): " suất"));
+        } else if(product.getQuantity() == 0){
+            holder.tvQuantity.setVisibility(View.VISIBLE);
+            holder.tvQuantity.setText("Hết hàng");
+            holder.tvQuantity.setTextColor(context.getResources().getColor(R.color.gray));
+            holder.tvQuantity.setBackgroundResource(R.drawable.bg_search_rounded);
+        }
+        else {
+            holder.tvQuantity.setVisibility(View.INVISIBLE);
+        }
 
         String imageUrl = product.getImageUrl();
         if (imageUrl != null && (imageUrl.endsWith(".jpg") || imageUrl.endsWith(".png") || imageUrl.endsWith(".jpeg"))) {
@@ -229,7 +241,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
     public static class ProductViewHolder extends RecyclerView.ViewHolder {
         ImageView imgProduct, imgFavorite;
-        TextView tvProductName, tvProductPrice, btnBuy;
+        TextView tvProductName, tvProductPrice,tvQuantity, btnBuy;
         ImageView[] stars = new ImageView[5];
 
         public ProductViewHolder(@NonNull View itemView) {
@@ -238,6 +250,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             imgFavorite = itemView.findViewById(R.id.img_favorite);
             tvProductName = itemView.findViewById(R.id.tv_product_name);
             tvProductPrice = itemView.findViewById(R.id.tv_product_price);
+            tvQuantity = itemView.findViewById(R.id.tv_quantity);
             btnBuy = itemView.findViewById(R.id.btn_buy);
 
             stars[0] = itemView.findViewById(R.id.star_1);
