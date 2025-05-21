@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     tools:context=".view.fragment.ProfileFragment">
-    <!--  Thông tin người dùng  -->
+
+    <!-- Thông tin người dùng -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0"
+        android:layout_weight="2"
         android:background="@color/primary"
         android:gravity="center"
         android:orientation="vertical"
@@ -21,9 +22,9 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center"
-            android:background="@drawable/circle_shape"
             android:contentDescription="Ảnh người dùng"
-            android:src="@drawable/ic_user" />
+            android:src="@drawable/ic_user"
+            android:background="@drawable/circle_shape" />
 
         <TextView
             android:id="@+id/userName"
@@ -44,7 +45,8 @@
             android:text="email@domain.com"
             android:textColor="@android:color/white"
             android:textSize="14sp" />
-        <!--  Nút Đăng xuất hoặc Đăng nhập/Đăng ký  -->
+
+        <!-- Nút Đăng xuất hoặc Đăng nhập/Đăng ký -->
         <Button
             android:id="@+id/authButton"
             android:layout_width="wrap_content"
@@ -75,7 +77,8 @@
                 android:text="Đăng ký" />
         </LinearLayout>
     </LinearLayout>
-    <!--  Tiêu đề đơn hàng  -->
+
+    <!-- Tiêu đề đơn hàng -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -92,10 +95,12 @@
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
-    <!--  Các trạng thái đơn hàng trong phần Đơn mua  -->
-    <!--  Các tùy chọn  -->
+
+    <!-- Các trạng thái đơn hàng trong phần Đơn mua -->
+
+    <!-- Các tùy chọn -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -105,7 +110,8 @@
         android:paddingEnd="16dp"
         android:paddingBottom="16dp"
         android:weightSum="4">
-        <!--  Các trạng thái đơn hàng  -->
+
+        <!-- Các trạng thái đơn hàng -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -203,17 +209,17 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="2"
         android:orientation="vertical"
+        android:layout_weight="2"
         android:padding="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/card_background"
             android:orientation="horizontal"
-            android:paddingBottom="8dp">
+            android:paddingBottom="8dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/card_background">
 
             <ImageView
                 android:layout_width="24dp"
@@ -235,16 +241,16 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginTop="8dp"
-            android:background="@color/light_gray" />
+            android:background="@color/light_gray"
+            android:layout_marginTop="8dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/card_background"
             android:orientation="horizontal"
-            android:paddingBottom="8dp">
+            android:paddingBottom="8dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/card_background">
 
             <ImageView
                 android:layout_width="24dp"
@@ -266,16 +272,16 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginTop="8dp"
-            android:background="@color/light_gray" />
+            android:background="@color/light_gray"
+            android:layout_marginTop="8dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/card_background"
             android:orientation="horizontal"
-            android:paddingBottom="8dp">
+            android:paddingBottom="8dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/card_background">
 
             <ImageView
                 android:layout_width="24dp"
@@ -297,16 +303,16 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginTop="8dp"
-            android:background="@color/light_gray" />
+            android:background="@color/light_gray"
+            android:layout_marginTop="8dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/card_background"
             android:orientation="horizontal"
-            android:paddingBottom="8dp">
+            android:paddingBottom="8dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/card_background">
 
             <ImageView
                 android:layout_width="24dp"
