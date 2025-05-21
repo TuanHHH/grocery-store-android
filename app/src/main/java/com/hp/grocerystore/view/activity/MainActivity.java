@@ -102,6 +102,9 @@ public class MainActivity extends AppCompatActivity {
                     case 2:
                         mBottomNavigationView.getMenu().findItem(R.id.navigation_heart).setChecked(true);
                         break;
+                    case 3:
+                        mBottomNavigationView.getMenu().findItem(R.id.navigation_profile).setChecked(true);
+                        break;
                 }
             }
         });
@@ -116,6 +119,8 @@ public class MainActivity extends AppCompatActivity {
                     mViewPager.setCurrentItem(1); break;
                 case R.id.navigation_heart:
                     mViewPager.setCurrentItem(2); break;
+                case R.id.navigation_profile:
+                    mViewPager.setCurrentItem(3); break;
             }
                 return true;
             }

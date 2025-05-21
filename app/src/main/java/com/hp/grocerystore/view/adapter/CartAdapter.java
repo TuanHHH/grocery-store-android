@@ -64,8 +64,6 @@ public class CartAdapter extends BaseAdapter {
         }
 
         final CartItem item = cartItems.get(position);
-        
-        // Tắt listener trước khi cập nhật trạng thái để tránh gọi callback không cần thiết
         holder.checkBox.setOnCheckedChangeListener(null);
         
         holder.productName.setText(item.getProductName());

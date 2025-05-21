@@ -12,4 +12,6 @@
     <string name="product_image">Sản phẩm</string>
     <string name="add_to_wishlist">Thêm vào wishlist</string>
     <string name="add_to_cart">Thêm vào giỏ</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
