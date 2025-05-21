@@ -58,7 +58,6 @@ public class SearchFragment extends Fragment {
     private SharedViewModel sharedViewModel;
     // List Data
     private List<Product> productList = new ArrayList<>();
-    private List<Product> originalProductList = new ArrayList<>();
     private List<Category> categoryList = new ArrayList<>();
     //Adapter
     private ProductAdapter productAdapter;
@@ -78,6 +77,8 @@ public class SearchFragment extends Fragment {
     private String selectedSort = "";    // Không sắp xếp
     private int minPrice = 0;
     private int maxPrice = 500000;
+    private float minRating = 0;
+    private float maxRating = 5;
     private String searchText = "";
     // load more product
     private boolean isLoading, isLastPage, isLoadMore;
@@ -108,10 +109,13 @@ public class SearchFragment extends Fragment {
         swipeRefreshLayout = view.findViewById(R.id.search_swipe_refresh_layout);
         // Danh sách nút sắp xếp sản phẩm
         filters = new TextView[]{
+                view.findViewById(R.id.filter_newest),
                 view.findViewById(R.id.filter_best_seller),
                 view.findViewById(R.id.filter_name),
                 view.findViewById(R.id.filter_price_low),
-                view.findViewById(R.id.filter_price_high)
+                view.findViewById(R.id.filter_price_high),
+                view.findViewById(R.id.filter_rating_low),
+                view.findViewById(R.id.filter_rating_high)
         };
 
         mViewModel = new ViewModelProvider(this, new ViewModelProvider.Factory() {
@@ -158,11 +162,14 @@ public class SearchFragment extends Fragment {
                 selectedCategorySlug = filterData.getSelectedCategorySlug();
                 selectedSort = filterData.getSelectedSort() == null ? "": filterData.getSelectedSort();
                 minPrice = filterData.getMinPrice();
-                maxPrice = filterData.getMaxPrice();
+                maxPrice = filterData.getMaxPrice() == 0 ? 500000 : filterData.getMaxPrice();
+                minRating = filterData.getMinRating();
+                maxRating = filterData.getMaxRating() == 0 ? 5 : filterData.getMaxRating();
                 searchText = filterData.getSearchText() == null ? "": filterData.getSearchText();
                 String sortQuery = getSortQuery(selectedSort);
                 isLoadMore = false;
                 lastScrollY[0] = 0;
+                currentPage = 1;
                 // Cập nhật lại giao diện sort
                 for (TextView filter: filters){
                     if (filter.getText().equals(selectedSort)){
@@ -174,36 +181,34 @@ public class SearchFragment extends Fragment {
                 }
 
                 if(selectedCategorySlug != null && selectedCategorySlug.contains("category.slug")
-                && selectedSort.isEmpty() && minPrice == 0 && maxPrice == 0 && searchText.isEmpty()){
+                        && selectedSort.isEmpty() && minPrice == 0 && maxPrice == 500000
+                        && minRating == 0 && maxRating == 5.0 && searchText.isEmpty()){
                     // Cập nhật lại giao diện category list
                     categoryAdapter.setupCategorySelection(linearCategoryContainer, selectedCategoryId, this::onCategoryClick);
                     addSortOptions();
-                    maxPrice = 500000;
-                    currentPage = 1;
                     loadProducts(currentPage, 10, selectedCategorySlug, true);
                 }else if(selectedCategorySlug != null && selectedCategorySlug.contains("productName")
-                && selectedSort.isEmpty() && minPrice == 0 && maxPrice == 0 && searchText.isEmpty()){
+                        && selectedSort.isEmpty() && minPrice == 0 && maxPrice == 500000
+                        && minRating == 0 && maxRating == 5 && searchText.isEmpty()){
                     categoryAdapter.setupCategorySelection(linearCategoryContainer, selectedCategoryId, this::onCategoryClick);
                     addSortOptions();
-                    maxPrice = 500000;
                     searchText = selectedCategorySlug;
-                    currentPage = 1;
                     searchProducts(currentPage, 10, selectedCategorySlug);
                 }else{
                     if (searchText.contains("productName~")) {
-                        currentPage = 1;
                         searchAndFilterProducts(currentPage, 10, "category.slug~'" + selectedCategorySlug + "'",
-                                searchText, "price > " + minPrice, "price < " + maxPrice, sortQuery);
+                                searchText, "price > " + minPrice, "price < " + maxPrice,
+                                "rating > "+minRating, "rating < "+maxRating, sortQuery);
                     }
                     else if(selectedCategorySlug.contains("category.slug"))
                     {
-                        currentPage = 1;
                         searchAndFilterProducts(currentPage,10, selectedCategorySlug,
-                                "productName~'"+searchText+"'", "price > "+minPrice, "price < "+maxPrice, getSortQuery(selectedSort));
+                                "productName~'"+searchText+"'", "price > "+minPrice, "price < "+maxPrice,
+                                "rating > "+minRating, "rating < "+maxRating, sortQuery);
                     }else{
-                        currentPage = 1;
                         searchAndFilterProducts(1,10, "category.slug~'"+selectedCategorySlug+"'",
-                                "productName~'"+searchText+"'", "price > "+minPrice, "price < "+maxPrice, sortQuery);
+                                "productName~'"+searchText+"'", "price > "+minPrice, "price < "+maxPrice,
+                                "rating > "+minRating, "rating < "+maxRating, sortQuery);
                     }
                 }
             }
@@ -268,6 +273,8 @@ public class SearchFragment extends Fragment {
             filterIntent.putExtra("selected_sort", (Serializable) selectedSort);
             filterIntent.putExtra("min_price", (Serializable) minPrice);
             filterIntent.putExtra("max_price", (Serializable) maxPrice);
+            filterIntent.putExtra("min_rating", (Serializable) minRating);
+            filterIntent.putExtra("max_rating", (Serializable) maxRating);
             filterIntent.putExtra("search_text", (Serializable) searchText);
             startActivity(filterIntent);
         });
@@ -374,10 +381,10 @@ public class SearchFragment extends Fragment {
             }
         });
     }
-    private void searchAndFilterProducts(int page, int size,
-                                         String filter1, String filter2,
-                                         String filter3, String filter4,String sort) {
-        mViewModel.searchAndFilterProducts(page, size, filter1, filter2, filter3, filter4, sort)
+    private void searchAndFilterProducts(int page, int size, String filter1,
+                                         String filter2, String filter3, String filter4,
+                                         String filter5,String filter6,String sort) {
+        mViewModel.searchAndFilterProducts(page, size, filter1, filter2, filter3, filter4, filter5, filter6, sort)
                 .observe(getViewLifecycleOwner(), resource -> {
                     switch (resource.status) {
                         case LOADING:
@@ -552,6 +559,9 @@ public class SearchFragment extends Fragment {
     private String getSortQuery(String selectedSort){
         String sortQuery = "";
         switch (selectedSort) {
+            case "Mới nhất":
+                sortQuery = "createdAt,desc";
+                break;
             case "Bán chạy":
                 sortQuery = "sold,desc";
                 break;
@@ -563,6 +573,12 @@ public class SearchFragment extends Fragment {
                 break;
             case "Giá cao đến thấp":
                 sortQuery = "price,desc";
+                break;
+            case "Rating cao đến thấp":
+                sortQuery = "rating,desc";
+                break;
+            case "Rating thấp đến cao":
+                sortQuery = "rating,asc";
                 break;
             default:
                 sortQuery = "";
@@ -582,24 +598,28 @@ public class SearchFragment extends Fragment {
             if (searchText.contains("productName~")){
 //                currentPage = 1;
                 searchAndFilterProducts(currentPage, 10, "category.slug~'" + selectedCategorySlug + "'",
-                        searchText, "price > " + minPrice, "price < " + maxPrice, getSortQuery(selectedSort));
+                        searchText, "price > " + minPrice, "price < " + maxPrice,
+                        "rating > "+minRating, "rating < "+maxRating, getSortQuery(selectedSort));
             }
             else if(selectedCategorySlug.contains("category.slug"))
             {
 //                currentPage = 1;
                 searchAndFilterProducts(currentPage,10, selectedCategorySlug,
-                        "productName~'"+searchText+"'", "price > "+minPrice, "price < "+maxPrice, getSortQuery(selectedSort));
+                        "productName~'"+searchText+"'", "price > "+minPrice, "price < "+maxPrice,
+                        "rating > "+minRating, "rating < "+maxRating, getSortQuery(selectedSort));
             }
             else if(selectedCategorySlug.contains("productName") && searchText.contains("productName~")){
 //                currentPage = 1;
                 searchAndFilterProducts(currentPage,10, selectedCategorySlug,
-                        searchText, "price > "+minPrice, "price < "+maxPrice, getSortQuery(selectedSort));
+                        searchText, "price > "+minPrice, "price < "+maxPrice,
+                        "rating > "+minRating, "rating < "+maxRating, getSortQuery(selectedSort));
             }
             else
             {
 //                currentPage = 1;
                 searchAndFilterProducts(currentPage,10, "category.slug~'"+selectedCategorySlug+"'",
-                        "productName~'"+searchText+"'", "price > "+minPrice, "price < "+maxPrice, getSortQuery(selectedSort));
+                        "productName~'"+searchText+"'", "price > "+minPrice, "price < "+maxPrice,
+                        "rating > "+minRating, "rating < "+maxRating, getSortQuery(selectedSort));
             }
         }
 

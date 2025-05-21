@@ -209,10 +209,11 @@ public class ProductRepository {
     }
 
     public LiveData<Resource<List<Product>>> searchAndFilterProducts(int page, int size, String filter1,
-                                                                     String filter2,String filter3,String filter4,String sort) {
+                                                                     String filter2,String filter3, String filter4,
+                                                                     String filter5,String filter6,String sort) {
         MutableLiveData<Resource<List<Product>>> liveData = new MutableLiveData<>();
         liveData.setValue(Resource.loading(null));
-        productApi.searchAndFilterProducts(page, size, filter1,filter2,filter3,filter4,sort).enqueue(new Callback<ApiResponse<PagedResult<Product>>>() {
+        productApi.searchAndFilterProducts(page, size, filter1,filter2,filter3,filter4,filter5,filter6,sort).enqueue(new Callback<ApiResponse<PagedResult<Product>>>() {
 
 
             @Override

@@ -41,6 +41,8 @@ public interface ProductApi {
             @Query("filter") String filter2,
             @Query("filter") String filter3,
             @Query("filter") String filter4,
+            @Query("filter") String filter5,
+            @Query("filter") String filter6,
             @Query("sort") String sort
     );
 }
