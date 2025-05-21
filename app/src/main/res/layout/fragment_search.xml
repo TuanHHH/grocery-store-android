@@ -7,6 +7,7 @@
     android:orientation="vertical"
     android:background="#FFFFFF"
     tools:context=".view.fragment.SearchFragment"
+    android:layout_marginBottom="20dp"
     >
 
     <!-- Danh mục nhỏ -->
@@ -24,8 +25,9 @@
             android:orientation="horizontal"
             android:paddingHorizontal="8dp"
             android:paddingVertical="6dp"
-            android:layout_marginHorizontal="4dp"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone"/>
     </HorizontalScrollView>
 
     <RelativeLayout
@@ -135,13 +137,55 @@
 
 
     </RelativeLayout>
-    <!-- Danh sách sản phẩm -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/search_result_products"
+    <ProgressBar
+        android:id="@+id/progress_bar_search_view"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:visibility="visible"
+        android:indeterminate="true" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/search_result_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="8dp"
-        android:layout_marginBottom="70dp"
-        />
+        android:fillViewport="true"
+        android:layout_marginBottom="42dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/search_result_products"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+            <ProgressBar
+                android:id="@+id/progress_bar_loadmore_view"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:indeterminate="true" />
+
+            <TextView
+                android:id="@+id/btn_view_more_product"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tải thêm"
+                android:textColor="#57606f"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_gravity="center"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="24dp"
+                android:drawableEnd="@drawable/ic_arrow_down"
+                android:drawablePadding="8dp"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>

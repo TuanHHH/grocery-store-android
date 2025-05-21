@@ -48,4 +48,29 @@ public class CategoryRepository {
 
         return liveData;
     }
+
+    public LiveData<Resource<Category>> getCategoryById(long categoryId) {
+        MutableLiveData<Resource<Category>> liveData = new MutableLiveData<>();
+        liveData.setValue(Resource.loading());
+
+        categoryApi.getCategoryById(categoryId).enqueue(new Callback<ApiResponse<Category>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Category>> call, Response<ApiResponse<Category>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Category category = response.body().getData();
+                    liveData.setValue(Resource.success(category));
+                } else {
+                    liveData.setValue(Resource.error("Không thể lấy dữ liệu danh mục"));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Category>> call, Throwable t) {
+                liveData.setValue(Resource.error(t.getMessage()));
+            }
+        });
+
+        return liveData;
+    }
+
 }

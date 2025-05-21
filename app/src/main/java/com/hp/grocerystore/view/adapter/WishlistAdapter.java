@@ -12,8 +12,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hp.grocerystore.R;
 //import com.hp.grocerystore.model.product.Product;
+import com.hp.grocerystore.model.product.Product;
 import com.hp.grocerystore.model.wishlist.Wishlist;
 
 import java.util.ArrayList;
@@ -22,16 +24,22 @@ import java.util.List;
 public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.WishlistViewHolder> {
 
     private Context context;
-    private List<Wishlist> productList = new ArrayList<>();
+    private List<Wishlist> wishList = new ArrayList<>();
 //    private OnWishlistItemClickListener listener;
 
 //    public interface OnWishlistItemClickListener {
 //        void onRemoveClick(Product product);
 //    }
 
-    public WishlistAdapter(Context context, List<Wishlist> productList) {
+    public WishlistAdapter(Context context, List<Wishlist> wishList) {
         this.context = context;
-        this.productList = productList;
+        this.wishList = wishList;
+    }
+    @SuppressLint("NotifyDataSetChanged")
+    public void setWishList(List<Wishlist> wishList) {
+        this.wishList.clear();
+        this.wishList.addAll(wishList);
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -43,7 +51,7 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.Wishli
 
     @Override
     public void onBindViewHolder(@NonNull WishlistViewHolder holder, int position) {
-        Wishlist product = productList.get(position);
+        Wishlist product = wishList.get(position);
         holder.bind(product);
 
         holder.imgFavorite.setOnClickListener(v -> {
@@ -53,13 +61,13 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.Wishli
 
     @Override
     public int getItemCount() {
-        return productList.size();
+        return wishList.size();
     }
 
     @SuppressLint("NotifyDataSetChanged")
     public void updateData(List<Wishlist> newList) {
-        productList.clear();
-        productList.addAll(newList);
+        wishList.clear();
+        wishList.addAll(newList);
         notifyDataSetChanged();
     }
 
@@ -79,11 +87,18 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.Wishli
             tvName.setText(product.getProductName());
             tvPrice.setText(product.getPrice() + "đ");
 
-            Glide.with(itemView.getContext())
-                    .load(product.getImageUrl())
-                    .placeholder(R.drawable.placeholder_product)
-                    .error(R.drawable.placeholder_product)
-                    .into(imgProduct);
+            String imageUrl = product.getImageUrl();
+            if (imageUrl != null && (imageUrl.endsWith(".jpg") || imageUrl.endsWith(".png") || imageUrl.endsWith(".jpeg"))) {
+                Glide.with(itemView.getContext())
+                        .load(imageUrl)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true)
+                        .placeholder(R.drawable.category_placeholder)
+                        .into(imgProduct);
+            } else {
+                // Có thể đặt placeholder mặc định hoặc lấy thumbnail nếu là video
+                imgProduct.setImageResource(R.drawable.category_placeholder);
+            }
         }
     }
 }

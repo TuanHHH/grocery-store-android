@@ -20,12 +20,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hp.grocerystore.R;
 import com.hp.grocerystore.model.product.Product;
+import com.hp.grocerystore.model.wishlist.Wishlist;
 import com.hp.grocerystore.view.activity.ProductDetailActivity;
+import com.hp.grocerystore.viewmodel.SharedViewModel;
 import com.hp.grocerystore.viewmodel.WishlistViewModel;
 //import com.hp.grocerystore.view.activity.WishlistActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 //public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
@@ -101,12 +105,21 @@ import java.util.List;
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
     private final Context context;
     private List<Product> productList;
+    private static List<Wishlist> wishlistList = new ArrayList<>();
     private WishlistViewModel wishlistViewModel;
+
+
 
     public ProductAdapter(Context context, List<Product> productList) {
         this.context = context;
         this.productList = productList;
     }
+    public ProductAdapter(Context context, List<Product> productList, List<Wishlist> wishlistList) {
+        this.context = context;
+        this.productList = productList;
+        this.wishlistList = wishlistList;
+    }
+
     public ProductAdapter(Context context, List<Product> productList, WishlistViewModel wishlistViewModel) {
         this.context = context;
         this.productList = productList;
@@ -117,11 +130,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         this.wishlistViewModel = wishlistViewModel;
     }
 
+
     @SuppressLint("NotifyDataSetChanged")
     public void setProductList(List<Product> products) {
         this.productList.clear();
         this.productList.addAll(products);
         notifyDataSetChanged();
+    }
+    public static void setWishList(List<Wishlist> wishlistList){
+        if (ProductAdapter.wishlistList.size() > 0) ProductAdapter.wishlistList.clear();
+        ProductAdapter.wishlistList.addAll(wishlistList);
     }
 
     @NonNull
@@ -138,10 +156,18 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.tvProductName.setText(product.getProductName());
         holder.tvProductPrice.setText(String.format("%,.0f đ", product.getPrice()));
 
-        Glide.with(context)
-                .load(product.getImageUrl())
-                .placeholder(R.drawable.placeholder_product)
-                .into(holder.imgProduct);
+        String imageUrl = product.getImageUrl();
+        if (imageUrl != null && (imageUrl.endsWith(".jpg") || imageUrl.endsWith(".png") || imageUrl.endsWith(".jpeg"))) {
+            Glide.with(context)
+                    .load(imageUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
+                    .placeholder(R.drawable.placeholder_product)
+                    .into(holder.imgProduct);
+        } else {
+            // Có thể đặt placeholder mặc định hoặc lấy thumbnail nếu là video
+            holder.imgProduct.setImageResource(R.drawable.placeholder_product);
+        }
 
         // Gợi ý: Có thể set sự kiện cho nút MUA và icon trái tim tại đây nếu cần
         holder.btnBuy.setOnClickListener(v -> {

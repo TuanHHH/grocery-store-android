@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -16,12 +17,17 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hp.grocerystore.R;
 import com.hp.grocerystore.model.category.Category;
+import com.hp.grocerystore.view.activity.MainActivity;
 import com.hp.grocerystore.view.fragment.SearchFragment;
+import com.hp.grocerystore.viewmodel.SharedViewModel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +38,7 @@ public class CategoryAdapter {
     private FrameLayout selectedCategoryFilter = null;
     private long selectedCategoryId = -1;
     private OnCategoryClickListener listener;
+
 
     public CategoryAdapter(Context context, List<Category> categoryList) {
         this.context = context;
@@ -47,9 +54,11 @@ public class CategoryAdapter {
     public void setSelectedCategoryId(long selectedCategoryId) {
         this.selectedCategoryId = selectedCategoryId;
     }
+
     public void setOnCategoryClickListener(OnCategoryClickListener listener) {
         this.listener = listener;
     }
+
 
     public interface OnCategoryClickListener {
         void onCategoryClick(Category category);
@@ -66,10 +75,23 @@ public class CategoryAdapter {
 
             name.setText(category.getName());
 
-            Glide.with(context)
-                    .load(category.getImageUrl())
-                    .placeholder(R.drawable.category_placeholder)
-                    .into(img);
+//            Glide.with(context)
+//                    .load(category.getImageUrl())
+//                    .placeholder(R.drawable.category_placeholder)
+//                    .into(img);
+
+            String imageUrl = category.getImageUrl();
+            if (imageUrl != null && (imageUrl.endsWith(".jpg") || imageUrl.endsWith(".png") || imageUrl.endsWith(".jpeg"))) {
+                Glide.with(context)
+                        .load(imageUrl)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true)
+                        .placeholder(R.drawable.category_placeholder)
+                        .into(img);
+            } else {
+                // Có thể đặt placeholder mặc định hoặc lấy thumbnail nếu là video
+                img.setImageResource(R.drawable.category_placeholder);
+            }
 
             LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
                     (int) (context.getResources().getDisplayMetrics().density * 100),
@@ -79,11 +101,69 @@ public class CategoryAdapter {
             itemView.setLayoutParams(param);
 
             itemView.setTag(category);
-
             linearLayout.addView(itemView);
+            itemView.setOnClickListener(v -> {
+                Category selectedCategory = (Category) v.getTag();
+                if(context instanceof MainActivity) {
+                    MainActivity mainActivity = (MainActivity) context;
+                    mainActivity.goToSearchWithCategory(selectedCategory.getId(),"category.slug~'" + selectedCategory.getSlug() + "'");
+                }
+            });
         }
     }
 
+    public void populateGridLayoutForFilter(GridLayout gridLayout, long categoryId) {
+        gridLayout.removeAllViews();
+        LayoutInflater inflater = LayoutInflater.from(context);
+
+        for (Category category : categoryList) {
+            FrameLayout item = (FrameLayout) inflater.inflate(R.layout.filter_item, gridLayout, false);
+            TextView text = item.findViewById(R.id.filterText);
+            text.setText(category.getName());
+            if (categoryId != -1){
+                boolean isSelected =  categoryId == category.getId();
+                if (isSelected){
+                    // Chọn mới
+                    item.setSelected(true);
+                    item.findViewById(R.id.checkmarkIcon).setVisibility(View.VISIBLE);
+                    selectedCategoryFilter = item;
+
+                    if (listener != null) {
+                        listener.onCategoryClick(category);
+                    }
+                }
+            }
+
+            item.setOnClickListener(v -> {
+                boolean isAlreadySelected = selectedCategoryFilter == item;
+
+                // Bỏ chọn tất cả
+                if (selectedCategoryFilter != null) {
+                    selectedCategoryFilter.setSelected(false);
+                    selectedCategoryFilter.findViewById(R.id.checkmarkIcon).setVisibility(View.GONE);
+                    selectedCategoryFilter = null;
+                }
+
+                if (!isAlreadySelected) {
+                    // Chọn mới
+                    item.setSelected(true);
+                    item.findViewById(R.id.checkmarkIcon).setVisibility(View.VISIBLE);
+                    selectedCategoryFilter = item;
+
+                    if (listener != null) {
+                        listener.onCategoryClick(category);
+                    }
+                } else {
+                    // Bỏ chọn nếu click lại
+                    if (listener != null) {
+                        listener.onCategoryClick(null);
+                    }
+                }
+            });
+
+            gridLayout.addView(item);
+        }
+    }
     public void setupCategorySelection(LinearLayout container, long selectedCategoryId, OnCategoryClickListener listener) {
         this.selectedCategoryId = selectedCategoryId;
         this.listener = listener;
@@ -137,5 +217,5 @@ public class CategoryAdapter {
             });
         }
     }
-}
 
+}

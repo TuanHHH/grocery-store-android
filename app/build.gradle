@@ -48,6 +48,8 @@ dependencies {
     implementation "androidx.datastore:datastore:1.1.6"
     implementation "androidx.security:security-crypto:1.1.0-alpha07"
     implementation libs.legacy.support.v4
+    implementation 'com.github.bumptech.glide:okhttp3-integration:4.16.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
 }

@@ -29,4 +29,11 @@ public class Resource<T> {
     public static <T> Resource<T> loading() {
         return new Resource<>(Status.LOADING, null, null);
     }
+    public static <T> Resource<T> error(String message, T data) {
+        return new Resource<>(Status.ERROR, data, message);
+    }
+
+    public static <T> Resource<T> loading(T data) {
+        return new Resource<>(Status.LOADING, data, null);
+    }
 }
