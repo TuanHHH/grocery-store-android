@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
     private String selectedSort = "";    // Không sắp xếp
     private int minPrice = 0;
     private int maxPrice = 500000;
+    private float minRating = 0;
+    private float maxRating = 5;
     private String searchText = "";
 
     @Override
@@ -142,19 +144,31 @@ public class MainActivity extends AppCompatActivity {
         if (intent.hasExtra("max_price")){
             maxPrice = (int) intent.getSerializableExtra("max_price");
         }
+        if (intent.hasExtra("min_rating")){
+            minRating = (float) intent.getSerializableExtra("min_rating");
+        }
+        if (intent.hasExtra("max_rating")){
+            maxRating = (float) intent.getSerializableExtra("max_rating");
+        }
         if (intent.hasExtra("search_text")){
             searchText = (String) intent.getSerializableExtra("search_text");
-            String searchBarText = searchText.replace("productName~'", "");
-            searchBar.setText(searchBarText.subSequence(0,searchBarText.length()-1));
+            if (searchText.length() > 0) {
+                String searchBarText = searchText.replace("productName~'", "");
+                searchBar.setText(searchBarText.subSequence(0,searchBarText.length()-1));
+            }else{
+                searchBar.setText("");
+            }
         }
 
         if((intent.hasExtra("selected_categorySlug") && intent.hasExtra("selected_categoryId"))
                 || intent.hasExtra("selected_sort")
                 || intent.hasExtra("min_price")
                 || intent.hasExtra("max_price")
-                || intent.hasExtra("search_text")) {
+                || intent.hasExtra("search_text")
+                || intent.hasExtra("min_rating")
+                || intent.hasExtra("max_rating")) {
             goToSearchFromFilter(selectedCategoryId, selectedCategorySlug,
-                    selectedSort, minPrice, maxPrice, searchText);
+                    selectedSort, minPrice, maxPrice,minRating, maxRating, searchText);
         }
     }
 
@@ -171,12 +185,12 @@ public class MainActivity extends AppCompatActivity {
         sharedViewModel.setFilterData(data);
         mViewPager.setCurrentItem(1, true);
     }
-    public void goToSearchFromFilter(long selectedCategoryId, String selectedCategorySlug, String selectedSort,
-                                     int minPrice, int maxPrice, String searchText){
+    public void goToSearchFromFilter(long selectedCategoryId, String selectedCategorySlug, String selectedSort, int minPrice,
+                                     int maxPrice, float minRating, float maxRating, String searchText){
 
         sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
         FilterData data = new FilterData(selectedCategoryId, selectedCategorySlug,
-                selectedSort, minPrice, maxPrice, searchText);
+                selectedSort, minPrice, maxPrice,minRating, maxRating, searchText);
         sharedViewModel.setFilterData(data);
         mViewPager.setCurrentItem(1, true);
     }

@@ -6,18 +6,23 @@ public class FilterData {
     private String selectedSort;
     private int minPrice;
     private int maxPrice;
+    private float minRating;
+    private float maxRating;
     private String searchText;
 
     public FilterData(String selectedCategorySlug) {
         this.selectedCategorySlug = selectedCategorySlug;
     }
 
-    public FilterData(long selectedCategoryId, String selectedCategorySlug, String selectedSort, int minPrice, int maxPrice, String searchText) {
+    public FilterData(long selectedCategoryId, String selectedCategorySlug, String selectedSort,
+                      int minPrice, int maxPrice, float minRating, float maxRating, String searchText) {
         this.selectedCategoryId = selectedCategoryId;
         this.selectedCategorySlug = selectedCategorySlug;
         this.selectedSort = selectedSort;
         this.minPrice = minPrice;
         this.maxPrice = maxPrice;
+        this.minRating = minRating;
+        this.maxRating = maxRating;
         this.searchText = searchText;
     }
 
@@ -59,6 +64,22 @@ public class FilterData {
 
     public void setMaxPrice(int maxPrice) {
         this.maxPrice = maxPrice;
+    }
+
+    public float getMinRating() {
+        return minRating;
+    }
+
+    public void setMinRating(float minRating) {
+        this.minRating = minRating;
+    }
+
+    public float getMaxRating() {
+        return maxRating;
+    }
+
+    public void setMaxRating(float maxRating) {
+        this.maxRating = maxRating;
     }
 
     public String getSearchText() {
