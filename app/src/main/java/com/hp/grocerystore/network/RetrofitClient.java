@@ -7,6 +7,7 @@ import com.hp.grocerystore.network.api.AuthApi;
 import com.hp.grocerystore.network.api.CartApi;
 import com.hp.grocerystore.network.api.CategoryApi;
 import com.hp.grocerystore.network.api.FeedbackApi;
+import com.hp.grocerystore.network.api.OrderApi;
 import com.hp.grocerystore.network.api.ProductApi;
 import com.hp.grocerystore.network.api.WishlistApi;
 import com.hp.grocerystore.network.authenticator.TokenAuthenticator;
@@ -67,5 +68,8 @@ public class RetrofitClient {
     }
     public static WishlistApi getWishlistApi(Context context) {
         return createRetrofit(context).create(WishlistApi.class);
+    }
+    public static OrderApi getOrderApi(Context context) {
+        return createRetrofit(context).create(OrderApi.class);
     }
 }

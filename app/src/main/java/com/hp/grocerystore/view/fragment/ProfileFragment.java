@@ -1,5 +1,6 @@
 package com.hp.grocerystore.view.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,8 +8,10 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.hp.grocerystore.R;
+import com.hp.grocerystore.view.activity.OrderActivity;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -61,6 +64,29 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+        View view = inflater.inflate(R.layout.fragment_profile, container, false);
+        LinearLayout pendingOrder = view.findViewById(R.id.pendingOrder);
+        LinearLayout indeliveryOrder = view.findViewById(R.id.indeliveryOrder);
+        LinearLayout successOrder = view.findViewById(R.id.successOrder);
+        LinearLayout cancelOrder = view.findViewById(R.id.cancelOrder);
+
+        View.OnClickListener listener = v -> {
+            int orderStatus = 0;
+            if (v.getId() == R.id.pendingOrder) orderStatus = 0;
+            else if (v.getId() == R.id.indeliveryOrder) orderStatus = 1;
+            else if (v.getId() == R.id.successOrder) orderStatus = 2;
+            else if (v.getId() == R.id.cancelOrder) orderStatus = 3;
+
+            Intent intent = new Intent(getActivity(), OrderActivity.class);
+            intent.putExtra("orderStatus", orderStatus);
+            startActivity(intent);
+        };
+
+        pendingOrder.setOnClickListener(listener);
+        indeliveryOrder.setOnClickListener(listener);
+        successOrder.setOnClickListener(listener);
+        cancelOrder.setOnClickListener(listener);
+//        return inflater.inflate(R.layout.fragment_profile, container, false);
+        return view;
     }
 }
