@@ -3,11 +3,9 @@ package com.hp.grocerystore.network.api;
 import com.google.gson.annotations.SerializedName;
 import com.hp.grocerystore.model.base.ApiResponse;
 import com.hp.grocerystore.model.base.PaginationResponse;
-import com.hp.grocerystore.model.cart.CartItem;
 import com.hp.grocerystore.model.order.CheckoutRequest;
 import com.hp.grocerystore.model.order.Order;
 import com.hp.grocerystore.model.product.ProductOrder;
-import com.hp.grocerystore.utils.PagedResult;
 
 import java.util.List;
 
@@ -35,7 +33,7 @@ Call<ApiResponse<Order>> getOrderInfo(@Path("id") int orderId); // Sửa từ Li
 
 
     @GET("orders/me")
-    Call<ApiResponse<PagedResult<Order>>> getMyOrders(
+    Call<ApiResponse<PaginationResponse<Order>>> getMyOrders(
             @Query("status") int status,
             @Query("page") int page,
             @Query("size") int size

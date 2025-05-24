@@ -87,6 +87,11 @@ public class ProfileFragment extends Fragment {
             startActivity(intent);
         };
 
+        pendingOrder.setOnClickListener(listener);
+        indeliveryOrder.setOnClickListener(listener);
+        successOrder.setOnClickListener(listener);
+        cancelOrder.setOnClickListener(listener);
+
         updateUserLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
