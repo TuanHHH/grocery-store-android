@@ -1,27 +1,28 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:weightSum="11"
     tools:context=".view.fragment.ProfileFragment">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="2"
-        android:orientation="horizontal"
-        android:padding="16dp"
+        android:background="@color/primary"
         android:gravity="center"
-        android:background="@color/primary">
+        android:orientation="horizontal"
+        android:padding="16dp">
 
         <ImageView
             android:id="@+id/profileImage"
             android:layout_width="80dp"
             android:layout_height="80dp"
+            android:background="@drawable/circle_shape"
             android:contentDescription="Ảnh người dùng"
-            android:src="@drawable/ic_user"
-            android:background="@drawable/circle_shape" />
+            android:src="@drawable/ic_user" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -54,8 +55,8 @@
             android:id="@+id/authButtons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:gravity="center_vertical"
+            android:orientation="vertical"
             android:visibility="gone">
 
             <Button
@@ -63,19 +64,19 @@
                 android:layout_width="140dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                android:backgroundTint="@color/white"
-                android:textColor="@color/primary"
                 android:layout_weight="1"
-                android:text="Đăng nhập" />
+                android:backgroundTint="@color/white"
+                android:text="Đăng nhập"
+                android:textColor="@color/primary" />
 
             <Button
                 android:id="@+id/registerButton"
                 android:layout_width="140dp"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/white"
-                android:textColor="@color/primary"
                 android:layout_weight="1"
-                android:text="Đăng ký" />
+                android:backgroundTint="@color/white"
+                android:text="Đăng ký"
+                android:textColor="@color/primary" />
         </LinearLayout>
     </LinearLayout>
 
@@ -90,20 +91,21 @@
             android:id="@+id/tvOrdersTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:text="Đơn mua"
             android:textColor="@color/black"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginTop="15dp"
+            android:orientation="horizontal"
             android:weightSum="4">
 
             <LinearLayout
+                android:id="@+id/pendingOrder"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -113,19 +115,20 @@
                 <ImageView
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:src="@drawable/ic_pending"/>
+                    android:src="@drawable/ic_pending" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
+                    android:gravity="center"
                     android:text="Chờ xác nhận"
                     android:textColor="@color/black"
-                    android:textSize="10sp"
-                    android:gravity="center" />
+                    android:textSize="10sp" />
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/indeliveryOrder"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -141,13 +144,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
+                    android:gravity="center"
                     android:text="Đang giao"
                     android:textColor="@color/black"
-                    android:textSize="10sp"
-                    android:gravity="center" />
+                    android:textSize="10sp" />
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/successOrder"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -163,13 +167,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
+                    android:gravity="center"
                     android:text="Đã giao"
                     android:textColor="@color/black"
-                    android:textSize="10sp"
-                    android:gravity="center" />
+                    android:textSize="10sp" />
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/cancelOrder"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -185,10 +190,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
+                    android:gravity="center"
                     android:text="Đã hủy"
                     android:textColor="@color/black"
-                    android:textSize="10sp"
-                    android:gravity="center" />
+                    android:textSize="10sp" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
@@ -204,85 +209,85 @@
             android:id="@+id/btnAccountInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="@android:color/transparent"
+            android:gravity="start|center_vertical"
+            android:paddingVertical="16dp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:paddingVertical="16dp"
-            android:gravity="start|center_vertical"
-            android:textAlignment="viewStart"
             android:text="Thông tin tài khoản"
+            android:textAlignment="viewStart"
             android:textColor="@color/black"
-            android:backgroundTint="@android:color/transparent"
             app:icon="@drawable/ic_user"
-            app:iconPadding="12dp"
             app:iconGravity="textStart"
+            app:iconPadding="12dp"
             app:iconTint="@color/black" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnChangePassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="@android:color/transparent"
+            android:gravity="start|center_vertical"
+            android:paddingVertical="16dp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:paddingVertical="16dp"
-            android:gravity="start|center_vertical"
-            android:textAlignment="viewStart"
             android:text="Thay đổi mật khẩu"
+            android:textAlignment="viewStart"
             android:textColor="@color/black"
-            android:backgroundTint="@android:color/transparent"
             app:icon="@drawable/ic_password"
-            app:iconPadding="12dp"
             app:iconGravity="textStart"
+            app:iconPadding="12dp"
             app:iconTint="@color/black" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDevices"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="@android:color/transparent"
+            android:gravity="start|center_vertical"
+            android:paddingVertical="16dp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:paddingVertical="16dp"
-            android:gravity="start|center_vertical"
-            android:textAlignment="viewStart"
             android:text="Thiết bị đã đăng nhập"
+            android:textAlignment="viewStart"
             android:textColor="@color/black"
-            android:backgroundTint="@android:color/transparent"
             app:icon="@drawable/ic_device"
-            app:iconPadding="12dp"
             app:iconGravity="textStart"
+            app:iconPadding="12dp"
             app:iconTint="@color/black" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDisableAccount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="@android:color/transparent"
+            android:gravity="start|center_vertical"
+            android:paddingVertical="16dp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:paddingVertical="16dp"
-            android:gravity="start|center_vertical"
-            android:textAlignment="viewStart"
             android:text="Vô hiệu hóa tài khoản"
+            android:textAlignment="viewStart"
             android:textColor="@color/black"
-            android:backgroundTint="@android:color/transparent"
             app:icon="@drawable/ic_disable_account"
-            app:iconPadding="12dp"
             app:iconGravity="textStart"
+            app:iconPadding="12dp"
             app:iconTint="@color/black" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLogout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="@android:color/transparent"
+            android:gravity="start|center_vertical"
+            android:paddingVertical="16dp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:paddingVertical="16dp"
-            android:gravity="start|center_vertical"
-            android:textAlignment="viewStart"
             android:text="Đăng xuất"
+            android:textAlignment="viewStart"
             android:textColor="@color/black"
-            android:backgroundTint="@android:color/transparent"
             app:icon="@drawable/ic_logout"
-            app:iconPadding="12dp"
             app:iconGravity="textStart"
+            app:iconPadding="12dp"
             app:iconTint="@color/black" />
 
 

@@ -10,10 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.ProgressBar;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,7 +23,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
+import com.hp.grocerystore.view.activity.OrderActivity;
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -34,7 +32,6 @@ import com.hp.grocerystore.R;
 import com.hp.grocerystore.model.user.DeviceInfoResponse;
 import com.hp.grocerystore.model.user.UpdatePasswordRequest;
 import com.hp.grocerystore.model.user.User;
-import com.hp.grocerystore.utils.LoadingUtil;
 import com.hp.grocerystore.utils.Resource;
 import com.hp.grocerystore.utils.UserSession;
 import com.hp.grocerystore.view.activity.LoginActivity;
@@ -61,6 +58,10 @@ public class ProfileFragment extends Fragment {
         userName = view.findViewById(R.id.userName);
         userEmail = view.findViewById(R.id.userEmail);
         profileImage = view.findViewById(R.id.profileImage);
+        LinearLayout pendingOrder = view.findViewById(R.id.pendingOrder);
+        LinearLayout indeliveryOrder = view.findViewById(R.id.indeliveryOrder);
+        LinearLayout successOrder = view.findViewById(R.id.successOrder);
+        LinearLayout cancelOrder = view.findViewById(R.id.cancelOrder);
         loadUserInfo();
 
         accountInfoBtn = view.findViewById(R.id.btnAccountInfo);
@@ -73,6 +74,19 @@ public class ProfileFragment extends Fragment {
         showDeviceBtn.setOnClickListener(this::showDevicesInfo);
         deactiveBtn = view.findViewById(R.id.btnDisableAccount);
         deactiveBtn.setOnClickListener(this::disableAccount);
+
+        View.OnClickListener listener = v -> {
+            int orderStatus = 0;
+            if (v.getId() == R.id.pendingOrder) orderStatus = 0;
+            else if (v.getId() == R.id.indeliveryOrder) orderStatus = 1;
+            else if (v.getId() == R.id.successOrder) orderStatus = 2;
+            else if (v.getId() == R.id.cancelOrder) orderStatus = 3;
+
+            Intent intent = new Intent(getActivity(), OrderActivity.class);
+            intent.putExtra("orderStatus", orderStatus);
+            startActivity(intent);
+        };
+
         updateUserLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -244,3 +258,4 @@ public class ProfileFragment extends Fragment {
     }
 
 }
+
