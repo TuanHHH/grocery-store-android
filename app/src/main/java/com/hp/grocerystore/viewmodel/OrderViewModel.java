@@ -17,7 +17,7 @@ public class OrderViewModel extends ViewModel {
     private final OrderRepository repository;
 
     public OrderViewModel() {
-        OrderApi orderApi = RetrofitClient.getOrderApi(GRCApplication.getAppContext());
+        OrderApi orderApi = RetrofitClient.getOrderApi();
         this.repository = new OrderRepository(orderApi);
     }
 

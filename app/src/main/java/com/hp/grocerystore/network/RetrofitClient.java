@@ -85,7 +85,7 @@ public class RetrofitClient {
     public static UserApi getUserApi() {
         return createRetrofit().create(UserApi.class);
     }
-    public static OrderApi getOrderApi(Context context) {
-        return createRetrofit(context).create(OrderApi.class);
+    public static OrderApi getOrderApi() {
+        return createRetrofit().create(OrderApi.class);
     }
 }
