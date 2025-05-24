@@ -18,8 +18,8 @@ public class ProductViewModel extends ViewModel {
     private final ProductRepository repository;
 
     public ProductViewModel() {
-        ProductApi productApi = RetrofitClient.getProductApi(GRCApplication.getAppContext());
-        FeedbackApi feedbackApi = RetrofitClient.getFeedbackApi(GRCApplication.getAppContext());
+        ProductApi productApi = RetrofitClient.getProductApi();
+        FeedbackApi feedbackApi = RetrofitClient.getFeedbackApi();
         this.repository = new ProductRepository(productApi, feedbackApi);
     }
 

@@ -1,8 +1,8 @@
 package com.hp.grocerystore.network.api;
 
 import com.hp.grocerystore.model.base.ApiResponse;
+import com.hp.grocerystore.model.base.PaginationResponse;
 import com.hp.grocerystore.model.product.Product;
-import com.hp.grocerystore.utils.PagedResult;
 
 import java.util.List;
 
@@ -21,20 +21,20 @@ public interface ProductApi {
                                                  @Query("size") int size);
 
     @GET("products")
-    Call<ApiResponse<PagedResult<Product>>> getProductsPaginated(
+    Call<ApiResponse<PaginationResponse<Product>>> getProductsPaginated(
             @Query("page") int page,
             @Query("size") int size,
             @Query("filter") String filter
     );
 
     @GET("products/search")
-    Call<ApiResponse<PagedResult<Product>>> searchProducts(
+    Call<ApiResponse<PaginationResponse<Product>>> searchProducts(
             @Query("page") int page,
             @Query("size") int size,
             @Query("filter") String filter);
 
     @GET("products")
-    Call<ApiResponse<PagedResult<Product>>> searchAndFilterProducts(
+    Call<ApiResponse<PaginationResponse<Product>>> searchAndFilterProducts(
             @Query("page") int page,
             @Query("size") int size,
             @Query("filter") String filter1,

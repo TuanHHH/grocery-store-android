@@ -67,7 +67,6 @@ public class HomeFragment extends Fragment {
     private CategoryAdapter categoryAdapter;
     private WishlistAdapter wishlistAdapter;
 
-
     public static HomeFragment newInstance() {
         return new HomeFragment();
     }
@@ -92,17 +91,17 @@ public class HomeFragment extends Fragment {
             @NonNull
             @Override
             public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                ProductRepository productRepo = new ProductRepository(RetrofitClient.getProductApi(GRCApplication.getAppContext())); // Đảm bảo constructor đúng
-                CategoryRepository categoryRepo = new CategoryRepository(RetrofitClient.getCategoryApi(GRCApplication.getAppContext()));
+                ProductRepository productRepo = new ProductRepository(RetrofitClient.getProductApi()); // Đảm bảo constructor đúng
+                CategoryRepository categoryRepo = new CategoryRepository(RetrofitClient.getCategoryApi());
                 return (T) new HomeViewModel(productRepo, categoryRepo);
             }
         }).get(HomeViewModel.class);
 
-        wishlistViewModel =  new ViewModelProvider(this, new ViewModelProvider.Factory() {
+        wishlistViewModel = new ViewModelProvider(this, new ViewModelProvider.Factory() {
             @NonNull
             @Override
             public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                WishlistRepository wishlistRepo = new WishlistRepository(RetrofitClient.getWishlistApi(GRCApplication.getAppContext()));  // Đảm bảo constructor đúng
+                WishlistRepository wishlistRepo = new WishlistRepository(RetrofitClient.getWishlistApi());  // Đảm bảo constructor đúng
                 return (T) new WishlistViewModel(wishlistRepo);
             }
         }).get(WishlistViewModel.class);
@@ -137,10 +136,11 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+
     private void loadCategories() {
         homeViewModel.getAllCategories().observe(getViewLifecycleOwner(), resource -> {
 
-            switch (resource.status){
+            switch (resource.status) {
                 case LOADING:
                     progressBarCategoryView.setVisibility(View.VISIBLE);
                     linearCategoryContainer.setVisibility(View.GONE);
@@ -162,6 +162,7 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+
     private void addCategoryBlock(Category category) {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View categoryView = inflater.inflate(R.layout.item_category_block, linearCategoryBlockContainer, false);
@@ -195,13 +196,13 @@ public class HomeFragment extends Fragment {
         int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin_product_grid);
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(3, spacingInPixels, true));
 
-        ProductAdapter productAdapter = new ProductAdapter(getContext(), new ArrayList<>(),wishlistViewModel,getViewLifecycleOwner());
+        ProductAdapter productAdapter = new ProductAdapter(getContext(), new ArrayList<>(), wishlistViewModel, getViewLifecycleOwner());
         recyclerView.setAdapter(productAdapter);
 
         // Gọi API load sản phẩm theo category.slug
         String filter = "category.slug~'" + category.getSlug() + "'";
         homeViewModel.getProducts(1, 6, filter).observe(getViewLifecycleOwner(), resource -> {
-            switch (resource.status){
+            switch (resource.status) {
                 case LOADING:
                     linearCategoryBlockContainer.setVisibility(View.GONE);
                     break;
@@ -220,18 +221,19 @@ public class HomeFragment extends Fragment {
         btnViewMore.setTag(category);
         btnViewMore.setOnClickListener(v -> {
             Category selectedCategory = (Category) v.getTag();
-            if(getContext() instanceof MainActivity) {
+            if (getContext() instanceof MainActivity) {
                 MainActivity mainActivity = (MainActivity) getContext();
-                mainActivity.goToSearchWithCategory(category.getId(),"category.slug~'" + selectedCategory.getSlug() + "'");
+                mainActivity.goToSearchWithCategory(category.getId(), "category.slug~'" + selectedCategory.getSlug() + "'");
             }
         });
 
         // Thêm view vào container
         linearCategoryBlockContainer.addView(categoryView);
     }
-    private void loadWishlist(int page, int size, WishlistLoadedCallback callback){
+
+    private void loadWishlist(int page, int size, WishlistLoadedCallback callback) {
         // Khởi tạo observer 1 lần (ví dụ trong onViewCreated)
-        wishlistViewModel.getWishlistLiveData(page,size).observe(getViewLifecycleOwner(), resource -> {
+        wishlistViewModel.getWishlistLiveData(page, size).observe(getViewLifecycleOwner(), resource -> {
             switch (resource.status) {
                 case SUCCESS:
                     if (resource.data != null && !resource.data.isEmpty()) {

@@ -7,13 +7,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
 
-import com.hp.grocerystore.utils.PreferenceManager;
+import com.hp.grocerystore.utils.AuthPreferenceManager;
 import com.hp.grocerystore.view.activity.LoginActivity;
 
 public class SessionExpiredReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        PreferenceManager pref = new PreferenceManager(context);
+        AuthPreferenceManager pref = AuthPreferenceManager.getInstance(context);
         pref.clear();
 
         Handler handler = new Handler(Looper.getMainLooper());

@@ -15,18 +15,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PreferenceManager {
+public class AuthPreferenceManager {
     private static final String PREF_NAME = "grc_app_pref";
     private static final String KEY_ACCESS_TOKEN = "access_token";
     private static final String KEY_REFRESH_TOKEN = "refresh_token";
     private static final String KEY_DEVICE = "device";
     private static final String KEY_USER_NAME = "user_name";
     private static final String KEY_USER_EMAIL = "user_email";
-
     private final SharedPreferences sharedPreferences;
     private final SharedPreferences.Editor editor;
+    private static AuthPreferenceManager instance;
 
-    public PreferenceManager(Context context) {
+    public static synchronized AuthPreferenceManager getInstance(Context context) {
+        if (instance == null) {
+            instance = new AuthPreferenceManager(context.getApplicationContext());
+        }
+        return instance;
+    }
+
+
+    private AuthPreferenceManager(Context context) {
         try {
             MasterKey masterKey = new MasterKey.Builder(context)
                     .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -42,7 +50,7 @@ public class PreferenceManager {
 
             editor = sharedPreferences.edit();
         } catch (GeneralSecurityException | IOException e) {
-            throw new RuntimeException("Lỗi khi khởi tạo EncryptedSharedPreferences", e);
+            throw new RuntimeException("Init EncryptedSharedPreferences error: ", e);
         }
     }
 
@@ -99,7 +107,7 @@ public class PreferenceManager {
     }
 
     @NonNull
-    public static PreferenceManager saveTokens(List<String> cookies, String accessToken) {
+    public static AuthPreferenceManager saveTokens(List<String> cookies, String accessToken) {
         Map<String, String> cookieMap = new HashMap<>();
         for (String cookie : cookies) {
             String[] parts = cookie.split(";", 2);
@@ -111,7 +119,7 @@ public class PreferenceManager {
 
         String refreshToken = cookieMap.get("refresh_token");
         String device = cookieMap.get("device");
-        PreferenceManager prefManager = new PreferenceManager(GRCApplication.getAppContext());
+        AuthPreferenceManager prefManager = new AuthPreferenceManager(GRCApplication.getAppContext());
         prefManager.saveTokens(accessToken, refreshToken, device);
         return prefManager;
     }

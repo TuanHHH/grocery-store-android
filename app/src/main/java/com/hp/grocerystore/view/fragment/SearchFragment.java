@@ -122,7 +122,7 @@ public class SearchFragment extends Fragment {
             @NonNull
             @Override
             public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                ProductRepository productRepo = new ProductRepository(RetrofitClient.getProductApi(GRCApplication.getAppContext())); // Đảm bảo constructor đúng
+                ProductRepository productRepo = new ProductRepository(RetrofitClient.getProductApi()); // Đảm bảo constructor đúng
                 return (T) new SearchViewModel(productRepo);
             }
         }).get(SearchViewModel.class);
@@ -131,8 +131,8 @@ public class SearchFragment extends Fragment {
             @NonNull
             @Override
             public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                ProductRepository productRepo = new ProductRepository(RetrofitClient.getProductApi(GRCApplication.getAppContext())); // Đảm bảo constructor đúng
-                CategoryRepository categoryRepo = new CategoryRepository(RetrofitClient.getCategoryApi(GRCApplication.getAppContext()));
+                ProductRepository productRepo = new ProductRepository(RetrofitClient.getProductApi()); // Đảm bảo constructor đúng
+                CategoryRepository categoryRepo = new CategoryRepository(RetrofitClient.getCategoryApi());
                 return (T) new HomeViewModel(productRepo, categoryRepo);
             }
         }).get(HomeViewModel.class);
@@ -141,7 +141,7 @@ public class SearchFragment extends Fragment {
             @NonNull
             @Override
             public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                WishlistRepository wishlistRepo = new WishlistRepository(RetrofitClient.getWishlistApi(GRCApplication.getAppContext()));  // Đảm bảo constructor đúng
+                WishlistRepository wishlistRepo = new WishlistRepository(RetrofitClient.getWishlistApi());  // Đảm bảo constructor đúng
                 return (T) new WishlistViewModel(wishlistRepo);
             }
         }).get(WishlistViewModel.class);

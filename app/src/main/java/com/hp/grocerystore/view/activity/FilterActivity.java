@@ -92,8 +92,8 @@ public class FilterActivity extends AppCompatActivity {
             @NonNull
             @Override
             public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                ProductRepository productRepo = new ProductRepository(RetrofitClient.getProductApi(GRCApplication.getAppContext())); // Đảm bảo constructor đúng
-                CategoryRepository categoryRepo = new CategoryRepository(RetrofitClient.getCategoryApi(GRCApplication.getAppContext()));
+                ProductRepository productRepo = new ProductRepository(RetrofitClient.getProductApi()); // Đảm bảo constructor đúng
+                CategoryRepository categoryRepo = new CategoryRepository(RetrofitClient.getCategoryApi());
                 return (T) new HomeViewModel(productRepo, categoryRepo);
             }
         }).get(HomeViewModel.class);

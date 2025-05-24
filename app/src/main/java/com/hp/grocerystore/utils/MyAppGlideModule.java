@@ -20,7 +20,6 @@ public class MyAppGlideModule extends AppGlideModule {
     @Override
     public void registerComponents(@NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                // Bạn có thể thêm Interceptor nếu cần (ví dụ log, header...)
                 .build();
 
         registry.replace(

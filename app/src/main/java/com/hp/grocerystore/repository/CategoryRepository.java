@@ -8,7 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.hp.grocerystore.model.base.ApiResponse;
 import com.hp.grocerystore.network.api.CategoryApi;
 import com.hp.grocerystore.model.category.Category;
-import com.hp.grocerystore.utils.PagedResult;
+import com.hp.grocerystore.model.base.PaginationResponse;
 import com.hp.grocerystore.utils.Resource;
 
 import java.util.List;
@@ -29,9 +29,9 @@ public class CategoryRepository {
         MutableLiveData<Resource<List<Category>>> liveData = new MutableLiveData<>();
         liveData.setValue(Resource.loading());
 
-        categoryApi.getAllCategories().enqueue(new Callback<ApiResponse<PagedResult<Category>>>() {
+        categoryApi.getAllCategories().enqueue(new Callback<ApiResponse<PaginationResponse<Category>>>() {
             @Override
-            public void onResponse(Call<ApiResponse<PagedResult<Category>>> call, Response<ApiResponse<PagedResult<Category>>> response) {
+            public void onResponse(Call<ApiResponse<PaginationResponse<Category>>> call, Response<ApiResponse<PaginationResponse<Category>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Category> categories = response.body().getData().getResult(); // 🛠 lấy từ .getResult()
                     liveData.setValue(Resource.success(categories));
@@ -41,7 +41,7 @@ public class CategoryRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<PagedResult<Category>>> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<PaginationResponse<Category>>> call, Throwable t) {
                 liveData.setValue(Resource.error(t.getMessage()));
             }
         });

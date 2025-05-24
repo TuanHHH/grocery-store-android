@@ -4,10 +4,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.hp.grocerystore.model.base.ApiResponse;
-import com.hp.grocerystore.model.product.Product;
+import com.hp.grocerystore.model.base.PaginationResponse;
 import com.hp.grocerystore.model.wishlist.Wishlist;
 import com.hp.grocerystore.network.api.WishlistApi;
-import com.hp.grocerystore.utils.PagedResult;
 import com.hp.grocerystore.utils.Resource;
 import com.hp.grocerystore.utils.SingleLiveEvent;
 
@@ -72,9 +71,9 @@ public class WishlistRepository {
         MutableLiveData<Resource<List<Wishlist>>> liveData = new MutableLiveData<>();
         liveData.setValue(Resource.loading(null));
 
-        wishlistApi.getProductsInWishlist(page, size).enqueue(new Callback<ApiResponse<PagedResult<Wishlist>>>() {
+        wishlistApi.getProductsInWishlist(page, size).enqueue(new Callback<ApiResponse<PaginationResponse<Wishlist>>>() {
             @Override
-            public void onResponse(Call<ApiResponse<PagedResult<Wishlist>>> call, Response<ApiResponse<PagedResult<Wishlist>>> response) {
+            public void onResponse(Call<ApiResponse<PaginationResponse<Wishlist>>> call, Response<ApiResponse<PaginationResponse<Wishlist>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Wishlist> wishlistItems = response.body().getData().getResult();
                     liveData.setValue(Resource.success(wishlistItems));
@@ -84,7 +83,7 @@ public class WishlistRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<PagedResult<Wishlist>>> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<PaginationResponse<Wishlist>>> call, Throwable t) {
                 liveData.setValue(Resource.error(t.getMessage()));
             }
         });
@@ -134,9 +133,5 @@ public class WishlistRepository {
     // Getter LiveData cho ViewModel hoặc UI quan sát
     public LiveData<ApiResponse<Void>> getAddWishlistResult() {
         return addWishlistResult;
-    }
-
-    public LiveData<Resource<List<Wishlist>>> getWishlistLiveData() {
-        return wishlistLiveData;
     }
 }
