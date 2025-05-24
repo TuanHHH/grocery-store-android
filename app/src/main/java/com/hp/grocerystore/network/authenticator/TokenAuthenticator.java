@@ -11,13 +11,11 @@ import com.hp.grocerystore.model.auth.AuthResponse;
 import com.hp.grocerystore.model.base.ApiResponse;
 import com.hp.grocerystore.receiver.SessionExpiredReceiver;
 import com.hp.grocerystore.utils.Constants;
-import com.hp.grocerystore.utils.PreferenceManager;
+import com.hp.grocerystore.utils.AuthPreferenceManager;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -42,7 +40,7 @@ public class TokenAuthenticator implements Authenticator {
         }
 
         Log.d(TAG, "Authenticator triggered due to " + response.code());
-        PreferenceManager pref = new PreferenceManager(GRCApplication.getAppContext());
+        AuthPreferenceManager pref = AuthPreferenceManager.getInstance(GRCApplication.getAppContext());
         String refreshToken = pref.getRefreshToken();
         String device = pref.getDevice();
 
@@ -104,7 +102,7 @@ public class TokenAuthenticator implements Authenticator {
                         Log.d(TAG, "New access token received");
                         newAccessToken = token;
                         List<String> cookies = refreshResponse.headers("Set-Cookie");
-                        PreferenceManager.saveTokens(cookies, token);
+                        AuthPreferenceManager.saveTokens(cookies, token);
                         pref.saveUserData(apiResponse.getData().getUser().getName(), apiResponse.getData().getUser().getEmail());
                         // Thông báo cho các request khác biết đã có token mới
                         synchronized (isRefreshing) {

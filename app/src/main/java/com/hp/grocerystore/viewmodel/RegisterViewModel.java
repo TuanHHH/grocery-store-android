@@ -16,7 +16,7 @@ public class RegisterViewModel extends ViewModel {
     private final AuthRepository repository;
 
     public RegisterViewModel() {
-        AuthApi authApi = RetrofitClient.getAuthApi(GRCApplication.getAppContext());
+        AuthApi authApi = RetrofitClient.getAuthApi();
         this.repository = new AuthRepository(authApi);
     }
 

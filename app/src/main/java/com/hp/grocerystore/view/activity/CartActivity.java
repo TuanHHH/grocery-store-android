@@ -26,7 +26,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.hp.grocerystore.application.GRCApplication;
 import com.hp.grocerystore.utils.Extensions;
 import com.hp.grocerystore.utils.LoadingUtil;
-import com.hp.grocerystore.utils.PreferenceManager;
+import com.hp.grocerystore.utils.AuthPreferenceManager;
 import com.hp.grocerystore.utils.Resource;
 import com.hp.grocerystore.view.adapter.CartAdapter;
 import com.hp.grocerystore.model.cart.CartItem;
@@ -81,7 +81,7 @@ public class CartActivity extends AppCompatActivity {
     }
 
     private void setupLoginCheck() {
-        PreferenceManager pref = new PreferenceManager(GRCApplication.getAppContext());
+        AuthPreferenceManager pref = AuthPreferenceManager.getInstance(GRCApplication.getAppContext());
         boolean isLoggedIn = pref.isUserLoggedIn();
         if (!isLoggedIn) {
             loginRequiredLayout.setVisibility(View.VISIBLE);

@@ -1,11 +1,5 @@
 package com.hp.grocerystore.view.adapter;
 
-import static com.hp.grocerystore.utils.Resource.Status.ERROR;
-import static com.hp.grocerystore.utils.Resource.Status.LOADING;
-import static com.hp.grocerystore.utils.Resource.Status.SUCCESS;
-
-import static java.security.AccessController.getContext;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -21,89 +15,17 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hp.grocerystore.R;
 import com.hp.grocerystore.model.product.Product;
 import com.hp.grocerystore.model.wishlist.Wishlist;
 import com.hp.grocerystore.utils.LiveDataUtils;
 import com.hp.grocerystore.view.activity.ProductDetailActivity;
-import com.hp.grocerystore.viewmodel.SharedViewModel;
 import com.hp.grocerystore.viewmodel.WishlistViewModel;
-//import com.hp.grocerystore.view.activity.WishlistActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-//public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
-//
-//    private Context context;
-//    private List<Product> productList;
-//
-//    public ProductAdapter(Context context, List<Product> productList) {
-//        this.context = context;
-//        this.productList = productList;
-//    }
-//
-//    @NonNull
-//    @Override
-//    public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-//
-//        View view = LayoutInflater.from(context).inflate(R.layout.item_product, parent, false);
-//
-//        return new ProductViewHolder(view);
-//    }
-//
-//    @Override
-//    public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
-//        Product product = productList.get(position);
-//        holder.bind(product);
-////        holder.itemView.setOnClickListener(v -> {
-////            Intent intent = new Intent(context, ProductDetailActivity.class);
-////            intent.putExtra("product", product); // gửi product qua Intent
-////            context.startActivity(intent);
-////        });
-//    }
-//
-//    @Override
-//    public int getItemCount() {
-//        return productList.size();
-//    }
-//
-//    public static class ProductViewHolder extends RecyclerView.ViewHolder {
-//        ImageView imgProduct, imgFavorite;
-//        TextView tvName, tvPrice;
-//
-//        public ProductViewHolder(@NonNull View itemView) {
-//            super(itemView);
-//            imgProduct = itemView.findViewById(R.id.img_product);
-//            tvName = itemView.findViewById(R.id.tv_product_name);
-//            tvPrice = itemView.findViewById(R.id.tv_product_price);
-//            imgFavorite = itemView.findViewById(R.id.img_favorite);
-//        }
-//        public void bind(Product product) {
-//            tvName.setText(product.getProductName());
-//            tvPrice.setText(product.getPrice() + "đ");
-//
-//            Glide.with(itemView.getContext())
-//                    .load(product.getImageUrl())
-//                    .placeholder(R.drawable.placeholder_product)
-//                    .error(R.drawable.placeholder_product)
-//                    .into(imgProduct);
-//
-//            // Xử lý sự kiện click icon trái tim
-//            imgFavorite.setOnClickListener(v -> {
-////                Intent intent = new Intent(itemView.getContext(), WishlistActivity.class);
-////                itemView.getContext().startActivity(intent);
-//            });
-//        }
-//    }
-//    @SuppressLint("NotifyDataSetChanged")
-//    public void updateData(List<Product> newList) {
-//        productList.clear();
-//        productList.addAll(newList);
-//        notifyDataSetChanged();
-//    }
-//}
+
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
     private final Context context;
     private List<Product> productList;
@@ -118,12 +40,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         this.productList = productList;
         this.lifecycleOwner = lifecycleOwner;
     }
-//    public ProductAdapter(Context context, List<Product> productList, List<Wishlist> wishlistList) {
-//        this.context = context;
-//        this.productList = productList;
-//        this.wishlistList = wishlistList;
-//    }
-
     public ProductAdapter(Context context, List<Product> productList, WishlistViewModel wishlistViewModel,LifecycleOwner lifecycleOwner) {
         this.context = context;
         this.productList = productList;

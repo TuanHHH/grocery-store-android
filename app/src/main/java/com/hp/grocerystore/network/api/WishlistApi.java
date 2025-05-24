@@ -1,10 +1,8 @@
 package com.hp.grocerystore.network.api;
 
 import com.hp.grocerystore.model.base.ApiResponse;
+import com.hp.grocerystore.model.base.PaginationResponse;
 import com.hp.grocerystore.model.wishlist.Wishlist;
-import com.hp.grocerystore.utils.PagedResult;
-
-import java.util.List;
 
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -22,7 +20,7 @@ public interface WishlistApi {
     );
 
     @GET("wishlist")
-    Call<ApiResponse<PagedResult<Wishlist>>> getProductsInWishlist(
+    Call<ApiResponse<PaginationResponse<Wishlist>>> getProductsInWishlist(
             @Query("page") int page,
             @Query("size") int size
     );
