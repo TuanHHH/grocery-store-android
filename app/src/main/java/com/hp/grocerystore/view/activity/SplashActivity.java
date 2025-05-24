@@ -4,19 +4,26 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.hp.grocerystore.R;
-import com.hp.grocerystore.utils.PreferenceManager;
+import com.hp.grocerystore.model.user.User;
+import com.hp.grocerystore.utils.AuthPreferenceManager;
+import com.hp.grocerystore.utils.UserSession;
+import com.hp.grocerystore.viewmodel.LoginViewModel;
 
 @SuppressLint("CustomSplashScreen")
 public class SplashActivity extends AppCompatActivity {
     private static final int SPLASH_DELAY = 1500;
+    private LoginViewModel loginViewModel;
+    private AuthPreferenceManager prefManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,19 +37,55 @@ public class SplashActivity extends AppCompatActivity {
             return insets;
         });
 
-        new Handler().postDelayed(() -> {
-            PreferenceManager prefManager = new PreferenceManager(SplashActivity.this);
-            boolean isLoggedIn = prefManager.isUserLoggedIn();
+        prefManager = AuthPreferenceManager.getInstance(this);
+        loginViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
+        new Handler().postDelayed(this::handleSplashLogic, SPLASH_DELAY);
+       
+    }
 
-            if (isLoggedIn) {
-                // fake access token to check refresh token api
-//                prefManager.setAccessToken("fake-eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdWRvcmkxMDA4QGdtYWlsLmNvbSIsImV4cCI6MTc0NTI3MDA1MCwiaWF0IjoxNzQ1MjI2ODUwLCJ1c2VyIjp7ImlkIjozMSwiZW1haWwiOiJzdWRvcmkxMDA4QGdtYWlsLmNvbSIsIm5hbWUiOiJTdWRvcmkiLCJyb2xlIjp7ImlkIjoyLCJyb2xlTmFtZSI6IlVTRsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiJdfQ.h8pGHiiUVGlZ3DM9p5zqdt7agcE9yYoCU7q4lgJ3Mlxg2HI7BVP5nvpm3Ef2x0o-K8OA9NJxn-VQVVzqc_QHYQ");
-                startActivity(new Intent(SplashActivity.this, MainActivity.class));
+    private void handleSplashLogic() {
+        if (prefManager.isUserLoggedIn()) {
+            String token = prefManager.getAccessToken();
+            if (token != null) {
+                fetchUserInfo(token);
             } else {
-                startActivity(new Intent(SplashActivity.this, LoginActivity.class));
+                // fallback: no token
+                navigateToLogin();
             }
+        } else {
+            navigateToLogin();
+        }
+    }
 
-            finish();
-        }, SPLASH_DELAY);
+    private void fetchUserInfo(String token) {
+        loginViewModel.getUserInfo().observe(this, resource -> {
+            if (resource == null) return;
+
+            switch (resource.status) {
+                case SUCCESS:
+                    navigateToMain();
+                    break;
+
+                case ERROR:
+                    Toast.makeText(this, "Không thể lấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+                    navigateToLogin();
+                    break;
+
+                case LOADING:
+                    break;
+            }
+        });
+
+        loginViewModel.getUserInfo();
+    }
+
+    private void navigateToMain() {
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
+    }
+
+    private void navigateToLogin() {
+        startActivity(new Intent(this, LoginActivity.class));
+        finish();
     }
 }

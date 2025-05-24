@@ -9,7 +9,6 @@ import com.hp.grocerystore.model.feedback.Feedback;
 import com.hp.grocerystore.model.product.Product;
 import com.hp.grocerystore.network.api.FeedbackApi;
 import com.hp.grocerystore.network.api.ProductApi;
-import com.hp.grocerystore.utils.PagedResult;
 import com.hp.grocerystore.utils.Resource;
 
 import java.util.List;
@@ -163,9 +162,9 @@ public class ProductRepository {
         MutableLiveData<Resource<List<Product>>> liveData = new MutableLiveData<>();
         liveData.setValue(Resource.loading());
 
-        productApi.getProductsPaginated(page, size, filter).enqueue(new Callback<ApiResponse<PagedResult<Product>>>() {
+        productApi.getProductsPaginated(page, size, filter).enqueue(new Callback<ApiResponse<PaginationResponse<Product>>>() {
             @Override
-            public void onResponse(Call<ApiResponse<PagedResult<Product>>> call, Response<ApiResponse<PagedResult<Product>>> response) {
+            public void onResponse(Call<ApiResponse<PaginationResponse<Product>>> call, Response<ApiResponse<PaginationResponse<Product>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Product> products = response.body().getData().getResult();
                     liveData.setValue(Resource.success(products));
@@ -175,7 +174,7 @@ public class ProductRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<PagedResult<Product>>> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<PaginationResponse<Product>>> call, Throwable t) {
                 liveData.setValue(Resource.error(t.getMessage()));
             }
         });
@@ -186,11 +185,11 @@ public class ProductRepository {
     public LiveData<Resource<List<Product>>> searchProducts(int page, int size, String filter) {
         MutableLiveData<Resource<List<Product>>> liveData = new MutableLiveData<>();
         liveData.setValue(Resource.loading());
-        productApi.searchProducts(page, size, filter).enqueue(new Callback<ApiResponse<PagedResult<Product>>>() {
+        productApi.searchProducts(page, size, filter).enqueue(new Callback<ApiResponse<PaginationResponse<Product>>>() {
 
 
             @Override
-            public void onResponse(Call<ApiResponse<PagedResult<Product>>> call, Response<ApiResponse<PagedResult<Product>>> response) {
+            public void onResponse(Call<ApiResponse<PaginationResponse<Product>>> call, Response<ApiResponse<PaginationResponse<Product>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Product> products = response.body().getData().getResult();
                     liveData.setValue(Resource.success(products));
@@ -200,7 +199,7 @@ public class ProductRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<PagedResult<Product>>> call, Throwable throwable) {
+            public void onFailure(Call<ApiResponse<PaginationResponse<Product>>> call, Throwable throwable) {
                 liveData.setValue(Resource.error(throwable.getMessage()));
             }
         });
@@ -213,11 +212,11 @@ public class ProductRepository {
                                                                      String filter5,String filter6,String sort) {
         MutableLiveData<Resource<List<Product>>> liveData = new MutableLiveData<>();
         liveData.setValue(Resource.loading(null));
-        productApi.searchAndFilterProducts(page, size, filter1,filter2,filter3,filter4,filter5,filter6,sort).enqueue(new Callback<ApiResponse<PagedResult<Product>>>() {
+        productApi.searchAndFilterProducts(page, size, filter1,filter2,filter3,filter4,filter5,filter6,sort).enqueue(new Callback<ApiResponse<PaginationResponse<Product>>>() {
 
 
             @Override
-            public void onResponse(Call<ApiResponse<PagedResult<Product>>> call, Response<ApiResponse<PagedResult<Product>>> response) {
+            public void onResponse(Call<ApiResponse<PaginationResponse<Product>>> call, Response<ApiResponse<PaginationResponse<Product>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Product> products = response.body().getData().getResult();
                     liveData.setValue(Resource.success(products));
@@ -227,7 +226,7 @@ public class ProductRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<PagedResult<Product>>> call, Throwable throwable) {
+            public void onFailure(Call<ApiResponse<PaginationResponse<Product>>> call, Throwable throwable) {
                 liveData.setValue(Resource.error(throwable.getMessage(),null));
             }
         });

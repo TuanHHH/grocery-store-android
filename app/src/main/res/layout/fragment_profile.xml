@@ -1,338 +1,295 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
+    android:weightSum="11"
     tools:context=".view.fragment.ProfileFragment">
 
-    <!-- Thông tin người dùng -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="2"
         android:background="@color/primary"
         android:gravity="center"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:padding="16dp">
 
         <ImageView
             android:id="@+id/profileImage"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="center"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@drawable/circle_shape"
             android:contentDescription="Ảnh người dùng"
-            android:src="@drawable/ic_user"
-            android:background="@drawable/circle_shape" />
+            android:src="@drawable/ic_user" />
 
-        <TextView
-            android:id="@+id/userName"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center"
-            android:text="Tên người dùng"
-            android:textColor="@android:color/white"
-            android:textSize="18sp" />
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:gravity="start|center_vertical"
+            android:orientation="vertical"
+            tools:ignore="NestedWeights">
 
-        <TextView
-            android:id="@+id/userEmail"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:gravity="center"
-            android:text="email@domain.com"
-            android:textColor="@android:color/white"
-            android:textSize="14sp" />
+            <TextView
+                android:id="@+id/userName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tên người dùng"
+                android:textColor="@android:color/white"
+                android:textSize="18sp" />
 
-        <!-- Nút Đăng xuất hoặc Đăng nhập/Đăng ký -->
-        <Button
-            android:id="@+id/authButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Đăng xuất"
-            android:visibility="gone" />
+            <TextView
+                android:id="@+id/userEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="email@domain.com"
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/authButtons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
             android:visibility="gone">
 
             <Button
                 android:id="@+id/loginButton"
-                android:layout_width="wrap_content"
+                android:layout_width="140dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                android:text="Đăng nhập" />
+                android:layout_weight="1"
+                android:backgroundTint="@color/white"
+                android:text="Đăng nhập"
+                android:textColor="@color/primary" />
 
             <Button
                 android:id="@+id/registerButton"
-                android:layout_width="wrap_content"
+                android:layout_width="140dp"
                 android:layout_height="wrap_content"
-                android:text="Đăng ký" />
+                android:layout_weight="1"
+                android:backgroundTint="@color/white"
+                android:text="Đăng ký"
+                android:textColor="@color/primary" />
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Tiêu đề đơn hàng -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="16dp"
-        android:paddingTop="16dp"
-        android:paddingEnd="16dp">
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/tvOrdersTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:text="Đơn mua"
             android:textColor="@color/black"
             android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:textStyle="bold" />
 
-    <!-- Các trạng thái đơn hàng trong phần Đơn mua -->
-
-    <!-- Các tùy chọn -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="16dp"
-        android:weightSum="4">
-
-        <!-- Các trạng thái đơn hàng -->
         <LinearLayout
-            android:id="@+id/pendingOrder"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:layout_marginTop="15dp"
+            android:orientation="horizontal"
+            android:weightSum="4">
 
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_menu_placeholder"
-                app:tint="@color/black" />
-
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/pendingOrder"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Chờ xác nhận"
-                android:textColor="@color/black"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/indeliveryOrder"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_menu_placeholder"
-                app:tint="@color/black" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Đang giao"
-                android:textColor="@color/black"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/successOrder"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_menu_placeholder"
-                app:tint="@color/black" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Đã giao"
-                android:textColor="@color/black"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/cancelOrder"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <FrameLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
 
                 <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:src="@drawable/ic_menu_placeholder"
-                    app:tint="@color/black" />
-            </FrameLayout>
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_pending" />
 
-            <TextView
-                android:layout_width="wrap_content"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center"
+                    android:text="Chờ xác nhận"
+                    android:textColor="@color/black"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/indeliveryOrder"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Đã hủy"
-                android:textColor="@color/black"
-                android:textSize="12sp" />
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_shipping" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center"
+                    android:text="Đang giao"
+                    android:textColor="@color/black"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/successOrder"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_order" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center"
+                    android:text="Đã giao"
+                    android:textColor="@color/black"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/cancelOrder"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_return" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center"
+                    android:text="Đã hủy"
+                    android:textColor="@color/black"
+                    android:textSize="10sp" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="7"
         android:orientation="vertical"
-        android:layout_weight="2"
         android:padding="16dp">
 
-        <LinearLayout
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAccountInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingBottom="8dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/card_background">
+            android:backgroundTint="@android:color/transparent"
+            android:gravity="start|center_vertical"
+            android:paddingVertical="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="Thông tin tài khoản"
+            android:textAlignment="viewStart"
+            android:textColor="@color/black"
+            app:icon="@drawable/ic_user"
+            app:iconGravity="textStart"
+            app:iconPadding="12dp"
+            app:iconTint="@color/black" />
 
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center_vertical"
-                android:contentDescription="Thông tin tài khoản"
-                android:src="@drawable/ic_user" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:text="Thông tin tài khoản"
-                android:textSize="16sp" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/light_gray"
-            android:layout_marginTop="8dp" />
-
-        <LinearLayout
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnChangePassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingBottom="8dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/card_background">
+            android:backgroundTint="@android:color/transparent"
+            android:gravity="start|center_vertical"
+            android:paddingVertical="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="Thay đổi mật khẩu"
+            android:textAlignment="viewStart"
+            android:textColor="@color/black"
+            app:icon="@drawable/ic_password"
+            app:iconGravity="textStart"
+            app:iconPadding="12dp"
+            app:iconTint="@color/black" />
 
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center_vertical"
-                android:contentDescription="Thay đổi mật khẩu"
-                android:src="@drawable/ic_password" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:text="Thay đổi mật khẩu"
-                android:textSize="16sp" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/light_gray"
-            android:layout_marginTop="8dp" />
-
-        <LinearLayout
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDevices"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingBottom="8dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/card_background">
+            android:backgroundTint="@android:color/transparent"
+            android:gravity="start|center_vertical"
+            android:paddingVertical="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="Thiết bị đã đăng nhập"
+            android:textAlignment="viewStart"
+            android:textColor="@color/black"
+            app:icon="@drawable/ic_device"
+            app:iconGravity="textStart"
+            app:iconPadding="12dp"
+            app:iconTint="@color/black" />
 
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center_vertical"
-                android:contentDescription="Thiết bị đã đăng nhập"
-                android:src="@drawable/ic_device" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:text="Thiết bị đã đăng nhập"
-                android:textSize="16sp" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/light_gray"
-            android:layout_marginTop="8dp" />
-
-        <LinearLayout
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDisableAccount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingBottom="8dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/card_background">
+            android:backgroundTint="@android:color/transparent"
+            android:gravity="start|center_vertical"
+            android:paddingVertical="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="Vô hiệu hóa tài khoản"
+            android:textAlignment="viewStart"
+            android:textColor="@color/black"
+            app:icon="@drawable/ic_disable_account"
+            app:iconGravity="textStart"
+            app:iconPadding="12dp"
+            app:iconTint="@color/black" />
 
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center_vertical"
-                android:contentDescription="Yêu cầu vô hiệu hóa tài khoản"
-                android:src="@drawable/ic_disable_account" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLogout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@android:color/transparent"
+            android:gravity="start|center_vertical"
+            android:paddingVertical="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="Đăng xuất"
+            android:textAlignment="viewStart"
+            android:textColor="@color/black"
+            app:icon="@drawable/ic_logout"
+            app:iconGravity="textStart"
+            app:iconPadding="12dp"
+            app:iconTint="@color/black" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:text="Yêu cầu vô hiệu hóa tài khoản"
-                android:textSize="16sp" />
-        </LinearLayout>
+
     </LinearLayout>
 </LinearLayout>

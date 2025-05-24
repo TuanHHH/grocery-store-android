@@ -87,7 +87,7 @@ public class WishlistFragment extends Fragment {
             @Override
             public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
                 WishlistRepository wishlistRepo = new WishlistRepository(
-                        RetrofitClient.getWishlistApi(GRCApplication.getAppContext())
+                        RetrofitClient.getWishlistApi()
                 );
                 return (T) new WishlistViewModel(wishlistRepo);
             }

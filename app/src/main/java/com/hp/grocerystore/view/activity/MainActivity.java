@@ -8,9 +8,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Intent;
@@ -25,22 +23,15 @@ import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
 
 import android.view.View;
 
 
-
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.hp.grocerystore.R;
-import com.hp.grocerystore.model.product.Product;
 import com.hp.grocerystore.utils.FilterData;
 import com.hp.grocerystore.view.adapter.ViewpageAdapter;
 import com.hp.grocerystore.viewmodel.SharedViewModel;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -83,7 +74,8 @@ public class MainActivity extends AppCompatActivity {
         }
         mViewPager = findViewById(R.id.view_pager);
         mBottomNavigationView = findViewById(R.id.bottom_navigation);
-        ViewpageAdapter viewpagerAdater = new ViewpageAdapter(this);;
+        ViewpageAdapter viewpagerAdater = new ViewpageAdapter(this);
+        ;
 
         mViewPager.setAdapter(viewpagerAdater);
         mViewPager.setCurrentItem(0);
@@ -109,19 +101,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mBottomNavigationView.setOnNavigationItemSelectedListener(new  BottomNavigationView.OnNavigationItemSelectedListener() {
+        mBottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @SuppressLint("NonConstantResourceId")
             @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {  switch (item.getItemId()){
-                case R.id.navigation_home:
-                    mViewPager.setCurrentItem(0);break;
-                case R.id.navigation_category:
-                    mViewPager.setCurrentItem(1); break;
-                case R.id.navigation_heart:
-                    mViewPager.setCurrentItem(2); break;
-                case R.id.navigation_profile:
-                    mViewPager.setCurrentItem(3); break;
-            }
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.navigation_home:
+                        mViewPager.setCurrentItem(0);
+                        break;
+                    case R.id.navigation_category:
+                        mViewPager.setCurrentItem(1);
+                        break;
+                    case R.id.navigation_heart:
+                        mViewPager.setCurrentItem(2);
+                        break;
+                    case R.id.navigation_profile:
+                        mViewPager.setCurrentItem(3);
+                        break;
+                }
                 return true;
             }
         });
@@ -129,38 +126,38 @@ public class MainActivity extends AppCompatActivity {
         settingSearchFunc();
 
         Intent intent = getIntent();
-        if (intent.hasExtra("selected_categoryId")){
+        if (intent.hasExtra("selected_categoryId")) {
             selectedCategoryId = (long) intent.getSerializableExtra("selected_categoryId");
         }
-        if (intent.hasExtra("selected_categorySlug")){
+        if (intent.hasExtra("selected_categorySlug")) {
             selectedCategorySlug = (String) intent.getSerializableExtra("selected_categorySlug");
         }
-        if (intent.hasExtra("selected_sort")){
+        if (intent.hasExtra("selected_sort")) {
             selectedSort = (String) intent.getSerializableExtra("selected_sort");
         }
-        if (intent.hasExtra("min_price")){
+        if (intent.hasExtra("min_price")) {
             minPrice = (int) intent.getSerializableExtra("min_price");
         }
-        if (intent.hasExtra("max_price")){
+        if (intent.hasExtra("max_price")) {
             maxPrice = (int) intent.getSerializableExtra("max_price");
         }
-        if (intent.hasExtra("min_rating")){
+        if (intent.hasExtra("min_rating")) {
             minRating = (float) intent.getSerializableExtra("min_rating");
         }
-        if (intent.hasExtra("max_rating")){
+        if (intent.hasExtra("max_rating")) {
             maxRating = (float) intent.getSerializableExtra("max_rating");
         }
-        if (intent.hasExtra("search_text")){
+        if (intent.hasExtra("search_text")) {
             searchText = (String) intent.getSerializableExtra("search_text");
             if (searchText.length() > 0) {
                 String searchBarText = searchText.replace("productName~'", "");
-                searchBar.setText(searchBarText.subSequence(0,searchBarText.length()-1));
-            }else{
+                searchBar.setText(searchBarText.subSequence(0, searchBarText.length() - 1));
+            } else {
                 searchBar.setText("");
             }
         }
 
-        if((intent.hasExtra("selected_categorySlug") && intent.hasExtra("selected_categoryId"))
+        if ((intent.hasExtra("selected_categorySlug") && intent.hasExtra("selected_categoryId"))
                 || intent.hasExtra("selected_sort")
                 || intent.hasExtra("min_price")
                 || intent.hasExtra("max_price")
@@ -168,33 +165,36 @@ public class MainActivity extends AppCompatActivity {
                 || intent.hasExtra("min_rating")
                 || intent.hasExtra("max_rating")) {
             goToSearchFromFilter(selectedCategoryId, selectedCategorySlug,
-                    selectedSort, minPrice, maxPrice,minRating, maxRating, searchText);
+                    selectedSort, minPrice, maxPrice, minRating, maxRating, searchText);
         }
     }
 
-    public void goToSearchWithCategory(long categoryId,String categorySlug) {
+    public void goToSearchWithCategory(long categoryId, String categorySlug) {
         sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
         FilterData data = new FilterData(categorySlug);
         data.setSelectedCategoryId(categoryId);
         sharedViewModel.setFilterData(data);
         mViewPager.setCurrentItem(1, true);
     }
+
     public void goToSearchWithKeyword(String keyword) {
         sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
         FilterData data = new FilterData(keyword);
         sharedViewModel.setFilterData(data);
         mViewPager.setCurrentItem(1, true);
     }
+
     public void goToSearchFromFilter(long selectedCategoryId, String selectedCategorySlug, String selectedSort, int minPrice,
-                                     int maxPrice, float minRating, float maxRating, String searchText){
+                                     int maxPrice, float minRating, float maxRating, String searchText) {
 
         sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
         FilterData data = new FilterData(selectedCategoryId, selectedCategorySlug,
-                selectedSort, minPrice, maxPrice,minRating, maxRating, searchText);
+                selectedSort, minPrice, maxPrice, minRating, maxRating, searchText);
         sharedViewModel.setFilterData(data);
         mViewPager.setCurrentItem(1, true);
     }
-    private void settingSearchFunc(){
+
+    private void settingSearchFunc() {
         // Khi nhấn Enter trên bàn phím
         searchBar.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH ||
@@ -215,8 +215,14 @@ public class MainActivity extends AppCompatActivity {
             searchBar.setText("");
         });
     }
+
     private void performSearch(String keyword) {
         if (keyword.contains("productName~")) goToSearchWithKeyword(keyword);
-        else goToSearchWithKeyword("productName~'"+keyword+"'");
+        else goToSearchWithKeyword("productName~'" + keyword + "'");
+    }
+
+    public void redirectToCart(View view) {
+        Intent intent = new Intent(MainActivity.this, CartActivity.class);
+        startActivity(intent);
     }
 }

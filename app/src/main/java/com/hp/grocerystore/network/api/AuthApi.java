@@ -5,9 +5,12 @@ import com.hp.grocerystore.model.auth.AuthResponse;
 import com.hp.grocerystore.model.auth.RegisterRequest;
 import com.hp.grocerystore.model.auth.RegisterResponse;
 import com.hp.grocerystore.model.base.ApiResponse;
+import com.hp.grocerystore.model.user.User;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 
 public interface AuthApi {
@@ -15,5 +18,11 @@ public interface AuthApi {
     Call<ApiResponse<AuthResponse>> login(@Body LoginRequest loginRequest);
     @POST("auth/register")
     Call<ApiResponse<RegisterResponse>> register(@Body RegisterRequest registerRequest);
+
+    @GET("auth/me")
+    Call<ApiResponse<User>> getUserInfo();
+
+    @POST("auth/logout")
+    Call<ApiResponse<Void>> logout(@Header("Cookie") String cookie);
 
 }

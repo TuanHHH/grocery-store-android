@@ -16,7 +16,7 @@ public class CartViewModel extends ViewModel {
     private final CartRepository repository;
 
     public CartViewModel() {
-        CartApi cartApi = RetrofitClient.getCartApi(GRCApplication.getAppContext());
+        CartApi cartApi = RetrofitClient.getCartApi();
         this.repository = new CartRepository(cartApi);
     }
 
