@@ -124,7 +124,7 @@
                     android:gravity="center"
                     android:text="Chờ xác nhận"
                     android:textColor="@color/black"
-                    android:textSize="10sp" />
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -147,7 +147,7 @@
                     android:gravity="center"
                     android:text="Đang giao"
                     android:textColor="@color/black"
-                    android:textSize="10sp" />
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -170,7 +170,7 @@
                     android:gravity="center"
                     android:text="Đã giao"
                     android:textColor="@color/black"
-                    android:textSize="10sp" />
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -193,7 +193,7 @@
                     android:gravity="center"
                     android:text="Đã hủy"
                     android:textColor="@color/black"
-                    android:textSize="10sp" />
+                    android:textSize="12sp" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

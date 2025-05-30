@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.hp.grocerystore.application.GRCApplication;
+import com.hp.grocerystore.model.feedback.CreateFeedbackRequest;
 import com.hp.grocerystore.model.feedback.Feedback;
 import com.hp.grocerystore.model.product.Product;
 import com.hp.grocerystore.network.api.FeedbackApi;
@@ -41,5 +42,9 @@ public class ProductViewModel extends ViewModel {
 
     public void refreshProducts() {
         repository.refreshProducts();
+    }
+
+    public LiveData<Resource<Feedback>> addFeedBack(long productId, int rating, String description){
+        return repository.addFeedback(new CreateFeedbackRequest(productId, rating, description));
     }
 }

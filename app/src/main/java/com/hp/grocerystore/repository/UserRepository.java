@@ -27,16 +27,12 @@ import retrofit2.Response;
 
 public class UserRepository {
     private final UserApi userApi;
-    private final MutableLiveData<Resource<Void>> updatePasswordLiveData = new MutableLiveData<>();
-    private final MutableLiveData<Resource<UploadFileResponse>> uploadFileLiveData = new MutableLiveData<>();
-    private final MutableLiveData<Resource<User>> updateUserLiveData = new MutableLiveData<>();
-    private final MutableLiveData<Resource<List<DeviceInfoResponse>>> loggedInDevicesLiveData = new MutableLiveData<>();
-
     public UserRepository(UserApi userApi) {
         this.userApi = userApi;
     }
 
     public LiveData<Resource<Void>> updatePassword(UpdatePasswordRequest request) {
+        MutableLiveData<Resource<Void>> updatePasswordLiveData = new MutableLiveData<>();
         updatePasswordLiveData.setValue(Resource.loading());
         userApi.updatePassword(request).enqueue(new Callback<ApiResponse<Void>>() {
             @Override
@@ -75,7 +71,7 @@ public class UserRepository {
 
 
     public LiveData<Resource<UploadFileResponse>> uploadFile(MultipartBody.Part filePart, String folder) {
-
+        MutableLiveData<Resource<UploadFileResponse>> uploadFileLiveData = new MutableLiveData<>();
         uploadFileLiveData.setValue(Resource.loading());
 
         RequestBody folderBody = RequestBody.create(okhttp3.MediaType.parse("text/plain"), folder);
@@ -101,6 +97,7 @@ public class UserRepository {
 
 
     public LiveData<Resource<User>> updateUser(UpdateUserRequest updateUserRequest) {
+        MutableLiveData<Resource<User>> updateUserLiveData = new MutableLiveData<>();
         updateUserLiveData.setValue(Resource.loading());
         userApi.updateUser(updateUserRequest).enqueue(new Callback<ApiResponse<User>>() {
             @Override
@@ -134,6 +131,7 @@ public class UserRepository {
     }
 
     public LiveData<Resource<List<DeviceInfoResponse>>> getLoggerInDevice() {
+        MutableLiveData<Resource<List<DeviceInfoResponse>>> loggedInDevicesLiveData = new MutableLiveData<>();
         loggedInDevicesLiveData.setValue(Resource.loading());
         AuthPreferenceManager pref = AuthPreferenceManager.getInstance(GRCApplication.getAppContext());
         String deviceHash = pref.getDevice();

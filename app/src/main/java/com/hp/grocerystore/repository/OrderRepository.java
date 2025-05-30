@@ -167,4 +167,83 @@ public class OrderRepository {
             }
         });
     }
+
+    public LiveData<Resource<Order>> getOrderById(int orderId) {
+        loadOrderInformationById(orderId);
+        return orderInfo;
+    }
+
+    private void loadOrderInformationById(int orderId) {
+            isLoading = true;
+        orderInfo.setValue(Resource.loading());
+        orderApi.getOrderInfo(orderId).enqueue(new Callback<ApiResponse<Order>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Order>> call, Response<ApiResponse<Order>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<Order> apiResponse = response.body();
+                    if (apiResponse.getStatusCode() == 200) {
+                        Order order = apiResponse.getData();
+                        Log.d("OrderRepository", "loadOrderInformationById: Order received: " + (order != null ? order.toString() : "null"));                    Log.d("OrderRepository", "loadOrderInformationById: Order received: " + (order != null ? order.toString() : "null"));
+                        if (order != null) {
+                            orderInfo.setValue(Resource.success(order));
+                        } else {
+                            orderInfo.setValue(Resource.error("Không tìm thấy thông tin đơn hàng"));
+                        }
+                    } else {
+                        Log.e("OrderRepository", "loadOrderInformationById: API error: " + apiResponse.getMessage());                    Log.e("OrderRepository", "loadOrderInformationById: API error: " + apiResponse.getMessage());
+                        orderInfo.setValue(Resource.error(apiResponse.getMessage()));
+                    }
+                } else {
+                    Log.e("OrderRepository", "loadOrderInformationById: Response failed: " + response.message());                Log.e("OrderRepository", "loadOrderInformationById: Response failed: " + response.message());
+                    orderInfo.setValue(Resource.error("Lỗi khi tải thông tin đơn hàng"));
+                }
+                isLoading = false;
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Order>> call, Throwable t) {
+                isLoading = false;
+                Log.e("OrderRepository", "loadOrderInformationById: Failure: " + t.getMessage());            Log.e("OrderRepository", "loadOrderInformationById: Failure: " + t.getMessage());
+                orderInfo.setValue(Resource.error(t.getMessage()));
+            }
+        });
+    }
+
+    public LiveData<Resource<List<ProductOrder>>> getProductLiveData(int orderId) {
+        loadProductsInOrderDetailById(orderId);
+        return productLiveData;
+    }
+
+    private void loadProductsInOrderDetailById(int orderId) {
+            isLoading = true;
+        productLiveData.setValue(Resource.loading());
+        orderApi.getOrderDetail(orderId).enqueue(new Callback<ApiResponse<List<ProductOrder>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<List<ProductOrder>>> call, Response<ApiResponse<List<ProductOrder>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<List<ProductOrder>> apiResponse = response.body();
+                    if (apiResponse.getStatusCode() == 200) {
+                        List<ProductOrder> products = apiResponse.getData();
+                        Log.d("OrderRepository", "loadProductsInOrderDetailById: Products received: " + (products != null ? products.size() : "null"));                        Log.d("OrderRepository", "loadProductsInOrderDetailById: Products received: " + (products != null ? products.size() : "null"));
+                        productLiveData.setValue(Resource.success(products));
+                    } else {
+                        Log.e("OrderRepository", "loadProductsInOrderDetailById: API error: " + apiResponse.getMessage());                        Log.e("OrderRepository", "loadProductsInOrderDetailById: API error: " + apiResponse.getMessage());
+                        productLiveData.setValue(Resource.error(apiResponse.getMessage()));
+                    }
+                } else {
+                    Log.e("OrderRepository", "loadProductsInOrderDetailById: Response failed: " + response.message());                    Log.e("OrderRepository", "loadProductsInOrderDetailById: Response failed: " + response.message());
+                    productLiveData.setValue(Resource.error("Lỗi khi tải chi tiết đơn hàng"));
+                }
+                isLoading = false;
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<List<ProductOrder>>> call, Throwable t) {
+                isLoading = false;
+                Log.e("OrderRepository", "loadProductsInOrderDetailById: Failure: " + t.getMessage());                Log.e("OrderRepository", "loadProductsInOrderDetailById: Failure: " + t.getMessage());
+                productLiveData.setValue(Resource.error(t.getMessage()));
+            }
+        });
+    }
+
 }

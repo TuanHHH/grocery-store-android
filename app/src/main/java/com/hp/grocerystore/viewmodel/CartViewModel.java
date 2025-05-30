@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.hp.grocerystore.application.GRCApplication;
+import com.hp.grocerystore.model.cart.AddToCartRequest;
 import com.hp.grocerystore.network.api.CartApi;
 import com.hp.grocerystore.model.cart.CartItem;
 import com.hp.grocerystore.network.RetrofitClient;
@@ -46,5 +47,9 @@ public class CartViewModel extends ViewModel {
 
     public void removeCartItem(long productId) {
         repository.removeCartItem(productId);
+    }
+
+    public LiveData<Resource<Void>> addOrUpdateCart(long productId, int quantity){
+        return repository.addOrUpdateCart(new AddToCartRequest(productId, quantity));
     }
 }

@@ -25,17 +25,12 @@ import retrofit2.Response;
 public class AuthRepository {
     private final AuthApi authApi;
 
-    private final MutableLiveData<Resource<AuthResponse>> loginResult = new MutableLiveData<>();
-    private final MutableLiveData<Resource<RegisterResponse>> registerResult = new MutableLiveData<>();
-    private final MutableLiveData<Resource<User>> userInfoLiveData = new MutableLiveData<>();
-
-    private final MutableLiveData<Resource<Void>> logoutLiveData = new MutableLiveData<>();
-
     public AuthRepository(AuthApi authApi) {
         this.authApi = authApi;
     }
 
     public LiveData<Resource<AuthResponse>> login(String email, String password) {
+        MutableLiveData<Resource<AuthResponse>> loginResult = new MutableLiveData<>();
         loginResult.setValue(Resource.loading());
         LoginRequest request = new LoginRequest(email, password);
         authApi.login(request).enqueue(new Callback<ApiResponse<AuthResponse>>() {
@@ -78,6 +73,7 @@ public class AuthRepository {
     }
 
     public LiveData<Resource<RegisterResponse>> register(String name, String email, String password) {
+        MutableLiveData<Resource<RegisterResponse>> registerResult = new MutableLiveData<>();
         registerResult.setValue(Resource.loading());
         RegisterRequest request = new RegisterRequest(name, email, password);
         authApi.register(request).enqueue(new Callback<ApiResponse<RegisterResponse>>() {
@@ -116,6 +112,7 @@ public class AuthRepository {
     }
 
     public LiveData<Resource<User>> getUserInfo() {
+        MutableLiveData<Resource<User>> userInfoLiveData = new MutableLiveData<>();
         userInfoLiveData.setValue(Resource.loading());
 
         authApi.getUserInfo().enqueue(new Callback<ApiResponse<User>>() {
@@ -139,6 +136,7 @@ public class AuthRepository {
     }
 
     public LiveData<Resource<Void>> logout() {
+        MutableLiveData<Resource<Void>> logoutLiveData = new MutableLiveData<>();
         logoutLiveData.setValue(Resource.loading());
         AuthPreferenceManager pref = AuthPreferenceManager.getInstance(GRCApplication.getAppContext());
         String deviceHash = pref.getDevice();

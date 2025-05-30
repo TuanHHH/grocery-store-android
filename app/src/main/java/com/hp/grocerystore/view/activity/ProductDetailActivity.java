@@ -1,6 +1,8 @@
 package com.hp.grocerystore.view.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,20 +27,28 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
 import com.hp.grocerystore.R;
 import com.hp.grocerystore.model.feedback.Feedback;
 import com.hp.grocerystore.model.product.Product;
 import com.hp.grocerystore.utils.Extensions;
 import com.hp.grocerystore.utils.LoadingUtil;
 import com.hp.grocerystore.utils.Resource;
+import com.hp.grocerystore.utils.UserSession;
 import com.hp.grocerystore.view.adapter.FeedbackAdapter;
+import com.hp.grocerystore.viewmodel.CartViewModel;
 import com.hp.grocerystore.viewmodel.ProductViewModel;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.IntStream;
 
 public class ProductDetailActivity extends AppCompatActivity {
     private ProductViewModel viewModel;
+    private CartViewModel cartViewModel;
+    private Product currentProduct;
     private RecyclerView recyclerFeedback;
     private FeedbackAdapter feedbackAdapter;
     private List<Feedback> feedbackList;
@@ -59,10 +69,12 @@ public class ProductDetailActivity extends AppCompatActivity {
         loadingOverlay = findViewById(R.id.loading_overlay);
         progressBar = findViewById(R.id.progress_bar);
         viewModel = new ViewModelProvider(this).get(ProductViewModel.class);
+        cartViewModel = new ViewModelProvider(this).get(CartViewModel.class);
+        setupCartDialog();
         setupRecyclerView();
 
         Intent intent = getIntent();
-        long productId = -1;
+        long productId;
 
         if (intent.hasExtra("product_id")) {
             Object extra = intent.getSerializableExtra("product_id");
@@ -78,6 +90,9 @@ public class ProductDetailActivity extends AppCompatActivity {
         }
         observeProduct(productId);
         observeFeedback(productId);
+    }
+
+    private void setupCartDialog() {
     }
 
 
@@ -115,16 +130,19 @@ public class ProductDetailActivity extends AppCompatActivity {
         recyclerFeedback.setAdapter(feedbackAdapter);
     }
 
+    @SuppressLint("DefaultLocale")
     private void showProductDetails(Product product) {
+        currentProduct = product;
         TextView name = findViewById(R.id.text_title);
         TextView price = findViewById(R.id.text_price);
         TextView description = findViewById(R.id.text_description);
         ImageView image = findViewById(R.id.image_product);
+        TextView unit = findViewById(R.id.text_unit);
         RatingBar ratingBar = findViewById(R.id.rating_bar);
-
         name.setText(product.getProductName());
         price.setText(Extensions.formatCurrency(product.getPrice()));
         description.setText(product.getDescription());
+        unit.setText((product.getUnit() == null || product.getUnit().isEmpty())  ? "Không có đơn vị" : product.getUnit());
         Glide.with(this)
                 .load(product.getImageUrl())
                 .timeout(10000)
@@ -133,7 +151,59 @@ public class ProductDetailActivity extends AppCompatActivity {
         ratingBar.setRating(product.getRating());
     }
 
+    public void addToCart(View view){
+        if (currentProduct == null) {
+            Toast.makeText(this, "Đang tải sản phẩm, vui lòng chờ", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        View dialogView = LayoutInflater.from(this)
+                .inflate(R.layout.dialog_quantity_selector, null);
+        dialog.setContentView(dialogView);
+        MaterialButton confirmBtn = dialogView.findViewById(R.id.button_confirm_quantity);
+        TextView stockInDialog = dialogView.findViewById(R.id.stock_available);
+        stockInDialog.setText(
+                        String.format(Locale.getDefault(), "Kho: %d", currentProduct.getQuantity())
+        );
+        MaterialButton minusBtn = dialogView.findViewById(R.id.button_minus);
+        MaterialButton plusBtn  = dialogView.findViewById(R.id.button_plus);
+        TextView quantityView   = dialogView.findViewById(R.id.text_quantity);
+        quantityView.setText("1");
+        minusBtn.setOnClickListener(v -> {
+            int q = Integer.parseInt(quantityView.getText().toString());
+            if (q > 1) quantityView.setText(String.valueOf(q - 1));
+        });
+        plusBtn.setOnClickListener(v -> {
+            int q = Integer.parseInt(quantityView.getText().toString());
+            if (q < currentProduct.getQuantity())
+                quantityView.setText(String.valueOf(q + 1));
+        });
+
+        confirmBtn.setOnClickListener(v->{
+            int q = Integer.parseInt(quantityView.getText().toString());
+            cartViewModel.addOrUpdateCart(currentProduct.getId(), q).observe(this, resource -> {
+                if (resource.status == Resource.Status.LOADING) {
+                    LoadingUtil.showLoading(loadingOverlay, progressBar);
+                } else if (resource.status == Resource.Status.SUCCESS) {
+                    LoadingUtil.hideLoading(loadingOverlay, progressBar);
+                    Toast.makeText(this, "Thêm giỏ hàng thành công", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                } else {
+                    LoadingUtil.hideLoading(loadingOverlay, progressBar);
+                    Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                }
+                });
+            });
+
+        dialog.show();
+    }
     public void showFeedbackDialog(View view) {
+        if (currentProduct == null) {
+            Toast.makeText(this, "Đang tải sản phẩm, vui lòng chờ", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         BottomSheetDialog dialog = new BottomSheetDialog(this);
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_review, null);
         dialog.setContentView(dialogView);
@@ -149,9 +219,35 @@ public class ProductDetailActivity extends AppCompatActivity {
             if (comment.isEmpty() || rating == 0) {
                 Toast.makeText(this, "Vui lòng nhập nội dung và chọn sao", Toast.LENGTH_SHORT).show();
             } else {
-                //Call api
-                Log.d("SendReview", "Rating: " + rating + " | Comment: " + comment);
-                dialog.dismiss();
+                viewModel.addFeedBack(
+                        currentProduct.getId(),
+                        rating,
+                        comment
+                ).observe(this, resource -> {
+                    if (resource.status == Resource.Status.LOADING) {
+                        LoadingUtil.showLoading(loadingOverlay, progressBar);
+                    } else if (resource.status == Resource.Status.SUCCESS) {
+                        Feedback fb = resource.data;
+                        int existingIndex = IntStream.range(0, feedbackList.size())
+                                .filter(i -> feedbackList.get(i).getId() == fb.getId())
+                                .findFirst()
+                                .orElse(-1);
+                        if (existingIndex >= 0) {
+                            feedbackList.set(existingIndex, fb);
+                            feedbackAdapter.notifyItemChanged(existingIndex);
+                        } else {
+                            feedbackList.add(0, fb);
+                            feedbackAdapter.notifyItemInserted(0);
+                            recyclerFeedback.scrollToPosition(0);
+                        }
+                        LoadingUtil.hideLoading(loadingOverlay, progressBar);
+                        Toast.makeText(this, "Đánh giá thành công", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    } else {
+                        LoadingUtil.hideLoading(loadingOverlay, progressBar);
+                        Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
         dialog.show();

@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.hp.grocerystore.model.base.ApiResponse;
 import com.hp.grocerystore.model.base.PaginationResponse;
+import com.hp.grocerystore.model.feedback.CreateFeedbackRequest;
 import com.hp.grocerystore.model.feedback.Feedback;
 import com.hp.grocerystore.model.product.Product;
 import com.hp.grocerystore.network.api.FeedbackApi;
@@ -20,17 +21,15 @@ import retrofit2.Response;
 public class ProductRepository {
     private final ProductApi productApi;
     private final FeedbackApi feedbackApi;
-    private final MutableLiveData<Resource<Product>> productLiveData;
-    private final MutableLiveData<Resource<List<Feedback>>> feedbackLiveData;
-    private final MutableLiveData<Resource<List<Product>>> productsLiveData;
+    MutableLiveData<Resource<List<Feedback>>> feedbackLiveData;
+    MutableLiveData<Resource<List<Product>>> productsLiveData;
     private int currentPage;
     private boolean isLoading;
     private boolean hasMoreData;
 
     public ProductRepository(ProductApi productApi) {
         this.productApi = productApi;
-        this.feedbackApi = null; // hoặc có thể loại bỏ nếu không dùng
-        this.productLiveData = new MutableLiveData<>();
+        this.feedbackApi = null;
         this.feedbackLiveData = new MutableLiveData<>();
         this.productsLiveData = new MutableLiveData<>();
         this.currentPage = 1;
@@ -42,7 +41,6 @@ public class ProductRepository {
     public ProductRepository(ProductApi productApi, FeedbackApi feedbackApi) {
         this.productApi = productApi;
         this.feedbackApi = feedbackApi;
-        this.productLiveData = new MutableLiveData<>();
         this.feedbackLiveData = new MutableLiveData<>();
         this.productsLiveData = new MutableLiveData<>();
         this.currentPage = 1;
@@ -51,6 +49,7 @@ public class ProductRepository {
     }
 
     public LiveData<Resource<Product>> getProduct(long productId) {
+        MutableLiveData<Resource<Product>> productLiveData = new MutableLiveData<>();
         productLiveData.setValue(Resource.loading());
         productApi.getProductById(productId).enqueue(new Callback<ApiResponse<Product>>() {
             @Override
@@ -234,5 +233,30 @@ public class ProductRepository {
         return liveData;
     }
 
+    public LiveData<Resource<Feedback>> addFeedback(CreateFeedbackRequest request) {
+        MutableLiveData<Resource<Feedback>> addFeedbackLiveData = new MutableLiveData<>();
+        addFeedbackLiveData.setValue(Resource.loading());
+        feedbackApi.addFeedback(request).enqueue(new Callback<ApiResponse<Feedback>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Feedback>> call, Response<ApiResponse<Feedback>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<Feedback> apiResponse = response.body();
+                    if (apiResponse.getStatusCode() == 201) {
+                        Feedback feedback = apiResponse.getData();
+                        addFeedbackLiveData.setValue(Resource.success(feedback));
+                    } else {
+                        addFeedbackLiveData.setValue(Resource.error(apiResponse.getMessage()));
+                    }
+                } else {
+                    addFeedbackLiveData.setValue(Resource.error("Không thể tạo đánh giá"));
+                }
+            }
 
+            @Override
+            public void onFailure(Call<ApiResponse<Feedback>> call, Throwable t) {
+                feedbackLiveData.setValue(Resource.error(t.getMessage()));
+            }
+        });
+        return addFeedbackLiveData;
+    }
 }

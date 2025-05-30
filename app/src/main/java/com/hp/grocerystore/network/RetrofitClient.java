@@ -29,21 +29,21 @@ public class RetrofitClient {
     // Phương thức này tạo Retrofit mà không cần Context
     private static Retrofit createRetrofit() {
         if (retrofit == null) {
-            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
-                @Override
-                public void log(String message) {
-                    if (message.startsWith(">") || message.startsWith("<")) {
-                        return;
-                    }
-                    Log.d("Retrofit Request", message);
-                }
-            });
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+//            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
+//                @Override
+//                public void log(String message) {
+//                    if (message.startsWith(">") || message.startsWith("<")) {
+//                        return;
+//                    }
+//                    Log.d("Retrofit Request", message);
+//                }
+//            });
+//            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             OkHttpClient client = new OkHttpClient.Builder()
                     .addInterceptor(new UserAgentInterceptor())
                     .addInterceptor(new AuthInterceptor())
-                    .addInterceptor(loggingInterceptor)
+//                    .addInterceptor(loggingInterceptor)
                     .authenticator(new TokenAuthenticator())
                     .build();
 

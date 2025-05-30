@@ -5,8 +5,12 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.gson.Gson;
+import com.hp.grocerystore.R;
 import com.hp.grocerystore.model.base.ApiResponse;
 import com.hp.grocerystore.model.base.PaginationResponse;
+import com.hp.grocerystore.model.cart.AddCartResponse;
+import com.hp.grocerystore.model.cart.AddToCartRequest;
 import com.hp.grocerystore.model.cart.CartItem;
 import com.hp.grocerystore.network.api.CartApi;
 import com.hp.grocerystore.utils.Resource;
@@ -23,6 +27,7 @@ public class CartRepository {
     private final MutableLiveData<Resource<List<CartItem>>> cartItemsLiveData;
     private final MutableLiveData<Resource<Boolean>> selectAllLiveData;
     private final MutableLiveData<Resource<Integer>> totalItemsLiveData;
+
     private int currentPage;
     private boolean isLoading;
     private boolean hasMoreData;
@@ -182,5 +187,47 @@ public class CartRepository {
                 Log.e("CartRepository", "Lỗi kết nối: " + t.getMessage());
             }
         });
+    }
+
+    public LiveData<Resource<Void>> addOrUpdateCart(AddToCartRequest request) {
+        MutableLiveData<Resource<Void>> addCartLiveData = new MutableLiveData<>();
+        Log.d("API", "call cart");
+        addCartLiveData.setValue(Resource.loading());
+        cartApi.addOrUpdateCart(request).enqueue(new Callback<ApiResponse<AddCartResponse>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<AddCartResponse>> call, Response<ApiResponse<AddCartResponse>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<AddCartResponse> apiResponse = response.body();
+                    if (apiResponse.getStatusCode() == 201) {
+                        addCartLiveData.setValue(Resource.success(null));
+                    } else {
+                        Log.d("API", "call cart error");
+                        addCartLiveData.setValue(Resource.error("Thêm vào giỏ hàng thất bại"));
+                    }
+                } else {
+                    String errorMessage = "Thêm vào giỏ hàng thất bại";
+                    try {
+                        Log.d("API", "call cart error");
+                        if (response.errorBody() != null) {
+                            Gson gson = new Gson();
+                            ApiResponse<?> errorResponse = gson.fromJson(response.errorBody().charStream(), ApiResponse.class);
+                            if (errorResponse.getMessage() != null) {
+                                errorMessage = errorResponse.getMessage();
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    addCartLiveData.setValue(Resource.error(errorMessage));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<AddCartResponse>> call, Throwable throwable) {
+                Log.d("API", "call cart error");
+                addCartLiveData.setValue(Resource.error(throwable.getMessage()));
+            }
+        });
+        return addCartLiveData;
     }
 }
