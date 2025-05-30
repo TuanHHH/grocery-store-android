@@ -9,19 +9,11 @@ import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.hp.grocerystore.R;
@@ -29,12 +21,8 @@ import com.hp.grocerystore.utils.Extensions;
 import com.hp.grocerystore.viewmodel.LoginViewModel;
 
 public class LoginActivity extends AppCompatActivity {
-    private GoogleSignInClient mGoogleSignInClient;
-    private static final int RC_SIGN_IN = 9001;
-    private static final String TAG = "GoogleSignIn";
-    private static final String client_id = "test.apps.googleusercontent.com";
     private LoginViewModel viewModel;
-    MaterialButton loginButton, googleLoginButton;
+    MaterialButton loginButton;
     TextView registerText, forgotPasswordText, homeText;
     TextInputEditText emailEditText, passwordEditText;
 
@@ -55,7 +43,6 @@ public class LoginActivity extends AppCompatActivity {
         loadingOverlay = findViewById(R.id.loading_overlay);
         progressBar = findViewById(R.id.progress_bar);
         loginButton = findViewById(R.id.loginButton);
-        googleLoginButton = findViewById(R.id.googleLoginButton);
         registerText = findViewById(R.id.registerText);
         forgotPasswordText = findViewById(R.id.forgotPasswordText);
         homeText = findViewById(R.id.homeText);
@@ -67,36 +54,6 @@ public class LoginActivity extends AppCompatActivity {
         if (email != null && !email.isEmpty()) {
             emailEditText.setText(email);
             passwordEditText.requestFocus();
-        }
-
-        googleLoginButton.setOnClickListener(view -> signInWithGoogle());
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(client_id)
-                .requestEmail()
-                .build();
-
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-    }
-
-    private void signInWithGoogle() {
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == RC_SIGN_IN) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                // Lấy idToken
-                String idToken = account.getIdToken();
-                Toast.makeText(this, idToken, Toast.LENGTH_SHORT).show();
-            } catch (ApiException e) {
-                Log.w(TAG, "Google sign-in failed", e);
-            }
         }
     }
 

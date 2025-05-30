@@ -16,7 +16,6 @@ public class ProductOrder {
     @SerializedName("quantity")
     private int quantity;
 
-    @SerializedName("unit_price")
     private double unitPrice;
 
     @SerializedName("imageUrl")

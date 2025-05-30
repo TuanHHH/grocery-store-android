@@ -85,21 +85,6 @@
                 android:backgroundTint="@color/button_green"
                 android:onClick="processLogin"/>
 
-            <!-- Nút Google login -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/googleLoginButton"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:text="Đăng nhập với Google"
-                android:textSize="16sp"
-                android:textColor="@color/button_green"
-                app:icon="@drawable/ic_google"
-                app:iconTint="@color/button_green"
-                android:layout_marginBottom="32dp"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/button_green"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
-
             <!-- Quên mật khẩu / đăng ký -->
             <LinearLayout
                 android:layout_width="match_parent"

@@ -33,7 +33,6 @@ public class Order {
     @SerializedName("userId")
     private int userId;
 
-    @SerializedName("total_price")
     private double totalPrice;
 
     // Getters
