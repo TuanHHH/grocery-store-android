@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModel;
 
 import com.hp.grocerystore.application.GRCApplication;
 import com.hp.grocerystore.model.auth.AuthResponse;
+import com.hp.grocerystore.model.auth.ForgotPasswordRequest;
+import com.hp.grocerystore.model.auth.OTPRequest;
+import com.hp.grocerystore.model.auth.OTPResponse;
 import com.hp.grocerystore.model.user.User;
 import com.hp.grocerystore.network.api.AuthApi;
 import com.hp.grocerystore.network.RetrofitClient;
@@ -23,7 +26,15 @@ public class LoginViewModel extends ViewModel {
         return repository.login(email, password);
     }
 
-    public LiveData<Resource<User>> getUserInfo(){
+    public LiveData<Resource<User>> getUserInfo() {
         return repository.getUserInfo();
+    }
+
+    public LiveData<Resource<Void>> sendOTPForgotPassword(String email) {
+        return repository.sendOTPForgotPassword(new ForgotPasswordRequest(email));
+    }
+
+    public LiveData<Resource<OTPResponse>> verifyOTP(String email, String otp) {
+        return repository.verifyOTP(new OTPRequest(email, otp));
     }
 }

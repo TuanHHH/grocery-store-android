@@ -154,12 +154,24 @@ public class PersonalActivity extends AppCompatActivity {
 
         if (user == null) return;
 
+        String namePattern = "^[\\p{L} ]+$";
+        if (name.isEmpty() || !name.matches(namePattern)) {
+            Toast.makeText(this, "Tên chỉ được chứa chữ và khoảng trắng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String phonePattern = "^0\\d{9}$";
+        if (!phone.isEmpty() && !phone.matches(phonePattern)) {
+            Toast.makeText(this, "Số điện thoại phải gồm 10 số và bắt đầu bằng 0", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (selectedImageUri != null) {
             File file;
             try {
                 file = createTempFileFromUri(selectedImageUri);
                 if (file == null) {
-                    return; // Error message already shown in createTempFileFromUri
+                    return;
                 }
 
                 Log.d("UploadFileSize", "File size: " + file.length());
@@ -214,7 +226,6 @@ public class PersonalActivity extends AppCompatActivity {
     }
 
     private File createTempFileFromUri(Uri uri) throws IOException {
-        // Kiểm tra MIME type trước
         String mimeType = getContentResolver().getType(uri);
         Log.d("FileType", "MIME type: " + mimeType);
 

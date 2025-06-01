@@ -121,6 +121,8 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void navigateToHome(View view) {
+        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+        startActivity(intent);
         finish();
     }
 

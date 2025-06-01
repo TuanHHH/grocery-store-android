@@ -1,12 +1,17 @@
 package com.hp.grocerystore.repository;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.Gson;
 import com.hp.grocerystore.application.GRCApplication;
 import com.hp.grocerystore.model.auth.AuthResponse;
+import com.hp.grocerystore.model.auth.ForgotPasswordRequest;
 import com.hp.grocerystore.model.auth.LoginRequest;
+import com.hp.grocerystore.model.auth.OTPRequest;
+import com.hp.grocerystore.model.auth.OTPResponse;
 import com.hp.grocerystore.model.auth.RegisterRequest;
 import com.hp.grocerystore.model.auth.RegisterResponse;
 import com.hp.grocerystore.model.base.ApiResponse;
@@ -159,5 +164,71 @@ public class AuthRepository {
             }
         });
         return logoutLiveData;
+    }
+
+    public LiveData<Resource<Void>> sendOTPForgotPassword(ForgotPasswordRequest request) {
+        MutableLiveData<Resource<Void>> forgotPasswordLiveData = new MutableLiveData<>();
+        forgotPasswordLiveData.setValue(Resource.loading());
+        authApi.sendOTPForgotPassword(request).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    forgotPasswordLiveData.setValue(Resource.success(null));
+                } else {
+                    String errorMessage = "Gửi OTP thất bại";
+                    try {
+                        if (response.errorBody() != null) {
+                            Gson gson = new Gson();
+                            ApiResponse<?> errorResponse = gson.fromJson(response.errorBody().charStream(), ApiResponse.class);
+                            if (errorResponse.getMessage() != null) {
+                                errorMessage = errorResponse.getMessage();
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    forgotPasswordLiveData.setValue(Resource.error(errorMessage));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+                forgotPasswordLiveData.setValue(Resource.error(t.getMessage()));
+            }
+        });
+        return forgotPasswordLiveData;
+    }
+
+    public LiveData<Resource<OTPResponse>> verifyOTP(OTPRequest request) {
+        MutableLiveData<Resource<OTPResponse>> verifyOTPLiveData = new MutableLiveData<>();
+        verifyOTPLiveData.setValue(Resource.loading());
+        authApi.verifyOTP(request).enqueue(new Callback<ApiResponse<OTPResponse>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<OTPResponse>> call, Response<ApiResponse<OTPResponse>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    verifyOTPLiveData.setValue(Resource.success(null));
+                } else {
+                    String errorMessage = "Xác thực OTP thất bại";
+                    try {
+                        if (response.errorBody() != null) {
+                            Gson gson = new Gson();
+                            ApiResponse<?> errorResponse = gson.fromJson(response.errorBody().charStream(), ApiResponse.class);
+                            if (errorResponse.getMessage() != null) {
+                                errorMessage = errorResponse.getMessage();
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    verifyOTPLiveData.setValue(Resource.error(errorMessage));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<OTPResponse>> call, Throwable t) {
+                verifyOTPLiveData.setValue(Resource.error(t.getMessage()));
+            }
+        });
+        return verifyOTPLiveData;
     }
 }
