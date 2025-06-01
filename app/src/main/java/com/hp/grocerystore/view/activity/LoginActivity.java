@@ -7,9 +7,13 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -19,6 +23,8 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.hp.grocerystore.R;
 import com.hp.grocerystore.utils.Extensions;
 import com.hp.grocerystore.viewmodel.LoginViewModel;
+
+import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
     private LoginViewModel viewModel;
@@ -102,10 +108,107 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void navigateToForgotPassword(View view) {
-        // TODO: Implement forgot password
-        Toast.makeText(this, "Chức năng đang được phát triển", Toast.LENGTH_SHORT).show();
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_forgot_password);
+
+        TextInputEditText etEmail = dialog.findViewById(R.id.email);
+        Button btnSendOtp = dialog.findViewById(R.id.btnSendOtp);
+
+        btnSendOtp.setOnClickListener(v -> {
+            String email = Objects.requireNonNull(etEmail.getText()).toString().trim();
+            if (email.isEmpty()) {
+                etEmail.setError("Vui lòng nhập email");
+                etEmail.requestFocus();
+                return;
+            }
+
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                etEmail.setError("Email không hợp lệ");
+                etEmail.requestFocus();
+                return;
+            }
+
+            viewModel.sendOTPForgotPassword(email).observe(this, resource ->{
+                if (resource == null) return;
+
+                switch (resource.status) {
+                    case SUCCESS:
+                        hideLoading();
+                        Toast.makeText(this, "Đã gửi mã OTP tới: " + email, Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                        showOtpDialog(email);
+                        break;
+                    case ERROR:
+                        hideLoading();
+                        String errorMessage = resource.message != null ? resource.message : "Gửi OTP thất bại. Vui lòng thử lại.";
+                        Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+                        break;
+                    case LOADING:
+                        showLoading();
+                        break;
+                }
+            });
+        });
+
+        dialog.show();
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
     }
 
+    private void showOtpDialog(String email) {
+        Dialog otpDialog = new Dialog(this);
+        otpDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        otpDialog.setContentView(R.layout.dialog_input_otp);
+
+        TextInputEditText etOtp = otpDialog.findViewById(R.id.otp);
+        Button btnVerifyOtp = otpDialog.findViewById(R.id.btnVerifyOtp);
+
+        btnVerifyOtp.setOnClickListener(v -> {
+            String otp = Objects.requireNonNull(etOtp.getText()).toString().trim();
+            if (otp.isEmpty()) {
+                etOtp.setError("Vui lòng nhập mã OTP");
+                etOtp.requestFocus();
+                return;
+            }
+
+            if (otp.length() != 6) {
+                etOtp.setError("Mã OTP có 6 chữ số");
+                etOtp.requestFocus();
+                return;
+            }
+
+            viewModel.verifyOTP(email, otp).observe(this, resource ->{
+                if (resource == null) return;
+
+                switch (resource.status) {
+                    case SUCCESS:
+                        hideLoading();
+                        Toast.makeText(this, "Xác thực thành công", Toast.LENGTH_SHORT).show();
+                        otpDialog.dismiss();
+                        break;
+                    case ERROR:
+                        hideLoading();
+                        String errorMessage = resource.message != null ? resource.message : "Xác thực OTP thất bại. Vui lòng thử lại.";
+                        Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+                        break;
+                    case LOADING:
+                        showLoading();
+                        break;
+                }
+            });
+//            Toast.makeText(this, "Đã xác nhận OTP: " + otp, Toast.LENGTH_SHORT).show();
+
+        });
+
+        otpDialog.show();
+        Window window = otpDialog.getWindow();
+        if (window != null) {
+            window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+    }
     public void navigateToHome(View view) {
         finish();
     }
