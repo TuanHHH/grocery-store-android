@@ -1,5 +1,6 @@
 package com.hp.grocerystore.view.fragment;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -110,8 +112,82 @@ public class ProfileFragment extends Fragment {
     }
 
     private void disableAccount(View view) {
-        Toast.makeText(requireContext(), UserSession.getInstance().getUser().getName(), Toast.LENGTH_LONG).show();
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View dialogView = inflater.inflate(R.layout.dialog_request_deactivate, null);
+
+        Button btnCancel = dialogView.findViewById(R.id.btnCancel);
+        Button btnContinue = dialogView.findViewById(R.id.btnContinue);
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        dialog.show();
+
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnContinue.setOnClickListener(v -> {
+            viewModel.requestDeactivateAccount().observe(getViewLifecycleOwner(), resource -> {
+                if (resource.status == Resource.Status.LOADING){
+                    Toast.makeText(requireContext(), "Đang gửi yêu cầu", Toast.LENGTH_SHORT).show();
+                }
+                else if (resource.status == Resource.Status.SUCCESS) {
+                    Toast.makeText(requireContext(), "Gửi yêu cầu thành công", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                    showOTPDialog();
+                } else {
+                    Toast.makeText(requireContext(), resource.message, Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+
     }
+
+    private void showOTPDialog() {
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View dialogView = inflater.inflate(R.layout.dialog_input_otp, null);
+        TextInputEditText etOtp = dialogView.findViewById(R.id.otp);
+        Button btnVerifyOtp = dialogView.findViewById(R.id.btnVerifyOtp);
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        dialog.show();
+        btnVerifyOtp.setOnClickListener(v -> {
+            String otp = Objects.requireNonNull(etOtp.getText()).toString().trim();
+            if (otp.isEmpty()) {
+                etOtp.setError("Vui lòng nhập mã OTP");
+                etOtp.requestFocus();
+                return;
+            }
+
+            if (otp.length() != 6) {
+                etOtp.setError("Mã OTP có 6 chữ số");
+                etOtp.requestFocus();
+                return;
+            }
+
+            viewModel.confirmDeactivateAccount(otp).observe(getViewLifecycleOwner(), resource->{
+                if (resource.status == Resource.Status.LOADING){
+                    Toast.makeText(requireContext(), "Đang gửi yêu cầu", Toast.LENGTH_SHORT).show();
+                }
+                else if (resource.status == Resource.Status.SUCCESS) {
+                    Toast.makeText(requireContext(), "Gửi yêu cầu thành công", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                    UserSession.getInstance().clear();
+                    Intent intent = new Intent(requireActivity(), LoginActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    requireActivity().finish();
+                } else {
+                    Toast.makeText(requireContext(), resource.message, Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        });
+    }
+
 
     private void showDevicesInfo(View view) {
         LayoutInflater inflater = LayoutInflater.from(requireContext());
@@ -152,6 +228,7 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void getDeviceList(DeviceInfoAdapter adapter) {
         viewModel.getLoggedInDevices().observe(getViewLifecycleOwner(), resource -> {
             if (resource.status == Resource.Status.LOADING) {
@@ -178,6 +255,7 @@ public class ProfileFragment extends Fragment {
             }
             else if (resource.status == Resource.Status.SUCCESS) {
                 Toast.makeText(requireContext(), "Đăng xuất thành công", Toast.LENGTH_SHORT).show();
+                UserSession.getInstance().clear();
                 Intent intent = new Intent(requireActivity(), LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);

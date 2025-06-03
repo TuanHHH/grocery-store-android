@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.Context;
 
 public class GRCApplication extends Application {
-
     private static GRCApplication instance;
     private static Context appContext;
 

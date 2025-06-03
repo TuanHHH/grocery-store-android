@@ -86,14 +86,11 @@ public class HomeFragment extends Fragment {
         linearCategoryBlockContainer = view.findViewById(R.id.category_block_container);
         progressBarCategoryView = view.findViewById(R.id.progress_bar_category_view);
 
-        // ViewModelProvider có thể được dùng với factory nếu ProductRepository cần context hoặc params
         homeViewModel = new ViewModelProvider(this, new ViewModelProvider.Factory() {
             @NonNull
             @Override
             public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                ProductRepository productRepo = new ProductRepository(RetrofitClient.getProductApi()); // Đảm bảo constructor đúng
-                CategoryRepository categoryRepo = new CategoryRepository(RetrofitClient.getCategoryApi());
-                return (T) new HomeViewModel(productRepo, categoryRepo);
+                return (T) new HomeViewModel();
             }
         }).get(HomeViewModel.class);
 
@@ -101,8 +98,7 @@ public class HomeFragment extends Fragment {
             @NonNull
             @Override
             public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                WishlistRepository wishlistRepo = new WishlistRepository(RetrofitClient.getWishlistApi());  // Đảm bảo constructor đúng
-                return (T) new WishlistViewModel(wishlistRepo);
+                return (T) new WishlistViewModel();
             }
         }).get(WishlistViewModel.class);
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);

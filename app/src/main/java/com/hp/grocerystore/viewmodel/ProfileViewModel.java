@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.hp.grocerystore.application.GRCApplication;
+import com.hp.grocerystore.model.user.DeactivateOTP;
 import com.hp.grocerystore.model.user.DeviceInfoResponse;
 import com.hp.grocerystore.model.user.UpdatePasswordRequest;
 import com.hp.grocerystore.network.RetrofitClient;
@@ -19,8 +20,8 @@ public class ProfileViewModel extends ViewModel {
     private final AuthRepository authRepository;
     private final UserRepository userRepository;
     public ProfileViewModel() {
-        this.authRepository = new AuthRepository(RetrofitClient.getAuthApi());
-        this.userRepository = new UserRepository(RetrofitClient.getUserApi());
+        this.authRepository = AuthRepository.getInstance(RetrofitClient.getAuthApi());
+        this.userRepository = UserRepository.getInstance(RetrofitClient.getUserApi());
     }
 
     public LiveData<Resource<Void>> logout() {
@@ -35,4 +36,11 @@ public class ProfileViewModel extends ViewModel {
         return userRepository.getLoggerInDevice();
     }
 
+    public LiveData<Resource<Void>> requestDeactivateAccount(){
+        return userRepository.requestDeactivateAccount();
+    }
+
+    public LiveData<Resource<Void>> confirmDeactivateAccount(String otp){
+        return userRepository.confirmDeactivateAccount(new DeactivateOTP(otp));
+    }
 }

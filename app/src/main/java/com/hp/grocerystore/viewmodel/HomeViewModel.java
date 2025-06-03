@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.hp.grocerystore.model.category.Category;
 import com.hp.grocerystore.model.product.Product;
+import com.hp.grocerystore.network.RetrofitClient;
 import com.hp.grocerystore.repository.CategoryRepository;
 import com.hp.grocerystore.repository.ProductRepository;
 import com.hp.grocerystore.utils.Resource;
@@ -15,9 +16,9 @@ public class HomeViewModel extends ViewModel {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
-    public HomeViewModel(ProductRepository productRepository, CategoryRepository categoryRepository) {
-        this.productRepository = productRepository;
-        this.categoryRepository = categoryRepository;
+    public HomeViewModel() {
+        this.productRepository = new ProductRepository(RetrofitClient.getProductApi());;
+        this.categoryRepository = new CategoryRepository(RetrofitClient.getCategoryApi());
     }
 
     public LiveData<Resource<List<Product>>> getProducts(int page, int size, String filter) {

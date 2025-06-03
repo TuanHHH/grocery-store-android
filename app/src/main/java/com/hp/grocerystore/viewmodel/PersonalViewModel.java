@@ -17,7 +17,7 @@ public class PersonalViewModel extends ViewModel {
     private final UserRepository userRepository;
 
     public PersonalViewModel() {
-        this.userRepository = new UserRepository(RetrofitClient.getUserApi());
+        this.userRepository = UserRepository.getInstance(RetrofitClient.getUserApi());
     }
 
     public LiveData<Resource<UploadFileResponse>> uploadFile(MultipartBody.Part filePart) {

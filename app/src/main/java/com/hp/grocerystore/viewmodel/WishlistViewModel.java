@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.hp.grocerystore.model.base.ApiResponse;
 import com.hp.grocerystore.model.wishlist.Wishlist;
+import com.hp.grocerystore.network.RetrofitClient;
 import com.hp.grocerystore.repository.WishlistRepository;
 import com.hp.grocerystore.utils.Resource;
 
@@ -13,12 +14,12 @@ import java.util.List;
 public class WishlistViewModel extends ViewModel {
     private final WishlistRepository wishlistRepository;
 
-    public WishlistViewModel(WishlistRepository wishlistRepository) {
-        this.wishlistRepository = wishlistRepository;
+    public WishlistViewModel() {
+        this.wishlistRepository = new WishlistRepository(RetrofitClient.getWishlistApi());
     }
 
-    public LiveData<ApiResponse<Void>> getAddWishlistResult() {
-        return wishlistRepository.getAddWishlistResult();
+    public LiveData<Resource<Void>> getAddWishlistResult(long productId) {
+        return wishlistRepository.addWishlist(productId);
     }
 
     public LiveData<Resource<List<Wishlist>>> getWishlistLiveData(int page, int size) {

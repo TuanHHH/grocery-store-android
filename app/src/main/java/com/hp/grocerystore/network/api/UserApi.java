@@ -2,6 +2,7 @@ package com.hp.grocerystore.network.api;
 
 import com.hp.grocerystore.model.base.ApiResponse;
 import com.hp.grocerystore.model.base.UploadFileResponse;
+import com.hp.grocerystore.model.user.DeactivateOTP;
 import com.hp.grocerystore.model.user.DeviceInfoResponse;
 import com.hp.grocerystore.model.user.UpdatePasswordRequest;
 import com.hp.grocerystore.model.user.UpdateUserRequest;
@@ -39,4 +40,10 @@ public interface UserApi {
 
     @GET("users/devices")
     Call<ApiResponse<List<DeviceInfoResponse>>> getLoggedInDevices(@Header("Cookie") String cookie);
+
+    @POST("deactivate/request")
+    Call<ApiResponse<Void>> requestDeactivateAccount();
+
+    @POST("deactivate/confirm")
+    Call<ApiResponse<Void>> confirmDeactivateAccount(@Body DeactivateOTP otp);
 }

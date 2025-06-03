@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.hp.grocerystore.application.GRCApplication;
 import com.hp.grocerystore.model.base.ApiResponse;
 import com.hp.grocerystore.model.base.UploadFileResponse;
+import com.hp.grocerystore.model.user.DeactivateOTP;
 import com.hp.grocerystore.model.user.DeviceInfoResponse;
 import com.hp.grocerystore.model.user.UpdatePasswordRequest;
 import com.hp.grocerystore.model.user.UpdateUserRequest;
@@ -26,11 +27,21 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class UserRepository {
+    private static volatile UserRepository INSTANCE;
     private final UserApi userApi;
-    public UserRepository(UserApi userApi) {
+    private UserRepository(UserApi userApi) {
         this.userApi = userApi;
     }
-
+    public static UserRepository getInstance(UserApi userApi) {
+        if (INSTANCE == null) {
+            synchronized (UserRepository.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new UserRepository(userApi);
+                }
+            }
+        }
+        return INSTANCE;
+    }
     public LiveData<Resource<Void>> updatePassword(UpdatePasswordRequest request) {
         MutableLiveData<Resource<Void>> updatePasswordLiveData = new MutableLiveData<>();
         updatePasswordLiveData.setValue(Resource.loading());
@@ -166,5 +177,81 @@ public class UserRepository {
         return loggedInDevicesLiveData;
     }
 
+    public LiveData<Resource<Void>> requestDeactivateAccount() {
+        MutableLiveData<Resource<Void>> requestDeactivateLiveData = new MutableLiveData<>();
+        requestDeactivateLiveData.setValue(Resource.loading());
+        userApi.requestDeactivateAccount().enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<Void> apiResponse = response.body();
+                    if (apiResponse.getStatusCode() == 200) {
+                        requestDeactivateLiveData.setValue(Resource.success(null));
+                    } else {
+                        requestDeactivateLiveData.setValue(Resource.error("Yêu cầu thất bại"));
+                    }
+                } else {
+                    String errorMessage = "Yêu cầu thất bại";
+                    try {
+                        if (response.errorBody() != null) {
+                            Gson gson = new Gson();
+                            ApiResponse<?> errorResponse = gson.fromJson(response.errorBody().charStream(), ApiResponse.class);
+                            if (errorResponse.getMessage() != null) {
+                                errorMessage = errorResponse.getMessage();
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    requestDeactivateLiveData.setValue(Resource.error(errorMessage));
+                }
+            }
 
+            @Override
+            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+                requestDeactivateLiveData.setValue(Resource.error(t.getMessage()));
+            }
+        });
+        return requestDeactivateLiveData;
+    }
+
+    public LiveData<Resource<Void>> confirmDeactivateAccount(DeactivateOTP otp) {
+        MutableLiveData<Resource<Void>> confirmDeactivateLiveData = new MutableLiveData<>();
+        confirmDeactivateLiveData.setValue(Resource.loading());
+        userApi.confirmDeactivateAccount(otp).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<Void> apiResponse = response.body();
+                    if (apiResponse.getStatusCode() == 200) {
+                        AuthPreferenceManager pref = AuthPreferenceManager.getInstance(GRCApplication.getAppContext());
+                        pref.clear();
+                        confirmDeactivateLiveData.setValue(Resource.success(null));
+                    } else {
+                        confirmDeactivateLiveData.setValue(Resource.error("Yêu cầu thất bại"));
+                    }
+                } else {
+                    String errorMessage = "Yêu cầu thất bại";
+                    try {
+                        if (response.errorBody() != null) {
+                            Gson gson = new Gson();
+                            ApiResponse<?> errorResponse = gson.fromJson(response.errorBody().charStream(), ApiResponse.class);
+                            if (errorResponse.getMessage() != null) {
+                                errorMessage = errorResponse.getMessage();
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    confirmDeactivateLiveData.setValue(Resource.error(errorMessage));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+                confirmDeactivateLiveData.setValue(Resource.error(t.getMessage()));
+            }
+        });
+        return confirmDeactivateLiveData;
+    }
 }

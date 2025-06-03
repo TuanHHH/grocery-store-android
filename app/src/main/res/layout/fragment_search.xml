@@ -8,10 +8,6 @@
     android:background="#FFFFFF"
     android:layout_marginBottom="20dp"
     tools:context=".view.fragment.SearchFragment">
-
-
-
-    <!-- Danh mục nhỏ -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -35,11 +31,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/horizontal_filters"
-        android:layout_alignParentStart="true"
         android:layout_toStartOf="@id/btn_filter"
         android:scrollbars="none"
         android:translationZ="0dp">
-        <!-- Bộ lọc sản phẩm -->
         <HorizontalScrollView
             android:layout_width="354dp"
             android:layout_height="36dp"
@@ -57,7 +51,6 @@
                 android:gravity="center_vertical"
                 >
 
-                <!-- Mỗi bộ lọc là một TextView có background bo góc -->
                 <TextView
                     android:id="@+id/filter_newest"
                     android:layout_width="wrap_content"
@@ -139,7 +132,6 @@
                     android:background="@drawable/bg_sort_button" />
             </LinearLayout>
         </HorizontalScrollView>
-        <!-- Nút Bộ lọc  -->
         <LinearLayout
             android:id="@+id/btn_filter"
             android:layout_width="wrap_content"
@@ -168,8 +160,6 @@
                 android:textSize="12sp"
                 android:paddingTop="4dp"/>
         </LinearLayout>
-
-
     </RelativeLayout>
     <ProgressBar
         android:id="@+id/progress_bar_search_view"
@@ -182,21 +172,13 @@
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/search_swipe_refresh_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="42dp">
-<!--    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout-->
-<!--        android:id="@+id/search_swipe_refresh_layout"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:layout_marginBottom="42dp">-->
-        <!-- Wrapper layout: chứa toàn bộ UI bên trong -->
+        android:layout_height="match_parent">
     <androidx.core.widget.NestedScrollView
         android:id="@+id/search_result_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
         >
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

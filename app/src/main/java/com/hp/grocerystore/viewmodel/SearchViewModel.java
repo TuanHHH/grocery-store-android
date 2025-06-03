@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.hp.grocerystore.model.product.Product;
+import com.hp.grocerystore.network.RetrofitClient;
 import com.hp.grocerystore.network.api.ProductApi;
 import com.hp.grocerystore.repository.ProductRepository;
 import com.hp.grocerystore.utils.Resource;
@@ -14,8 +15,8 @@ import java.util.List;
 
 public class SearchViewModel extends ViewModel {
     private final ProductRepository productRepository;
-    public SearchViewModel(ProductRepository productRepository) {
-        this.productRepository = productRepository;
+    public SearchViewModel() {
+        this.productRepository = new ProductRepository(RetrofitClient.getProductApi());;
     }
     public LiveData<Resource<List<Product>>> searchProducts(int page, int size, String query) {
         return productRepository.searchProducts(page, size, query);
