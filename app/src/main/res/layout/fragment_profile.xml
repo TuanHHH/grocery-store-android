@@ -4,13 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:weightSum="11"
+    android:weightSum="5"
     tools:context=".view.fragment.ProfileFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"
+        android:layout_weight="1"
         android:background="@color/primary"
         android:gravity="center"
         android:orientation="horizontal"
@@ -83,7 +83,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"
+        android:layout_weight="1"
         android:orientation="vertical"
         android:padding="16dp">
 
@@ -201,7 +201,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="7"
+        android:layout_weight="3"
         android:orientation="vertical"
         android:padding="16dp">
 

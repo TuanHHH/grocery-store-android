@@ -18,7 +18,6 @@ import com.bumptech.glide.Glide;
 import com.hp.grocerystore.R;
 import com.hp.grocerystore.model.product.Product;
 import com.hp.grocerystore.model.wishlist.Wishlist;
-import com.hp.grocerystore.utils.LiveDataUtils;
 import com.hp.grocerystore.view.activity.ProductDetailActivity;
 import com.hp.grocerystore.viewmodel.WishlistViewModel;
 
@@ -96,7 +95,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                     .placeholder(R.drawable.placeholder_product)
                     .into(holder.imgProduct);
         } else {
-            // Có thể đặt placeholder mặc định hoặc lấy thumbnail nếu là video
             holder.imgProduct.setImageResource(R.drawable.placeholder_product);
         }
 
@@ -114,32 +112,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             }
         }
 
-
-        // Gợi ý: Có thể set sự kiện cho nút MUA và icon trái tim tại đây nếu cần
-        holder.btnBuy.setOnClickListener(v -> {
-            // TODO: xử lý mua hàng
-        });
-
         holder.imgFavorite.setOnClickListener(v -> {
-            wishlistViewModel.addWishlist(product.getId());
-
-            LiveDataUtils.observeOnce(wishlistViewModel.getAddWishlistResult(), lifecycleOwner, response -> {
-                if (response != null) {
-                    int statusCode = response.getStatusCode();
-                    switch (statusCode) {
-                        case 201:
-                            Toast.makeText(context, "Đã thêm vào danh sách yêu thích", Toast.LENGTH_SHORT).show();
-//                            holder.imgFavorite.setImageResource(R.drawable.ic_heart_filled);
-                            break;
-                        case -10:
-                            Toast.makeText(context, "Sản phẩm không tồn tại hoặc đã ngừng kinh doanh", Toast.LENGTH_SHORT).show();
-                            break;
-                        default:
-                            Toast.makeText(context, "Thêm vào danh sách yêu thích thất bại", Toast.LENGTH_SHORT).show();
-                            break;
-                    }
-                }
-            });
+//         wishlistViewModel.getAddWishlistResult(product.getId()).observe(, resource->{
+//
+//         });
 
         });
 
@@ -157,7 +133,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
     public static class ProductViewHolder extends RecyclerView.ViewHolder {
         ImageView imgProduct, imgFavorite;
-        TextView tvProductName, tvProductPrice,tvQuantity, btnBuy;
+        TextView tvProductName, tvProductPrice,tvQuantity;
         ImageView[] stars = new ImageView[5];
 
         public ProductViewHolder(@NonNull View itemView) {
@@ -167,7 +143,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             tvProductName = itemView.findViewById(R.id.tv_product_name);
             tvProductPrice = itemView.findViewById(R.id.tv_product_price);
             tvQuantity = itemView.findViewById(R.id.tv_quantity);
-            btnBuy = itemView.findViewById(R.id.btn_buy);
 
             stars[0] = itemView.findViewById(R.id.star_1);
             stars[1] = itemView.findViewById(R.id.star_2);

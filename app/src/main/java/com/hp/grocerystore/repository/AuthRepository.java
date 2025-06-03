@@ -14,6 +14,7 @@ import com.hp.grocerystore.model.auth.OTPRequest;
 import com.hp.grocerystore.model.auth.OTPResponse;
 import com.hp.grocerystore.model.auth.RegisterRequest;
 import com.hp.grocerystore.model.auth.RegisterResponse;
+import com.hp.grocerystore.model.auth.ResetPasswordRequest;
 import com.hp.grocerystore.model.base.ApiResponse;
 import com.hp.grocerystore.model.user.User;
 import com.hp.grocerystore.network.api.AuthApi;
@@ -28,12 +29,23 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class AuthRepository {
+    private static volatile AuthRepository INSTANCE;
     private final AuthApi authApi;
 
-    public AuthRepository(AuthApi authApi) {
+    private AuthRepository(AuthApi authApi) {
         this.authApi = authApi;
     }
 
+    public static AuthRepository getInstance(AuthApi userApi) {
+        if (INSTANCE == null) {
+            synchronized (UserRepository.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new AuthRepository(userApi);
+                }
+            }
+        }
+        return INSTANCE;
+    }
     public LiveData<Resource<AuthResponse>> login(String email, String password) {
         MutableLiveData<Resource<AuthResponse>> loginResult = new MutableLiveData<>();
         loginResult.setValue(Resource.loading());
@@ -206,7 +218,7 @@ public class AuthRepository {
             @Override
             public void onResponse(Call<ApiResponse<OTPResponse>> call, Response<ApiResponse<OTPResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    verifyOTPLiveData.setValue(Resource.success(null));
+                    verifyOTPLiveData.setValue(Resource.success(response.body().getData()));
                 } else {
                     String errorMessage = "Xác thực OTP thất bại";
                     try {
@@ -231,4 +243,38 @@ public class AuthRepository {
         });
         return verifyOTPLiveData;
     }
+
+    public LiveData<Resource<Void>> resetPassword(String token, ResetPasswordRequest request) {
+        MutableLiveData<Resource<Void>> resetPasswordLiveData = new MutableLiveData<>();
+        resetPasswordLiveData.setValue(Resource.loading());
+        authApi.resetPassword(token ,request).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    resetPasswordLiveData.setValue(Resource.success(null));
+                } else {
+                    String errorMessage = "Đổi mật khẩu thất bại";
+                    try {
+                        if (response.errorBody() != null) {
+                            Gson gson = new Gson();
+                            ApiResponse<?> errorResponse = gson.fromJson(response.errorBody().charStream(), ApiResponse.class);
+                            if (errorResponse.getMessage() != null) {
+                                errorMessage = errorResponse.getMessage();
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    resetPasswordLiveData.setValue(Resource.error(errorMessage));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+                resetPasswordLiveData.setValue(Resource.error(t.getMessage()));
+            }
+        });
+        return resetPasswordLiveData;
+    }
+
 }

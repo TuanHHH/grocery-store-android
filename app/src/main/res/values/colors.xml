@@ -17,4 +17,5 @@
     <color name="color_variation">#2ECC71</color>
     <color name="color_variation_shaped">#186c3c</color>
     <color name="color_variation_tint">#ebfaf2</color>
+    <color name="red_slim">#dd2d4a</color>
 </resources>

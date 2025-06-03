@@ -105,7 +105,7 @@ public class SearchFragment extends Fragment {
         progressBarLoadmoreView = view.findViewById(R.id.progress_bar_loadmore_view);
         btnFilter = view.findViewById(R.id.btn_filter);
         btnViewMore = view.findViewById(R.id.btn_view_more_product);
-        nestedScrollView = view.findViewById(R.id.search_result_container); // thêm ID nếu cần
+        nestedScrollView = view.findViewById(R.id.search_result_container);
         swipeRefreshLayout = view.findViewById(R.id.search_swipe_refresh_layout);
         // Danh sách nút sắp xếp sản phẩm
         filters = new TextView[]{
@@ -122,8 +122,7 @@ public class SearchFragment extends Fragment {
             @NonNull
             @Override
             public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                ProductRepository productRepo = new ProductRepository(RetrofitClient.getProductApi()); // Đảm bảo constructor đúng
-                return (T) new SearchViewModel(productRepo);
+                return (T) new SearchViewModel();
             }
         }).get(SearchViewModel.class);
 
@@ -131,9 +130,7 @@ public class SearchFragment extends Fragment {
             @NonNull
             @Override
             public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                ProductRepository productRepo = new ProductRepository(RetrofitClient.getProductApi()); // Đảm bảo constructor đúng
-                CategoryRepository categoryRepo = new CategoryRepository(RetrofitClient.getCategoryApi());
-                return (T) new HomeViewModel(productRepo, categoryRepo);
+                return (T) new HomeViewModel();
             }
         }).get(HomeViewModel.class);
 
@@ -141,8 +138,7 @@ public class SearchFragment extends Fragment {
             @NonNull
             @Override
             public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                WishlistRepository wishlistRepo = new WishlistRepository(RetrofitClient.getWishlistApi());  // Đảm bảo constructor đúng
-                return (T) new WishlistViewModel(wishlistRepo);
+                return (T) new WishlistViewModel();
             }
         }).get(WishlistViewModel.class);
 

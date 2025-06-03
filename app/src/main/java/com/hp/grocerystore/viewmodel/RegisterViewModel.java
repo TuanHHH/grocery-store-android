@@ -17,7 +17,7 @@ public class RegisterViewModel extends ViewModel {
 
     public RegisterViewModel() {
         AuthApi authApi = RetrofitClient.getAuthApi();
-        this.repository = new AuthRepository(authApi);
+        this.repository = AuthRepository.getInstance(authApi);
     }
 
     public LiveData<Resource<RegisterResponse>> register(String name, String email, String password) {

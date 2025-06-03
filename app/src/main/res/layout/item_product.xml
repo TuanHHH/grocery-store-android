@@ -13,7 +13,6 @@
         android:layout_height="wrap_content"
         >
 
-        <!-- Icon yêu thích (trái tim) -->
         <ImageView
             android:id="@+id/img_favorite"
             android:layout_width="20dp"
@@ -98,8 +97,6 @@
                     android:src="@drawable/ic_star_gray" />
             </LinearLayout>
 
-
-            <!-- Giá sản phẩm -->
             <TextView
                 android:id="@+id/tv_product_price"
                 android:layout_width="match_parent"
@@ -109,7 +106,6 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginTop="4dp" />
-            <!-- Số suất còn lại -->
             <TextView
                 android:id="@+id/tv_quantity"
                 android:layout_width="match_parent"
@@ -125,20 +121,6 @@
                 android:background="@drawable/bg_yellow_rounded"
                 android:textStyle="bold"
                 android:visibility="invisible"/>
-
-            <!-- Nút MUA -->
-            <TextView
-                android:id="@+id/btn_buy"
-                android:layout_width="match_parent"
-                android:layout_height="36dp"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                android:text="MUA"
-                android:textColor="#0DA55A"
-                android:textStyle="bold"
-                android:background="#E8FFF1"
-                android:textSize="14sp"
-                android:padding="4dp"/>
 
         </LinearLayout>
 

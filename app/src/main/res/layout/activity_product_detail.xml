@@ -175,8 +175,7 @@
             android:backgroundTint="@color/primary"
             android:text="@string/add_to_cart"
             android:textColor="@color/white"
-            app:iconTint="@color/primary"
-            android:onClick="addToCart"/>
+            app:iconTint="@color/primary" />
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

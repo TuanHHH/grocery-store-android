@@ -162,7 +162,6 @@ public class LoginActivity extends AppCompatActivity {
         Dialog otpDialog = new Dialog(this);
         otpDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         otpDialog.setContentView(R.layout.dialog_input_otp);
-
         TextInputEditText etOtp = otpDialog.findViewById(R.id.otp);
         Button btnVerifyOtp = otpDialog.findViewById(R.id.btnVerifyOtp);
 
@@ -182,12 +181,12 @@ public class LoginActivity extends AppCompatActivity {
 
             viewModel.verifyOTP(email, otp).observe(this, resource ->{
                 if (resource == null) return;
-
                 switch (resource.status) {
                     case SUCCESS:
                         hideLoading();
                         Toast.makeText(this, "Xác thực thành công", Toast.LENGTH_SHORT).show();
                         otpDialog.dismiss();
+                        showResetPasswordDialog(resource.data.getTempToken());
                         break;
                     case ERROR:
                         hideLoading();
@@ -199,8 +198,6 @@ public class LoginActivity extends AppCompatActivity {
                         break;
                 }
             });
-//            Toast.makeText(this, "Đã xác nhận OTP: " + otp, Toast.LENGTH_SHORT).show();
-
         });
 
         otpDialog.show();
@@ -209,6 +206,59 @@ public class LoginActivity extends AppCompatActivity {
             window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
     }
+
+    private void showResetPasswordDialog(String tempToken) {
+        Dialog resetDialog = new Dialog(this);
+        resetDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        resetDialog.setContentView(R.layout.dialog_reset_password);
+
+        TextInputEditText etNewPassword = resetDialog.findViewById(R.id.newPassword);
+        TextInputEditText etConfirmPassword = resetDialog.findViewById(R.id.confirmPassword);
+        Button btnSubmitNewPassword = resetDialog.findViewById(R.id.btnSubmitNewPassword);
+
+        btnSubmitNewPassword.setOnClickListener(v -> {
+            String newPassword = Objects.requireNonNull(etNewPassword.getText()).toString().trim();
+            String confirmPassword = Objects.requireNonNull(etConfirmPassword.getText()).toString().trim();
+
+            if (newPassword.isEmpty() || newPassword.length() < 6) {
+                etNewPassword.setError("Mật khẩu phải từ 6 ký tự");
+                etNewPassword.requestFocus();
+                return;
+            }
+            if (!newPassword.equals(confirmPassword)) {
+                etConfirmPassword.setError("Mật khẩu xác nhận không khớp");
+                etConfirmPassword.requestFocus();
+                return;
+            }
+
+            viewModel.resetPassword(tempToken, newPassword, confirmPassword).observe(this, resource ->{
+                if (resource == null) return;
+
+                switch (resource.status) {
+                    case SUCCESS:
+                        hideLoading();
+                        Toast.makeText(this, "Đổi mật khẩu thành công", Toast.LENGTH_SHORT).show();
+                        resetDialog.dismiss();
+                        break;
+                    case ERROR:
+                        hideLoading();
+                        String errorMessage = resource.message != null ? resource.message : "Đổi mật khẩu thất bại. Vui lòng thử lại.";
+                        Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+                        break;
+                    case LOADING:
+                        showLoading();
+                        break;
+                }
+            });
+        });
+
+        resetDialog.show();
+        Window window = resetDialog.getWindow();
+        if (window != null) {
+            window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+    }
+
     public void navigateToHome(View view) {
         finish();
     }

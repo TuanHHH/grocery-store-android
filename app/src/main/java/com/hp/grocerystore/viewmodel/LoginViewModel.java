@@ -8,6 +8,7 @@ import com.hp.grocerystore.model.auth.AuthResponse;
 import com.hp.grocerystore.model.auth.ForgotPasswordRequest;
 import com.hp.grocerystore.model.auth.OTPRequest;
 import com.hp.grocerystore.model.auth.OTPResponse;
+import com.hp.grocerystore.model.auth.ResetPasswordRequest;
 import com.hp.grocerystore.model.user.User;
 import com.hp.grocerystore.network.api.AuthApi;
 import com.hp.grocerystore.network.RetrofitClient;
@@ -19,7 +20,7 @@ public class LoginViewModel extends ViewModel {
 
     public LoginViewModel() {
         AuthApi authApi = RetrofitClient.getAuthApi();
-        this.repository = new AuthRepository(authApi);
+        this.repository = AuthRepository.getInstance(authApi);
     }
 
     public LiveData<Resource<AuthResponse>> login(String email, String password) {
@@ -36,5 +37,9 @@ public class LoginViewModel extends ViewModel {
 
     public LiveData<Resource<OTPResponse>> verifyOTP(String email, String otp) {
         return repository.verifyOTP(new OTPRequest(email, otp));
+    }
+
+    public LiveData<Resource<Void>> resetPassword(String token, String newPassword, String confirmPassword){
+        return repository.resetPassword(token, new ResetPasswordRequest(newPassword, confirmPassword));
     }
 }

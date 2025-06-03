@@ -29,8 +29,10 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.hp.grocerystore.R;
+import com.hp.grocerystore.application.GRCApplication;
 import com.hp.grocerystore.model.feedback.Feedback;
 import com.hp.grocerystore.model.product.Product;
+import com.hp.grocerystore.utils.AuthPreferenceManager;
 import com.hp.grocerystore.utils.Extensions;
 import com.hp.grocerystore.utils.LoadingUtil;
 import com.hp.grocerystore.utils.Resource;
@@ -39,7 +41,6 @@ import com.hp.grocerystore.view.adapter.FeedbackAdapter;
 import com.hp.grocerystore.viewmodel.CartViewModel;
 import com.hp.grocerystore.viewmodel.ProductViewModel;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -113,7 +114,7 @@ public class ProductDetailActivity extends AppCompatActivity {
     private void observeFeedback(long productId) {
         viewModel.getFeedback(productId).observe(this, resource -> {
             if (resource.status == Resource.Status.LOADING) {
-                //
+
             } else if (resource.status == Resource.Status.SUCCESS) {
                 feedbackAdapter.setFeedbackList(resource.data);
             } else {
@@ -139,6 +140,18 @@ public class ProductDetailActivity extends AppCompatActivity {
         ImageView image = findViewById(R.id.image_product);
         TextView unit = findViewById(R.id.text_unit);
         RatingBar ratingBar = findViewById(R.id.rating_bar);
+        MaterialButton addToCartBtn = findViewById(R.id.button_add_to_cart);
+
+        if (product.getQuantity() <=0){
+            addToCartBtn.setAlpha(0.5f);
+            addToCartBtn.setOnClickListener(v ->
+                    Toast.makeText(this, "Sản phẩm đang tạm hết hàng", Toast.LENGTH_SHORT).show()
+            );
+        }
+        else {
+            addToCartBtn.setAlpha(1.0f);
+            addToCartBtn.setOnClickListener(this::addToCart);
+        }
         name.setText(product.getProductName());
         price.setText(Extensions.formatCurrency(product.getPrice()));
         description.setText(product.getDescription());
@@ -154,6 +167,11 @@ public class ProductDetailActivity extends AppCompatActivity {
     public void addToCart(View view){
         if (currentProduct == null) {
             Toast.makeText(this, "Đang tải sản phẩm, vui lòng chờ", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!UserSession.getInstance().isLoggedIn() && !AuthPreferenceManager.getInstance(GRCApplication.getAppContext()).isUserLoggedIn()){
+            Toast.makeText(this, "Vui lòng đăng nhập để sử dụng tính năng này", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -201,6 +219,11 @@ public class ProductDetailActivity extends AppCompatActivity {
     public void showFeedbackDialog(View view) {
         if (currentProduct == null) {
             Toast.makeText(this, "Đang tải sản phẩm, vui lòng chờ", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!UserSession.getInstance().isLoggedIn() && !AuthPreferenceManager.getInstance(GRCApplication.getAppContext()).isUserLoggedIn()){
+            Toast.makeText(this, "Vui lòng đăng nhập để sử dụng tính năng này", Toast.LENGTH_SHORT).show();
             return;
         }
 

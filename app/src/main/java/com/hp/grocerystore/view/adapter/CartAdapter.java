@@ -72,15 +72,11 @@ public class CartAdapter extends BaseAdapter {
         Glide.with(context).load(item.getImageUrl()).into(holder.productImage);
         holder.productPrice.setText(Extensions.formatCurrency(item.getPrice()));
 
-        // Cập nhật trạng thái checkbox
         holder.checkBox.setChecked(item.isSelected());
         holder.checkBox.setEnabled(item.getStock() > 0);
-        
-        // Thêm lại listener sau khi đã cập nhật trạng thái
+
         holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             item.setSelected(isChecked);
-            Log.d("CartAdapter", String.format("Sản phẩm %s đã %s", 
-                item.getProductName(), isChecked ? "được chọn" : "bỏ chọn"));
             if (listener != null) {
                 listener.onSelectionChanged();
             }

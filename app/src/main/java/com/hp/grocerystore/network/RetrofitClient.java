@@ -13,6 +13,7 @@ import com.hp.grocerystore.network.api.UserApi;
 import com.hp.grocerystore.network.api.WishlistApi;
 import com.hp.grocerystore.network.authenticator.TokenAuthenticator;
 import com.hp.grocerystore.network.interceptor.AuthInterceptor;
+import com.hp.grocerystore.network.interceptor.ForbiddenInterceptor;
 import com.hp.grocerystore.network.interceptor.UserAgentInterceptor;
 import com.hp.grocerystore.utils.Constants;
 
@@ -44,6 +45,7 @@ public class RetrofitClient {
                     .addInterceptor(new UserAgentInterceptor())
                     .addInterceptor(new AuthInterceptor())
 //                    .addInterceptor(loggingInterceptor)
+                    .addInterceptor(new ForbiddenInterceptor())
                     .authenticator(new TokenAuthenticator())
                     .build();
 
