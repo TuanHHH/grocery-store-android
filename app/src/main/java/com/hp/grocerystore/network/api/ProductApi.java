@@ -3,6 +3,7 @@ package com.hp.grocerystore.network.api;
 import com.hp.grocerystore.model.base.ApiResponse;
 import com.hp.grocerystore.model.base.PaginationResponse;
 import com.hp.grocerystore.model.product.Product;
+import com.hp.grocerystore.model.product.WishlistStatusResponse;
 
 import java.util.List;
 
@@ -14,8 +15,6 @@ import retrofit2.http.Query;
 public interface ProductApi {
     @GET("products/{id}")
     Call<ApiResponse<Product>> getProductById(@Path("id") long productId);
-
-//    Call<ApiResponse<List<Product>>> getProducts(int currentPage, int i);
     @GET("products")
     Call<ApiResponse<List<Product>>> getProducts(@Query("page") int page,
                                                  @Query("size") int size);
@@ -45,4 +44,7 @@ public interface ProductApi {
             @Query("filter") String filter6,
             @Query("sort") String sort
     );
+
+    @GET("wishlist/status/{id}")
+    Call<ApiResponse<WishlistStatusResponse>> getWishlistStatus(@Path("id") long productId);
 }

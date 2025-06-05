@@ -18,7 +18,7 @@ public class OrderViewModel extends ViewModel {
 
     public OrderViewModel() {
         OrderApi orderApi = RetrofitClient.getOrderApi();
-        this.repository = new OrderRepository(orderApi);
+        this.repository = OrderRepository.getInstance(orderApi);
     }
 
     public LiveData<Resource<List<Order>>> getOrdersByStatus(int status) {

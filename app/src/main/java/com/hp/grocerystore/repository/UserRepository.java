@@ -1,7 +1,6 @@
 package com.hp.grocerystore.repository;
 
-import android.util.Log;
-
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -29,9 +28,11 @@ import retrofit2.Response;
 public class UserRepository {
     private static volatile UserRepository INSTANCE;
     private final UserApi userApi;
+
     private UserRepository(UserApi userApi) {
         this.userApi = userApi;
     }
+
     public static UserRepository getInstance(UserApi userApi) {
         if (INSTANCE == null) {
             synchronized (UserRepository.class) {
@@ -42,12 +43,13 @@ public class UserRepository {
         }
         return INSTANCE;
     }
+
     public LiveData<Resource<Void>> updatePassword(UpdatePasswordRequest request) {
         MutableLiveData<Resource<Void>> updatePasswordLiveData = new MutableLiveData<>();
         updatePasswordLiveData.setValue(Resource.loading());
         userApi.updatePassword(request).enqueue(new Callback<ApiResponse<Void>>() {
             @Override
-            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<Void>> call, @NonNull Response<ApiResponse<Void>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<Void> apiResponse = response.body();
                     if (apiResponse.getStatusCode() == 200) {
@@ -66,14 +68,14 @@ public class UserRepository {
                             }
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
                     }
                     updatePasswordLiveData.setValue(Resource.error(errorMessage));
                 }
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
                 updatePasswordLiveData.setValue(Resource.error(t.getMessage()));
             }
         });
@@ -89,7 +91,7 @@ public class UserRepository {
 
         userApi.uploadFile(filePart, folderBody).enqueue(new Callback<ApiResponse<UploadFileResponse>>() {
             @Override
-            public void onResponse(Call<ApiResponse<UploadFileResponse>> call, Response<ApiResponse<UploadFileResponse>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<UploadFileResponse>> call, @NonNull Response<ApiResponse<UploadFileResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     UploadFileResponse data = response.body().getData();
                     uploadFileLiveData.setValue(Resource.success(data));
@@ -99,7 +101,7 @@ public class UserRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<UploadFileResponse>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<UploadFileResponse>> call, @NonNull Throwable t) {
                 uploadFileLiveData.setValue(Resource.error(t.getMessage()));
             }
         });
@@ -112,7 +114,7 @@ public class UserRepository {
         updateUserLiveData.setValue(Resource.loading());
         userApi.updateUser(updateUserRequest).enqueue(new Callback<ApiResponse<User>>() {
             @Override
-            public void onResponse(Call<ApiResponse<User>> call, Response<ApiResponse<User>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<User>> call, @NonNull Response<ApiResponse<User>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     updateUserLiveData.setValue(Resource.success(response.body().getData()));
                 } else {
@@ -126,14 +128,14 @@ public class UserRepository {
                             }
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
                     }
                     updateUserLiveData.setValue(Resource.error(errorMessage));
                 }
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<User>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<User>> call, @NonNull Throwable t) {
                 updateUserLiveData.setValue(Resource.error(t.getMessage()));
             }
         });
@@ -149,7 +151,7 @@ public class UserRepository {
         String cookieHeader = "device=" + deviceHash;
         userApi.getLoggedInDevices(cookieHeader).enqueue(new Callback<ApiResponse<List<DeviceInfoResponse>>>() {
             @Override
-            public void onResponse(Call<ApiResponse<List<DeviceInfoResponse>>> call, Response<ApiResponse<List<DeviceInfoResponse>>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<List<DeviceInfoResponse>>> call, @NonNull Response<ApiResponse<List<DeviceInfoResponse>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     loggedInDevicesLiveData.setValue(Resource.success(response.body().getData()));
                 } else {
@@ -163,14 +165,14 @@ public class UserRepository {
                             }
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
                     }
                     loggedInDevicesLiveData.setValue(Resource.error(errorMessage));
                 }
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<List<DeviceInfoResponse>>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<List<DeviceInfoResponse>>> call, @NonNull Throwable t) {
                 loggedInDevicesLiveData.setValue(Resource.error(t.getMessage()));
             }
         });
@@ -182,7 +184,7 @@ public class UserRepository {
         requestDeactivateLiveData.setValue(Resource.loading());
         userApi.requestDeactivateAccount().enqueue(new Callback<ApiResponse<Void>>() {
             @Override
-            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<Void>> call, @NonNull Response<ApiResponse<Void>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<Void> apiResponse = response.body();
                     if (apiResponse.getStatusCode() == 200) {
@@ -201,14 +203,14 @@ public class UserRepository {
                             }
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                       // e.printStackTrace();
                     }
                     requestDeactivateLiveData.setValue(Resource.error(errorMessage));
                 }
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
                 requestDeactivateLiveData.setValue(Resource.error(t.getMessage()));
             }
         });
@@ -220,7 +222,7 @@ public class UserRepository {
         confirmDeactivateLiveData.setValue(Resource.loading());
         userApi.confirmDeactivateAccount(otp).enqueue(new Callback<ApiResponse<Void>>() {
             @Override
-            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<Void>> call, @NonNull Response<ApiResponse<Void>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<Void> apiResponse = response.body();
                     if (apiResponse.getStatusCode() == 200) {
@@ -241,14 +243,14 @@ public class UserRepository {
                             }
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
                     }
                     confirmDeactivateLiveData.setValue(Resource.error(errorMessage));
                 }
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
                 confirmDeactivateLiveData.setValue(Resource.error(t.getMessage()));
             }
         });

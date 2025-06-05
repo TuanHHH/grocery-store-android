@@ -1,5 +1,6 @@
 package com.hp.grocerystore.repository;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -8,7 +9,6 @@ import com.hp.grocerystore.model.base.PaginationResponse;
 import com.hp.grocerystore.model.wishlist.Wishlist;
 import com.hp.grocerystore.network.api.WishlistApi;
 import com.hp.grocerystore.utils.Resource;
-import com.hp.grocerystore.utils.SingleLiveEvent;
 
 import java.util.List;
 
@@ -19,10 +19,22 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class WishlistRepository {
+    private static volatile WishlistRepository INSTANCE;
     private final WishlistApi wishlistApi;
 
-    public WishlistRepository(WishlistApi wishlistApi) {
+    private WishlistRepository(WishlistApi wishlistApi) {
         this.wishlistApi = wishlistApi;
+    }
+
+    public static WishlistRepository getInstance(WishlistApi wishlistApi) {
+        if (INSTANCE == null) {
+            synchronized (UserRepository.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new WishlistRepository(wishlistApi);
+                }
+            }
+        }
+        return INSTANCE;
     }
 
     public LiveData<Resource<Void>> addWishlist(long productId) {
@@ -32,7 +44,7 @@ public class WishlistRepository {
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), json);
         wishlistApi.addWishlist(body).enqueue(new Callback<ApiResponse<Void>>() {
             @Override
-            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<Void>> call, @NonNull Response<ApiResponse<Void>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     liveData.setValue(Resource.success(null));
                 } else {
@@ -41,7 +53,7 @@ public class WishlistRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
                 liveData.postValue(Resource.error(t.getMessage()));
             }
         });
@@ -54,7 +66,7 @@ public class WishlistRepository {
 
         wishlistApi.getProductsInWishlist(page, size).enqueue(new Callback<ApiResponse<PaginationResponse<Wishlist>>>() {
             @Override
-            public void onResponse(Call<ApiResponse<PaginationResponse<Wishlist>>> call, Response<ApiResponse<PaginationResponse<Wishlist>>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<PaginationResponse<Wishlist>>> call,  @NonNull Response<ApiResponse<PaginationResponse<Wishlist>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Wishlist> wishlistItems = response.body().getData().getResult();
                     liveData.setValue(Resource.success(wishlistItems));
@@ -64,7 +76,7 @@ public class WishlistRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<PaginationResponse<Wishlist>>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<PaginationResponse<Wishlist>>> call, @NonNull Throwable t) {
                 liveData.setValue(Resource.error(t.getMessage()));
             }
         });
@@ -77,7 +89,7 @@ public class WishlistRepository {
 
         wishlistApi.deleteWishlist(id).enqueue(new Callback<ApiResponse<Void>>() {
             @Override
-            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<Void>> call, @NonNull Response<ApiResponse<Void>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().getStatusCode() == 200) {
                     liveData.setValue(Resource.success(null));
                 } else {
@@ -90,7 +102,7 @@ public class WishlistRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
                 liveData.setValue(Resource.error(t.getMessage()));
             }
         });

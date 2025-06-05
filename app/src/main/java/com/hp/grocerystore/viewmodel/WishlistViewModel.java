@@ -15,7 +15,7 @@ public class WishlistViewModel extends ViewModel {
     private final WishlistRepository wishlistRepository;
 
     public WishlistViewModel() {
-        this.wishlistRepository = new WishlistRepository(RetrofitClient.getWishlistApi());
+        this.wishlistRepository = WishlistRepository.getInstance(RetrofitClient.getWishlistApi());
     }
 
     public LiveData<Resource<Void>> getAddWishlistResult(long productId) {
