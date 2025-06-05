@@ -85,7 +85,7 @@ public class WishlistRepository {
 
     public LiveData<Resource<Void>> deleteWishlist(Long id) {
         MutableLiveData<Resource<Void>> liveData = new MutableLiveData<>();
-        liveData.setValue(Resource.loading(null));
+        liveData.setValue(Resource.loading());
 
         wishlistApi.deleteWishlist(id).enqueue(new Callback<ApiResponse<Void>>() {
             @Override

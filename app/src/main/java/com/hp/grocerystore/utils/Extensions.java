@@ -1,6 +1,8 @@
 package com.hp.grocerystore.utils;
 
+import android.content.Context;
 import android.os.Build;
+import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -52,4 +54,11 @@ public class Extensions {
         return iso;
     }
 
+    public static boolean isLoggedIn(Context context) {
+        if (!UserSession.getInstance().isLoggedIn() && !AuthPreferenceManager.getInstance(context).isUserLoggedIn()) {
+            Toast.makeText(context, "Vui lòng đăng nhập để sử dụng tính năng này", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
 }

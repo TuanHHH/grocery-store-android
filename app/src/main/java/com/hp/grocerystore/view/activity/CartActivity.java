@@ -18,6 +18,7 @@ import android.widget.CheckBox;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -48,6 +49,8 @@ public class CartActivity extends AppCompatActivity {
     private CheckBox checkboxSelectAll;
     private FrameLayout loadingOverlay;
     private ProgressBar progressBar;
+    private ConstraintLayout cartFooter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
@@ -62,9 +65,6 @@ public class CartActivity extends AppCompatActivity {
 
         initViews();
         setupLoginCheck();
-        setupListView();
-        setupViewModel();
-        setupSelectAllCheckbox();
     }
 
     private void initViews() {
@@ -77,18 +77,25 @@ public class CartActivity extends AppCompatActivity {
         textEmptyCart = findViewById(R.id.text_empty_cart);
         checkboxSelectAll = findViewById(R.id.checkbox_select_all);
         buttonCheckout = findViewById(R.id.button_checkout);
-        cartItems = new ArrayList<>();
+        cartFooter = findViewById(R.id.footer_cart);
     }
 
     private void setupLoginCheck() {
-        AuthPreferenceManager pref = AuthPreferenceManager.getInstance(GRCApplication.getAppContext());
-        boolean isLoggedIn = pref.isUserLoggedIn();
-        if (!isLoggedIn) {
+        if (!Extensions.isLoggedIn(this)) {
             loginRequiredLayout.setVisibility(View.VISIBLE);
             buttonLoginRequired.setVisibility(View.VISIBLE);
             imageLoginIcon.setVisibility(View.VISIBLE);
+            checkboxSelectAll.setVisibility(View.GONE);
             listView.setVisibility(View.GONE);
             textEmptyCart.setVisibility(View.GONE);
+            cartFooter.setVisibility(View.GONE);
+            buttonLoginRequired.setOnClickListener(this::navigateToLogin);
+        }
+        else {
+            cartItems = new ArrayList<>();
+            setupListView();
+            setupViewModel();
+            setupSelectAllCheckbox();
         }
     }
 

@@ -3,10 +3,12 @@ package com.hp.grocerystore.viewmodel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.hp.grocerystore.R;
 import com.hp.grocerystore.application.GRCApplication;
 import com.hp.grocerystore.model.feedback.CreateFeedbackRequest;
 import com.hp.grocerystore.model.feedback.Feedback;
 import com.hp.grocerystore.model.product.Product;
+import com.hp.grocerystore.model.product.WishlistStatusResponse;
 import com.hp.grocerystore.network.api.FeedbackApi;
 import com.hp.grocerystore.network.api.ProductApi;
 import com.hp.grocerystore.network.RetrofitClient;
@@ -46,5 +48,13 @@ public class ProductViewModel extends ViewModel {
 
     public LiveData<Resource<Feedback>> addFeedBack(long productId, int rating, String description){
         return repository.addFeedback(new CreateFeedbackRequest(productId, rating, description));
+    }
+
+    public LiveData<Resource<WishlistStatusResponse>> getWishlistStatus(long productId){
+        return repository.getWishlistStatus(productId);
+    }
+
+    public LiveData<Resource<String>> getSummaryFeedback(long productId){
+        return repository.getSummaryFeedback(productId);
     }
 }

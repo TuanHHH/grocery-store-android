@@ -1,5 +1,8 @@
 package com.hp.grocerystore.view.fragment;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
@@ -25,6 +28,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.hp.grocerystore.utils.Extensions;
 import com.hp.grocerystore.view.activity.OrderActivity;
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
@@ -38,6 +43,7 @@ import com.hp.grocerystore.utils.Resource;
 import com.hp.grocerystore.utils.UserSession;
 import com.hp.grocerystore.view.activity.LoginActivity;
 import com.hp.grocerystore.view.activity.PersonalActivity;
+import com.hp.grocerystore.view.activity.RegisterActivity;
 import com.hp.grocerystore.view.adapter.DeviceInfoAdapter;
 import com.hp.grocerystore.viewmodel.ProfileViewModel;
 
@@ -52,7 +58,9 @@ public class ProfileFragment extends Fragment {
     private ProfileViewModel viewModel;
     private List<DeviceInfoResponse> devices = new ArrayList<>();
     private ActivityResultLauncher<Intent> updateUserLauncher;
+
     @Override
+    @SuppressLint("SetTextI18n")
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
@@ -60,11 +68,28 @@ public class ProfileFragment extends Fragment {
         userName = view.findViewById(R.id.userName);
         userEmail = view.findViewById(R.id.userEmail);
         profileImage = view.findViewById(R.id.profileImage);
+        LinearLayout authLayout = view.findViewById(R.id.authButtons);
         LinearLayout pendingOrder = view.findViewById(R.id.pendingOrder);
         LinearLayout indeliveryOrder = view.findViewById(R.id.indeliveryOrder);
         LinearLayout successOrder = view.findViewById(R.id.successOrder);
         LinearLayout cancelOrder = view.findViewById(R.id.cancelOrder);
-        loadUserInfo();
+        LinearLayout orderLayout = view.findViewById(R.id.orderLayout);
+        LinearLayout accountLayout = view.findViewById(R.id.accountLayout);
+        if (Extensions.isLoggedIn(requireContext())){
+            loadUserInfo();
+        }
+        else {
+            authLayout.setVisibility(VISIBLE);
+            Button login = view.findViewById(R.id.loginButton);
+            Button register = view.findViewById(R.id.registerButton);
+            login.setOnClickListener(this::navigateToLogin);
+            register.setOnClickListener(this::navigateToRegister);
+            profileImage.setVisibility(GONE);
+            userName.setText("Chưa đăng nhập");
+            userEmail.setVisibility(GONE);
+            setLayoutEnabled(orderLayout, false);
+            setLayoutEnabled(accountLayout, false);
+        }
 
         accountInfoBtn = view.findViewById(R.id.btnAccountInfo);
         accountInfoBtn.setOnClickListener(this::navigateToAccountInfo);
@@ -78,7 +103,7 @@ public class ProfileFragment extends Fragment {
         deactiveBtn.setOnClickListener(this::disableAccount);
 
         View.OnClickListener listener = v -> {
-            int orderStatus = 0;
+            Integer orderStatus = 0;
             if (v.getId() == R.id.pendingOrder) orderStatus = 0;
             else if (v.getId() == R.id.indeliveryOrder) orderStatus = 1;
             else if (v.getId() == R.id.successOrder) orderStatus = 2;
@@ -103,6 +128,21 @@ public class ProfileFragment extends Fragment {
                 });
 
         return view;
+    }
+
+    private void setLayoutEnabled(ViewGroup layout, boolean enabled) {
+        layout.setEnabled(enabled);
+        layout.setAlpha(enabled ? 1.0f : 0.4f);
+
+        for (int i = 0; i < layout.getChildCount(); i++) {
+            View child = layout.getChildAt(i);
+            child.setEnabled(enabled);
+            child.setClickable(enabled);
+            child.setFocusable(enabled);
+            if (child instanceof ViewGroup) {
+                setLayoutEnabled((ViewGroup) child, enabled);
+            }
+        }
     }
 
     @Override
@@ -339,6 +379,18 @@ public class ProfileFragment extends Fragment {
                     });
         });
     }
+
+    private void navigateToLogin(View view) {
+        Intent intent = new Intent(getActivity(), LoginActivity.class);
+        startActivity(intent);
+    }
+
+
+    private void navigateToRegister(View view) {
+        Intent intent = new Intent(getActivity(), RegisterActivity.class);
+        startActivity(intent);
+    }
+
 
 }
 

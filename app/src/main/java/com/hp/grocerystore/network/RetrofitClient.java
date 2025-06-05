@@ -1,6 +1,5 @@
 package com.hp.grocerystore.network;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.hp.grocerystore.network.api.AuthApi;
@@ -21,13 +20,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class RetrofitClient {
 
     // Khởi tạo Retrofit một lần duy nhất
     private static Retrofit retrofit = null;
 
-    // Phương thức này tạo Retrofit mà không cần Context
     private static Retrofit createRetrofit() {
         if (retrofit == null) {
 //            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
@@ -52,6 +51,7 @@ public class RetrofitClient {
             retrofit = new Retrofit.Builder()
                     .baseUrl(Constants.BASE_URL_API)
                     .client(client)
+                    .addConverterFactory(ScalarsConverterFactory.create())
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }

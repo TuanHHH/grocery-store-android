@@ -2,14 +2,13 @@ package com.hp.grocerystore.view.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
@@ -26,6 +25,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.hp.grocerystore.R;
@@ -40,6 +40,7 @@ import com.hp.grocerystore.utils.UserSession;
 import com.hp.grocerystore.view.adapter.FeedbackAdapter;
 import com.hp.grocerystore.viewmodel.CartViewModel;
 import com.hp.grocerystore.viewmodel.ProductViewModel;
+import com.hp.grocerystore.viewmodel.WishlistViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,12 +50,15 @@ import java.util.stream.IntStream;
 public class ProductDetailActivity extends AppCompatActivity {
     private ProductViewModel viewModel;
     private CartViewModel cartViewModel;
+    private WishlistViewModel wishlistViewModel;
     private Product currentProduct;
+    private boolean isWishlisted = false;
     private RecyclerView recyclerFeedback;
     private FeedbackAdapter feedbackAdapter;
     private List<Feedback> feedbackList;
     private FrameLayout loadingOverlay;
     private ProgressBar progressBar;
+    private ImageButton wishlistBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,9 +75,8 @@ public class ProductDetailActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progress_bar);
         viewModel = new ViewModelProvider(this).get(ProductViewModel.class);
         cartViewModel = new ViewModelProvider(this).get(CartViewModel.class);
-        setupCartDialog();
+        wishlistViewModel = new ViewModelProvider(this).get(WishlistViewModel.class);
         setupRecyclerView();
-
         Intent intent = getIntent();
         long productId;
 
@@ -91,9 +94,6 @@ public class ProductDetailActivity extends AppCompatActivity {
         }
         observeProduct(productId);
         observeFeedback(productId);
-    }
-
-    private void setupCartDialog() {
     }
 
 
@@ -121,6 +121,26 @@ public class ProductDetailActivity extends AppCompatActivity {
                 Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
             }
         });
+        showSummaryFeedback(productId);
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void showSummaryFeedback(long productId) {
+        ShimmerFrameLayout shimmerFrameLayout = findViewById(R.id.shimmer_layout);
+        TextView aiSummary = findViewById(R.id.text_ai_summary);
+        viewModel.getSummaryFeedback(productId).observe(this, resource->{
+            if (resource.status == Resource.Status.LOADING) {
+                shimmerFrameLayout.startShimmer();
+            } else if (resource.status == Resource.Status.SUCCESS) {
+                aiSummary.setText("✨ Tóm tắt bởi AI\n\n" + resource.data);
+                shimmerFrameLayout.stopShimmer();
+                shimmerFrameLayout.setShimmer(null);
+            } else {
+                aiSummary.setText("✨ Tóm tắt bởi AI\n\nKhông lấy được thông tin từ server");
+                shimmerFrameLayout.stopShimmer();
+                shimmerFrameLayout.setShimmer(null);
+            }
+        });
     }
 
     private void setupRecyclerView() {
@@ -141,40 +161,100 @@ public class ProductDetailActivity extends AppCompatActivity {
         TextView unit = findViewById(R.id.text_unit);
         RatingBar ratingBar = findViewById(R.id.rating_bar);
         MaterialButton addToCartBtn = findViewById(R.id.button_add_to_cart);
-
-        if (product.getQuantity() <=0){
+        wishlistBtn = findViewById(R.id.button_wishlist);
+        if (product.getQuantity() <= 0) {
             addToCartBtn.setAlpha(0.5f);
             addToCartBtn.setOnClickListener(v ->
                     Toast.makeText(this, "Sản phẩm đang tạm hết hàng", Toast.LENGTH_SHORT).show()
             );
-        }
-        else {
+        } else {
             addToCartBtn.setAlpha(1.0f);
             addToCartBtn.setOnClickListener(this::addToCart);
         }
         name.setText(product.getProductName());
         price.setText(Extensions.formatCurrency(product.getPrice()));
         description.setText(product.getDescription());
-        unit.setText((product.getUnit() == null || product.getUnit().isEmpty())  ? "Không có đơn vị" : product.getUnit());
+        unit.setText((product.getUnit() == null || product.getUnit().isEmpty()) ? "Không có đơn vị" : product.getUnit());
         Glide.with(this)
                 .load(product.getImageUrl())
                 .timeout(10000)
                 .placeholder(R.drawable.product_placeholder)
                 .into(image);
         ratingBar.setRating(product.getRating());
+
+        if (UserSession.getInstance().isLoggedIn() && AuthPreferenceManager.getInstance(GRCApplication.getAppContext()).isUserLoggedIn()) {
+            viewModel.getWishlistStatus(product.getId()).observe(this, resource -> {
+                if (resource.status == Resource.Status.LOADING) {
+                    // pass
+                } else if (resource.status == Resource.Status.SUCCESS) {
+                    isWishlisted = resource.data.getWishlisted();
+                    updateWishlistUI(wishlistBtn);
+                } else {
+                    Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            isWishlisted = false;
+            updateWishlistUI(wishlistBtn);
+        }
+
+        wishlistBtn.setOnClickListener(this::handleWishlist);
     }
 
-    public void addToCart(View view){
+    private void updateWishlistUI(ImageButton wishlistBtn) {
+        if (isWishlisted) {
+            wishlistBtn.setImageResource(R.drawable.ic_heart_filled);
+        } else {
+            wishlistBtn.setImageResource(R.drawable.ic_favorite);
+        }
+    }
+    private void handleWishlist(View view) {
         if (currentProduct == null) {
             Toast.makeText(this, "Đang tải sản phẩm, vui lòng chờ", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        if (!UserSession.getInstance().isLoggedIn() && !AuthPreferenceManager.getInstance(GRCApplication.getAppContext()).isUserLoggedIn()){
-            Toast.makeText(this, "Vui lòng đăng nhập để sử dụng tính năng này", Toast.LENGTH_SHORT).show();
+        if (!Extensions.isLoggedIn(this)) {
             return;
         }
+        wishlistBtn.setEnabled(false);
+        if (isWishlisted){
+            wishlistViewModel.deleteWishlist(currentProduct.getId()).observe(this, resource ->{
+                wishlistBtn.setEnabled(true);
+                if (resource.status == Resource.Status.LOADING) {
+                    // pass
+                } else if (resource.status == Resource.Status.SUCCESS) {
+                    isWishlisted = false;
+                    updateWishlistUI(wishlistBtn);
+                    Toast.makeText(this, "Đã xóa khỏi danh sách yêu thích", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+        else {
+            wishlistViewModel.addWishlist(currentProduct.getId()).observe(this, resource ->{
+                wishlistBtn.setEnabled(true);
+                if (resource.status == Resource.Status.LOADING) {
+                    // pass
+                } else if (resource.status == Resource.Status.SUCCESS) {
+                    isWishlisted = true;
+                    updateWishlistUI(wishlistBtn);
+                    Toast.makeText(this, "Đã thêm vào danh sách yêu thích", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
 
+    public void addToCart(View view) {
+        if (currentProduct == null) {
+            Toast.makeText(this, "Đang tải sản phẩm, vui lòng chờ", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!Extensions.isLoggedIn(this)) {
+            return;
+        }
         BottomSheetDialog dialog = new BottomSheetDialog(this);
         View dialogView = LayoutInflater.from(this)
                 .inflate(R.layout.dialog_quantity_selector, null);
@@ -182,11 +262,11 @@ public class ProductDetailActivity extends AppCompatActivity {
         MaterialButton confirmBtn = dialogView.findViewById(R.id.button_confirm_quantity);
         TextView stockInDialog = dialogView.findViewById(R.id.stock_available);
         stockInDialog.setText(
-                        String.format(Locale.getDefault(), "Kho: %d", currentProduct.getQuantity())
+                String.format(Locale.getDefault(), "Kho: %d", currentProduct.getQuantity())
         );
         MaterialButton minusBtn = dialogView.findViewById(R.id.button_minus);
-        MaterialButton plusBtn  = dialogView.findViewById(R.id.button_plus);
-        TextView quantityView   = dialogView.findViewById(R.id.text_quantity);
+        MaterialButton plusBtn = dialogView.findViewById(R.id.button_plus);
+        TextView quantityView = dialogView.findViewById(R.id.text_quantity);
         quantityView.setText("1");
         minusBtn.setOnClickListener(v -> {
             int q = Integer.parseInt(quantityView.getText().toString());
@@ -198,7 +278,7 @@ public class ProductDetailActivity extends AppCompatActivity {
                 quantityView.setText(String.valueOf(q + 1));
         });
 
-        confirmBtn.setOnClickListener(v->{
+        confirmBtn.setOnClickListener(v -> {
             int q = Integer.parseInt(quantityView.getText().toString());
             cartViewModel.addOrUpdateCart(currentProduct.getId(), q).observe(this, resource -> {
                 if (resource.status == Resource.Status.LOADING) {
@@ -211,22 +291,20 @@ public class ProductDetailActivity extends AppCompatActivity {
                     LoadingUtil.hideLoading(loadingOverlay, progressBar);
                     Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
                 }
-                });
             });
+        });
 
         dialog.show();
     }
+
     public void showFeedbackDialog(View view) {
         if (currentProduct == null) {
             Toast.makeText(this, "Đang tải sản phẩm, vui lòng chờ", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        if (!UserSession.getInstance().isLoggedIn() && !AuthPreferenceManager.getInstance(GRCApplication.getAppContext()).isUserLoggedIn()){
-            Toast.makeText(this, "Vui lòng đăng nhập để sử dụng tính năng này", Toast.LENGTH_SHORT).show();
+        if (!Extensions.isLoggedIn(this)) {
             return;
         }
-
         BottomSheetDialog dialog = new BottomSheetDialog(this);
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_review, null);
         dialog.setContentView(dialogView);
@@ -284,4 +362,6 @@ public class ProductDetailActivity extends AppCompatActivity {
     public void navigateBack(View view) {
         finish();
     }
+
+
 }
