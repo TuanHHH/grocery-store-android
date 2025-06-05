@@ -21,7 +21,7 @@ public class ProductViewModel extends ViewModel {
     public ProductViewModel() {
         ProductApi productApi = RetrofitClient.getProductApi();
         FeedbackApi feedbackApi = RetrofitClient.getFeedbackApi();
-        this.repository = new ProductRepository(productApi, feedbackApi);
+        this.repository = ProductRepository.getInstance(productApi, feedbackApi);
     }
 
     public LiveData<Resource<Product>> getProduct(long productId) {

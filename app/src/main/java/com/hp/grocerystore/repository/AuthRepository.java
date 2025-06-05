@@ -2,6 +2,7 @@ package com.hp.grocerystore.repository;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -36,23 +37,24 @@ public class AuthRepository {
         this.authApi = authApi;
     }
 
-    public static AuthRepository getInstance(AuthApi userApi) {
+    public static AuthRepository getInstance(AuthApi authApi) {
         if (INSTANCE == null) {
             synchronized (UserRepository.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = new AuthRepository(userApi);
+                    INSTANCE = new AuthRepository(authApi);
                 }
             }
         }
         return INSTANCE;
     }
+
     public LiveData<Resource<AuthResponse>> login(String email, String password) {
         MutableLiveData<Resource<AuthResponse>> loginResult = new MutableLiveData<>();
         loginResult.setValue(Resource.loading());
         LoginRequest request = new LoginRequest(email, password);
         authApi.login(request).enqueue(new Callback<ApiResponse<AuthResponse>>() {
             @Override
-            public void onResponse(Call<ApiResponse<AuthResponse>> call, Response<ApiResponse<AuthResponse>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<AuthResponse>> call, @NonNull Response<ApiResponse<AuthResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     if (response.body().getStatusCode() == 200) {
                         AuthResponse loginData = response.body().getData();
@@ -82,7 +84,7 @@ public class AuthRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<AuthResponse>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<AuthResponse>> call, @NonNull Throwable t) {
                 loginResult.setValue(Resource.error(t.getMessage()));
             }
         });
@@ -95,7 +97,7 @@ public class AuthRepository {
         RegisterRequest request = new RegisterRequest(name, email, password);
         authApi.register(request).enqueue(new Callback<ApiResponse<RegisterResponse>>() {
             @Override
-            public void onResponse(Call<ApiResponse<RegisterResponse>> call, Response<ApiResponse<RegisterResponse>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<RegisterResponse>> call, @NonNull Response<ApiResponse<RegisterResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<RegisterResponse> apiResponse = response.body();
                     if (apiResponse.getStatusCode() == 201) {
@@ -121,7 +123,7 @@ public class AuthRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<RegisterResponse>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<RegisterResponse>> call, @NonNull Throwable t) {
                 registerResult.setValue(Resource.error(t.getMessage()));
             }
         });
@@ -134,7 +136,7 @@ public class AuthRepository {
 
         authApi.getUserInfo().enqueue(new Callback<ApiResponse<User>>() {
             @Override
-            public void onResponse(Call<ApiResponse<User>> call, Response<ApiResponse<User>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<User>> call, @NonNull Response<ApiResponse<User>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     User user = response.body().getData();
                     UserSession.getInstance().setUser(user);
@@ -145,7 +147,7 @@ public class AuthRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<User>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<User>> call, @NonNull Throwable t) {
                 userInfoLiveData.setValue(Resource.error(t.getMessage()));
             }
         });
@@ -160,7 +162,7 @@ public class AuthRepository {
         String cookieHeader = "device=" + deviceHash;
         authApi.logout(cookieHeader).enqueue(new Callback<ApiResponse<Void>>() {
             @Override
-            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<Void>> call, @NonNull Response<ApiResponse<Void>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     pref.clear();
                     UserSession.getInstance().clear();
@@ -171,7 +173,7 @@ public class AuthRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
                 logoutLiveData.setValue(Resource.error(t.getMessage()));
             }
         });
@@ -183,7 +185,7 @@ public class AuthRepository {
         forgotPasswordLiveData.setValue(Resource.loading());
         authApi.sendOTPForgotPassword(request).enqueue(new Callback<ApiResponse<Void>>() {
             @Override
-            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<Void>> call, @NonNull Response<ApiResponse<Void>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     forgotPasswordLiveData.setValue(Resource.success(null));
                 } else {
@@ -204,7 +206,7 @@ public class AuthRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
                 forgotPasswordLiveData.setValue(Resource.error(t.getMessage()));
             }
         });
@@ -216,7 +218,7 @@ public class AuthRepository {
         verifyOTPLiveData.setValue(Resource.loading());
         authApi.verifyOTP(request).enqueue(new Callback<ApiResponse<OTPResponse>>() {
             @Override
-            public void onResponse(Call<ApiResponse<OTPResponse>> call, Response<ApiResponse<OTPResponse>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<OTPResponse>> call, @NonNull Response<ApiResponse<OTPResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     verifyOTPLiveData.setValue(Resource.success(response.body().getData()));
                 } else {
@@ -237,7 +239,7 @@ public class AuthRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<OTPResponse>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<OTPResponse>> call, @NonNull Throwable t) {
                 verifyOTPLiveData.setValue(Resource.error(t.getMessage()));
             }
         });
@@ -247,9 +249,9 @@ public class AuthRepository {
     public LiveData<Resource<Void>> resetPassword(String token, ResetPasswordRequest request) {
         MutableLiveData<Resource<Void>> resetPasswordLiveData = new MutableLiveData<>();
         resetPasswordLiveData.setValue(Resource.loading());
-        authApi.resetPassword(token ,request).enqueue(new Callback<ApiResponse<Void>>() {
+        authApi.resetPassword(token, request).enqueue(new Callback<ApiResponse<Void>>() {
             @Override
-            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<Void>> call, @NonNull Response<ApiResponse<Void>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     resetPasswordLiveData.setValue(Resource.success(null));
                 } else {
@@ -270,7 +272,7 @@ public class AuthRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
                 resetPasswordLiveData.setValue(Resource.error(t.getMessage()));
             }
         });

@@ -107,7 +107,6 @@ public class SearchFragment extends Fragment {
         btnViewMore = view.findViewById(R.id.btn_view_more_product);
         nestedScrollView = view.findViewById(R.id.search_result_container);
         swipeRefreshLayout = view.findViewById(R.id.search_swipe_refresh_layout);
-        // Danh sách nút sắp xếp sản phẩm
         filters = new TextView[]{
                 view.findViewById(R.id.filter_newest),
                 view.findViewById(R.id.filter_best_seller),

@@ -17,8 +17,11 @@ public class HomeViewModel extends ViewModel {
     private final CategoryRepository categoryRepository;
 
     public HomeViewModel() {
-        this.productRepository = new ProductRepository(RetrofitClient.getProductApi());;
-        this.categoryRepository = new CategoryRepository(RetrofitClient.getCategoryApi());
+        this.productRepository = ProductRepository.getInstance(
+                RetrofitClient.getProductApi(),
+                RetrofitClient.getFeedbackApi()
+        );;
+        this.categoryRepository = CategoryRepository.getInstance(RetrofitClient.getCategoryApi());
     }
 
     public LiveData<Resource<List<Product>>> getProducts(int page, int size, String filter) {

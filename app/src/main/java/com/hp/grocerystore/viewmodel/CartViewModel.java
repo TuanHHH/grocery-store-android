@@ -18,7 +18,7 @@ public class CartViewModel extends ViewModel {
 
     public CartViewModel() {
         CartApi cartApi = RetrofitClient.getCartApi();
-        this.repository = new CartRepository(cartApi);
+        this.repository = CartRepository.getInstance(cartApi);
     }
 
     public LiveData<Resource<List<CartItem>>> getCartItems() {

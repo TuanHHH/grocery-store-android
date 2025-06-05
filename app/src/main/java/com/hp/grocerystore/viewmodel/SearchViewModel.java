@@ -16,7 +16,7 @@ import java.util.List;
 public class SearchViewModel extends ViewModel {
     private final ProductRepository productRepository;
     public SearchViewModel() {
-        this.productRepository = new ProductRepository(RetrofitClient.getProductApi());;
+        this.productRepository = ProductRepository.getInstance(RetrofitClient.getProductApi(), RetrofitClient.getFeedbackApi());;
     }
     public LiveData<Resource<List<Product>>> searchProducts(int page, int size, String query) {
         return productRepository.searchProducts(page, size, query);

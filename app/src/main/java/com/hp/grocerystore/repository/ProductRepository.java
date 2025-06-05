@@ -1,5 +1,6 @@
 package com.hp.grocerystore.repository;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -19,41 +20,37 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ProductRepository {
+    private static volatile ProductRepository INSTANCE;
     private final ProductApi productApi;
     private final FeedbackApi feedbackApi;
-    MutableLiveData<Resource<List<Feedback>>> feedbackLiveData;
     MutableLiveData<Resource<List<Product>>> productsLiveData;
     private int currentPage;
     private boolean isLoading;
     private boolean hasMoreData;
 
-    public ProductRepository(ProductApi productApi) {
-        this.productApi = productApi;
-        this.feedbackApi = null;
-        this.feedbackLiveData = new MutableLiveData<>();
-        this.productsLiveData = new MutableLiveData<>();
-        this.currentPage = 1;
-        this.isLoading = false;
-        this.hasMoreData = true;
-    }
-
-
-    public ProductRepository(ProductApi productApi, FeedbackApi feedbackApi) {
+    private ProductRepository(ProductApi productApi, FeedbackApi feedbackApi) {
         this.productApi = productApi;
         this.feedbackApi = feedbackApi;
-        this.feedbackLiveData = new MutableLiveData<>();
         this.productsLiveData = new MutableLiveData<>();
         this.currentPage = 1;
         this.isLoading = false;
         this.hasMoreData = true;
     }
+
+    public static ProductRepository getInstance(ProductApi productApi, FeedbackApi feedbackApi) {
+        if (INSTANCE == null) {
+            INSTANCE = new ProductRepository(productApi, feedbackApi);
+        }
+        return INSTANCE;
+    }
+
 
     public LiveData<Resource<Product>> getProduct(long productId) {
         MutableLiveData<Resource<Product>> productLiveData = new MutableLiveData<>();
         productLiveData.setValue(Resource.loading());
         productApi.getProductById(productId).enqueue(new Callback<ApiResponse<Product>>() {
             @Override
-            public void onResponse(Call<ApiResponse<Product>> call, Response<ApiResponse<Product>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<Product>> call, @NonNull Response<ApiResponse<Product>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<Product> apiResponse = response.body();
                     if (apiResponse.getStatusCode() == 200) {
@@ -67,7 +64,7 @@ public class ProductRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<Product>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<Product>> call, @NonNull Throwable t) {
                 productLiveData.setValue(Resource.error(t.getMessage()));
             }
         });
@@ -75,10 +72,11 @@ public class ProductRepository {
     }
 
     public LiveData<Resource<List<Feedback>>> getFeedback(long productId) {
+        MutableLiveData<Resource<List<Feedback>>> feedbackLiveData = new MutableLiveData<>();
         feedbackLiveData.setValue(Resource.loading());
         feedbackApi.getFeedbacksByProductId(productId).enqueue(new Callback<ApiResponse<PaginationResponse<Feedback>>>() {
             @Override
-            public void onResponse(Call<ApiResponse<PaginationResponse<Feedback>>> call, Response<ApiResponse<PaginationResponse<Feedback>>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<PaginationResponse<Feedback>>> call, @NonNull Response<ApiResponse<PaginationResponse<Feedback>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<PaginationResponse<Feedback>> apiResponse = response.body();
                     if (apiResponse.getStatusCode() == 200) {
@@ -93,7 +91,7 @@ public class ProductRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<PaginationResponse<Feedback>>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<PaginationResponse<Feedback>>> call, @NonNull Throwable t) {
                 feedbackLiveData.setValue(Resource.error(t.getMessage()));
             }
         });
@@ -126,7 +124,7 @@ public class ProductRepository {
 
         productApi.getProducts(currentPage, 15).enqueue(new Callback<ApiResponse<List<Product>>>() {
             @Override
-            public void onResponse(Call<ApiResponse<List<Product>>> call, Response<ApiResponse<List<Product>>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<List<Product>>> call, @NonNull Response<ApiResponse<List<Product>>> response) {
                 isLoading = false;
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<List<Product>> apiResponse = response.body();
@@ -149,7 +147,7 @@ public class ProductRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<List<Product>>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<List<Product>>> call, @NonNull Throwable t) {
                 isLoading = false;
                 productsLiveData.setValue(Resource.error(t.getMessage()));
             }
@@ -163,7 +161,7 @@ public class ProductRepository {
 
         productApi.getProductsPaginated(page, size, filter).enqueue(new Callback<ApiResponse<PaginationResponse<Product>>>() {
             @Override
-            public void onResponse(Call<ApiResponse<PaginationResponse<Product>>> call, Response<ApiResponse<PaginationResponse<Product>>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<PaginationResponse<Product>>> call, @NonNull Response<ApiResponse<PaginationResponse<Product>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Product> products = response.body().getData().getResult();
                     liveData.setValue(Resource.success(products));
@@ -173,7 +171,7 @@ public class ProductRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<PaginationResponse<Product>>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<PaginationResponse<Product>>> call, @NonNull Throwable t) {
                 liveData.setValue(Resource.error(t.getMessage()));
             }
         });
@@ -188,7 +186,7 @@ public class ProductRepository {
 
 
             @Override
-            public void onResponse(Call<ApiResponse<PaginationResponse<Product>>> call, Response<ApiResponse<PaginationResponse<Product>>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<PaginationResponse<Product>>> call, @NonNull Response<ApiResponse<PaginationResponse<Product>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Product> products = response.body().getData().getResult();
                     liveData.setValue(Resource.success(products));
@@ -198,7 +196,7 @@ public class ProductRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<PaginationResponse<Product>>> call, Throwable throwable) {
+            public void onFailure(@NonNull Call<ApiResponse<PaginationResponse<Product>>> call, @NonNull Throwable throwable) {
                 liveData.setValue(Resource.error(throwable.getMessage()));
             }
         });
@@ -207,26 +205,26 @@ public class ProductRepository {
     }
 
     public LiveData<Resource<List<Product>>> searchAndFilterProducts(int page, int size, String filter1,
-                                                                     String filter2,String filter3, String filter4,
-                                                                     String filter5,String filter6,String sort) {
+                                                                     String filter2, String filter3, String filter4,
+                                                                     String filter5, String filter6, String sort) {
         MutableLiveData<Resource<List<Product>>> liveData = new MutableLiveData<>();
         liveData.setValue(Resource.loading(null));
-        productApi.searchAndFilterProducts(page, size, filter1,filter2,filter3,filter4,filter5,filter6,sort).enqueue(new Callback<ApiResponse<PaginationResponse<Product>>>() {
+        productApi.searchAndFilterProducts(page, size, filter1, filter2, filter3, filter4, filter5, filter6, sort).enqueue(new Callback<ApiResponse<PaginationResponse<Product>>>() {
 
 
             @Override
-            public void onResponse(Call<ApiResponse<PaginationResponse<Product>>> call, Response<ApiResponse<PaginationResponse<Product>>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<PaginationResponse<Product>>> call, @NonNull Response<ApiResponse<PaginationResponse<Product>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Product> products = response.body().getData().getResult();
                     liveData.setValue(Resource.success(products));
                 } else {
-                    liveData.setValue(Resource.error("Lỗi khi tải danh sách sản phẩm",null));
+                    liveData.setValue(Resource.error("Lỗi khi tải danh sách sản phẩm", null));
                 }
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<PaginationResponse<Product>>> call, Throwable throwable) {
-                liveData.setValue(Resource.error(throwable.getMessage(),null));
+            public void onFailure(@NonNull Call<ApiResponse<PaginationResponse<Product>>> call, @NonNull Throwable throwable) {
+                liveData.setValue(Resource.error(throwable.getMessage(), null));
             }
         });
 
@@ -238,7 +236,7 @@ public class ProductRepository {
         addFeedbackLiveData.setValue(Resource.loading());
         feedbackApi.addFeedback(request).enqueue(new Callback<ApiResponse<Feedback>>() {
             @Override
-            public void onResponse(Call<ApiResponse<Feedback>> call, Response<ApiResponse<Feedback>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<Feedback>> call, @NonNull Response<ApiResponse<Feedback>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<Feedback> apiResponse = response.body();
                     if (apiResponse.getStatusCode() == 201) {
@@ -253,10 +251,12 @@ public class ProductRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<Feedback>> call, Throwable t) {
-                feedbackLiveData.setValue(Resource.error(t.getMessage()));
+            public void onFailure(@NonNull Call<ApiResponse<Feedback>> call, @NonNull Throwable t) {
+                addFeedbackLiveData.setValue(Resource.error(t.getMessage()));
             }
         });
         return addFeedbackLiveData;
     }
+
+
 }
