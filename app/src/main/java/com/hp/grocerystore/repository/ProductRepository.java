@@ -9,6 +9,7 @@ import com.hp.grocerystore.model.base.PaginationResponse;
 import com.hp.grocerystore.model.feedback.CreateFeedbackRequest;
 import com.hp.grocerystore.model.feedback.Feedback;
 import com.hp.grocerystore.model.product.Product;
+import com.hp.grocerystore.model.product.WishlistStatusResponse;
 import com.hp.grocerystore.network.api.FeedbackApi;
 import com.hp.grocerystore.network.api.ProductApi;
 import com.hp.grocerystore.utils.Resource;
@@ -262,5 +263,43 @@ public class ProductRepository {
         return addFeedbackLiveData;
     }
 
+    public LiveData<Resource<WishlistStatusResponse>> getWishlistStatus(long productId) {
+        MutableLiveData<Resource<WishlistStatusResponse>> wishlistStatusLiveData = new MutableLiveData<>();
+        wishlistStatusLiveData.setValue(Resource.loading());
+        productApi.getWishlistStatus(productId).enqueue(new Callback<ApiResponse<WishlistStatusResponse>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<WishlistStatusResponse>> call, @NonNull Response<ApiResponse<WishlistStatusResponse>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<WishlistStatusResponse> apiResponse = response.body();
+                    if (apiResponse.getStatusCode() == 200) {
+                        wishlistStatusLiveData.setValue(Resource.success(apiResponse.getData()));
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<WishlistStatusResponse>> call, @NonNull Throwable t) {
+                wishlistStatusLiveData.setValue(Resource.error(t.getMessage()));
+            }
+        });
+        return wishlistStatusLiveData;
+    }
+    public LiveData<Resource<String>> getSummaryFeedback(long productId) {
+        MutableLiveData<Resource<String>> summaryFeedbackLiveData = new MutableLiveData<>();
+        summaryFeedbackLiveData.setValue(Resource.loading());
+        productApi.getSummaryFeedback(productId).enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                        summaryFeedbackLiveData.setValue(Resource.success(response.body()));
+                }
+            }
+            @Override
+            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                summaryFeedbackLiveData.setValue(Resource.error(t.getMessage()));
+            }
+        });
+        return summaryFeedbackLiveData;
+    }
 
 }

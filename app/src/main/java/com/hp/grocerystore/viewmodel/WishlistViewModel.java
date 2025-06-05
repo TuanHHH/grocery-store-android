@@ -26,12 +26,10 @@ public class WishlistViewModel extends ViewModel {
         return wishlistRepository.getWishlist(page, size);
     }
 
-    public void addWishlist(long productId) {
-        wishlistRepository.addWishlist(productId);
+    public LiveData<Resource<Void>> addWishlist(long productId) {
+        return wishlistRepository.addWishlist(productId);
     }
     public LiveData<Resource<Void>> deleteWishlist(Long id) {
         return wishlistRepository.deleteWishlist(id);
     }
-
-
 }

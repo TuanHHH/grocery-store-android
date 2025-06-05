@@ -16,8 +16,7 @@ import retrofit2.http.Query;
 public interface WishlistApi {
     @POST("wishlist")
     Call<ApiResponse<Void>> addWishlist(
-            @Body RequestBody productRequest
-    );
+            @Body RequestBody productRequest);
 
     @GET("wishlist")
     Call<ApiResponse<PaginationResponse<Wishlist>>> getProductsInWishlist(
