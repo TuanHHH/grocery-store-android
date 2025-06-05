@@ -48,7 +48,7 @@ public class OrderRepository {
 
     public static OrderRepository getInstance(OrderApi orderApi) {
         if (INSTANCE == null) {
-            synchronized (UserRepository.class) {
+            synchronized (OrderRepository.class) {
                 if (INSTANCE == null) {
                     INSTANCE = new OrderRepository(orderApi);
                 }

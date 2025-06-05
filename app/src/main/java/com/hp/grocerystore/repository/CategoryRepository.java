@@ -29,7 +29,7 @@ public class CategoryRepository {
 
     public static CategoryRepository getInstance(CategoryApi categoryApi) {
         if (INSTANCE == null) {
-            synchronized (UserRepository.class) {
+            synchronized (CategoryRepository.class) {
                 if (INSTANCE == null) {
                     INSTANCE = new CategoryRepository(categoryApi);
                 }
