@@ -39,7 +39,11 @@ public class ProductRepository {
 
     public static ProductRepository getInstance(ProductApi productApi, FeedbackApi feedbackApi) {
         if (INSTANCE == null) {
-            INSTANCE = new ProductRepository(productApi, feedbackApi);
+            synchronized (ProductRepository.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new ProductRepository(productApi, feedbackApi);
+                }
+            }
         }
         return INSTANCE;
     }

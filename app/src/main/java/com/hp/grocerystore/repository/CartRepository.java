@@ -50,7 +50,7 @@ public class CartRepository {
 
     public static CartRepository getInstance(CartApi cartApi) {
         if (INSTANCE == null) {
-            synchronized (UserRepository.class) {
+            synchronized (CartRepository.class) {
                 if (INSTANCE == null) {
                     INSTANCE = new CartRepository(cartApi);
                 }

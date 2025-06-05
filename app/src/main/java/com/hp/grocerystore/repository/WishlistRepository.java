@@ -28,7 +28,7 @@ public class WishlistRepository {
 
     public static WishlistRepository getInstance(WishlistApi wishlistApi) {
         if (INSTANCE == null) {
-            synchronized (UserRepository.class) {
+            synchronized (WishlistRepository.class) {
                 if (INSTANCE == null) {
                     INSTANCE = new WishlistRepository(wishlistApi);
                 }

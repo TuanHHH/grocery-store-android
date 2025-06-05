@@ -39,7 +39,7 @@ public class AuthRepository {
 
     public static AuthRepository getInstance(AuthApi authApi) {
         if (INSTANCE == null) {
-            synchronized (UserRepository.class) {
+            synchronized (AuthRepository.class) {
                 if (INSTANCE == null) {
                     INSTANCE = new AuthRepository(authApi);
                 }
