@@ -27,7 +27,7 @@ public interface ProductApi {
             @Query("filter") String filter
     );
 
-    @GET("products/search")
+    @GET("products")
     Call<ApiResponse<PaginationResponse<Product>>> searchProducts(
             @Query("page") int page,
             @Query("size") int size,
