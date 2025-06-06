@@ -16,7 +16,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -196,7 +195,6 @@ public class PersonalActivity extends AppCompatActivity {
                 });
             } catch (IOException e) {
                 Toast.makeText(this, "Không thể đọc file ảnh. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
-                e.printStackTrace();
             }
         } else {
             String avatarUrl = user.getAvatarUrl();
@@ -206,24 +204,30 @@ public class PersonalActivity extends AppCompatActivity {
 
     private void updateUser(String name, String phone, String address, String avatarUrl) {
         viewModel.updateUser(name, phone, address, avatarUrl).observe(this, resource -> {
-            if (resource.status == Resource.Status.LOADING) {
-                LoadingUtil.showLoading(loadingOverlay, progressBar);
-            }
-            if (resource.status == Resource.Status.SUCCESS) {
-                UserSession.getInstance().setUser(
-                        resource.data
-                );
-                LoadingUtil.hideLoading(loadingOverlay, progressBar);
-                Toast.makeText(this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent();
-                setResult(Activity.RESULT_OK, intent);
-                finish();
-            } else if (resource.status == Resource.Status.ERROR) {
-                LoadingUtil.hideLoading(loadingOverlay, progressBar);
-                Toast.makeText(this, "Có lỗi khi cập nhật thông tin", Toast.LENGTH_SHORT).show();
+            if (resource == null) return;
+
+            switch (resource.status) {
+                case LOADING:
+                    LoadingUtil.showLoading(loadingOverlay, progressBar);
+                    break;
+
+                case SUCCESS:
+                    UserSession.getInstance().setUser(resource.data);
+                    LoadingUtil.hideLoading(loadingOverlay, progressBar);
+                    Toast.makeText(this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent();
+                    setResult(Activity.RESULT_OK, intent);
+                    finish();
+                    break;
+
+                case ERROR:
+                    LoadingUtil.hideLoading(loadingOverlay, progressBar);
+                    Toast.makeText(this, "Có lỗi khi cập nhật thông tin", Toast.LENGTH_SHORT).show();
+                    break;
             }
         });
     }
+
 
     private File createTempFileFromUri(Uri uri) throws IOException {
         String mimeType = getContentResolver().getType(uri);
