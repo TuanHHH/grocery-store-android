@@ -2,75 +2,92 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <ProgressBar
-        android:id="@+id/progress_bar_wishlist_view"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center"
-        android:visibility="visible"
-        android:indeterminate="true" />
+
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh_wishlist"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/wislist_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="42dp"
+            android:fillViewport="true">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp">
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/wislist_container"
+                <TextView
+                    android:id="@+id/tv_title_wishlist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:background="@android:color/white"
+                    android:gravity="center"
+                    android:paddingTop="16dp"
+                    android:text="Yêu thích"
+                    android:textColor="#0DA55A"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_wishlist"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/tv_title_wishlist"
+                    android:layout_marginBottom="20dp"
+                    android:clipToPadding="false"
+                    android:visibility="visible" />
+
+                <ProgressBar
+                    android:id="@+id/progress_bar_loadmore_view"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:indeterminate="true"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/btn_view_more_wishlist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="24dp"
+                    android:drawableEnd="@drawable/ic_arrow_down"
+                    android:drawablePadding="8dp"
+                    android:text="Tải thêm"
+                    android:textColor="#57606f"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    <LinearLayout
+        android:id="@+id/login_required"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true"
-        android:layout_marginBottom="42dp">
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <ImageView
+            android:id="@+id/image_login_icon"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/ic_user" />
+
+        <Button
+            android:id="@+id/button_login_required"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="8dp">
-            <TextView
-                android:id="@+id/tv_title_wishlist"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Yêu thích"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="#0DA55A"
-                android:gravity="center"
-                android:paddingTop="16dp"
-                android:layout_marginBottom="20dp"
-                android:background="@android:color/white" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_wishlist"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@id/tv_title_wishlist"
-                android:clipToPadding="false"
-                android:layout_marginBottom="20dp"
-                android:visibility="gone"/>
-
-            <ProgressBar
-                android:id="@+id/progress_bar_loadmore_view"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="center"
-                android:visibility="gone"
-                android:indeterminate="true" />
-
-            <TextView
-                android:id="@+id/btn_view_more_wishlist"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tải thêm"
-                android:textColor="#57606f"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:layout_gravity="center"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="24dp"
-                android:drawableEnd="@drawable/ic_arrow_down"
-                android:drawablePadding="8dp"/>
-
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/primary"
+            android:text="Đăng nhập để xem danh sách yêu thích"
+            android:textColor="@color/white" />
+    </LinearLayout>
 </RelativeLayout>

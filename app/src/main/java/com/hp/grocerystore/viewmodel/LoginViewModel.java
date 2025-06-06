@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel;
 import com.hp.grocerystore.application.GRCApplication;
 import com.hp.grocerystore.model.auth.AuthResponse;
 import com.hp.grocerystore.model.auth.ForgotPasswordRequest;
+import com.hp.grocerystore.model.auth.GoogleCredentialRequest;
 import com.hp.grocerystore.model.auth.OTPRequest;
 import com.hp.grocerystore.model.auth.OTPResponse;
 import com.hp.grocerystore.model.auth.ResetPasswordRequest;
@@ -42,4 +43,9 @@ public class LoginViewModel extends ViewModel {
     public LiveData<Resource<Void>> resetPassword(String token, String newPassword, String confirmPassword){
         return repository.resetPassword(token, new ResetPasswordRequest(newPassword, confirmPassword));
     }
+
+    public LiveData<Resource<AuthResponse>> loginGoogle(String credentail) {
+        return repository.loginGoogle(new GoogleCredentialRequest(credentail));
+    }
+
 }

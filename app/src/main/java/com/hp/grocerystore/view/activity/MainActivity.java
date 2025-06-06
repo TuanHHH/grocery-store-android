@@ -43,8 +43,8 @@ public class MainActivity extends AppCompatActivity {
     private SharedViewModel sharedViewModel;
     private long selectedCategoryId = -1;
 
-    private String selectedCategorySlug = ""; // Không lọc
-    private String selectedSort = "";    // Không sắp xếp
+    private String selectedCategorySlug = "";
+    private String selectedSort = "";
     private int minPrice = 0;
     private int maxPrice = 500000;
     private float minRating = 0;
@@ -74,10 +74,10 @@ public class MainActivity extends AppCompatActivity {
         }
         mViewPager = findViewById(R.id.view_pager);
         mBottomNavigationView = findViewById(R.id.bottom_navigation);
-        ViewpageAdapter viewpagerAdater = new ViewpageAdapter(this);
+        ViewpageAdapter viewpagerAdapter = new ViewpageAdapter(this);
         ;
 
-        mViewPager.setAdapter(viewpagerAdater);
+        mViewPager.setAdapter(viewpagerAdapter);
         mViewPager.setCurrentItem(0);
 
         mViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
@@ -149,7 +149,8 @@ public class MainActivity extends AppCompatActivity {
         }
         if (intent.hasExtra("search_text")) {
             searchText = (String) intent.getSerializableExtra("search_text");
-            if (searchText.length() > 0) {
+            assert searchText != null;
+            if (!searchText.isEmpty()) {
                 String searchBarText = searchText.replace("productName~'", "");
                 searchBar.setText(searchBarText.subSequence(0, searchBarText.length() - 1));
             } else {
@@ -195,7 +196,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void settingSearchFunc() {
-        // Khi nhấn Enter trên bàn phím
         searchBar.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH ||
                     (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
@@ -205,12 +205,9 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
-        // Khi nhấn icon kính lúp (đã tách riêng)
         btnSearch.setOnClickListener(v -> {
             performSearch(searchBar.getText().toString().trim());
         });
-
-        // Khi nhấn nút close
         btnClose.setOnClickListener(v -> {
             searchBar.setText("");
         });

@@ -1,6 +1,7 @@
 package com.hp.grocerystore.network.api;
 
 import com.hp.grocerystore.model.auth.ForgotPasswordRequest;
+import com.hp.grocerystore.model.auth.GoogleCredentialRequest;
 import com.hp.grocerystore.model.auth.LoginRequest;
 import com.hp.grocerystore.model.auth.AuthResponse;
 import com.hp.grocerystore.model.auth.OTPRequest;
@@ -38,4 +39,7 @@ public interface AuthApi {
 
     @POST("auth/reset-password")
     Call<ApiResponse<Void>> resetPassword(@Query("token") String token, @Body ResetPasswordRequest request);
+
+    @POST("auth/google-login")
+    Call<ApiResponse<AuthResponse>> loginGoogle(@Body GoogleCredentialRequest request);
 }

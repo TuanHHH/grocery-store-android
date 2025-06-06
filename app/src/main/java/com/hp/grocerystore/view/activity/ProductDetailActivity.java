@@ -1,6 +1,7 @@
 package com.hp.grocerystore.view.activity;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -79,7 +81,6 @@ public class ProductDetailActivity extends AppCompatActivity {
         setupRecyclerView();
         Intent intent = getIntent();
         long productId;
-
         if (intent.hasExtra("product_id")) {
             Object extra = intent.getSerializableExtra("product_id");
             if (extra != null) {
@@ -93,7 +94,6 @@ public class ProductDetailActivity extends AppCompatActivity {
             return;
         }
         observeProduct(productId);
-        observeFeedback(productId);
     }
 
 
@@ -104,24 +104,45 @@ public class ProductDetailActivity extends AppCompatActivity {
             } else if (resource.status == Resource.Status.SUCCESS) {
                 showProductDetails(resource.data);
                 LoadingUtil.hideLoading(loadingOverlay, progressBar);
+                observeFeedback(productId);
             } else {
-                Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
                 LoadingUtil.hideLoading(loadingOverlay, progressBar);
+                if (resource.message != null
+                        && resource.message.contains("404")) {
+                    AlertDialog dialog = new AlertDialog.Builder(this)
+                            .setTitle("Lỗi")
+                            .setMessage("Sản phẩm không tồn tại hoặc đã ngừng kinh doanh")
+                            .setPositiveButton("OK", (d, which) -> {
+                                finish();
+                            })
+                            .setCancelable(false)
+                            .create();
+                    dialog.show();
+                    Button btnOk = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                    if (btnOk != null) {
+                        btnOk.setTextColor(ContextCompat.getColor(this, R.color.primary));
+                    }
+                } else {
+                    Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
 
     private void observeFeedback(long productId) {
         viewModel.getFeedback(productId).observe(this, resource -> {
-            if (resource.status == Resource.Status.LOADING) {
-
-            } else if (resource.status == Resource.Status.SUCCESS) {
-                feedbackAdapter.setFeedbackList(resource.data);
-            } else {
-                Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+            switch (resource.status){
+                case LOADING:
+                    break;
+                case SUCCESS:
+                    feedbackAdapter.setFeedbackList(resource.data);
+                    showSummaryFeedback(productId);
+                    break;
+                case ERROR:
+                    Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
             }
         });
-        showSummaryFeedback(productId);
+
     }
 
     @SuppressLint("SetTextI18n")

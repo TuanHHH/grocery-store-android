@@ -12,20 +12,6 @@
         android:maxWidth="100dp"
         android:layout_height="wrap_content"
         >
-
-        <ImageView
-            android:id="@+id/img_favorite"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginEnd="6dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:src="@drawable/ic_heart_selector"
-            android:contentDescription="Favorite"
-            android:clickable="true"
-            android:focusable="true" />
-
         <!-- Ảnh sản phẩm -->
         <ImageView
             android:id="@+id/img_product"

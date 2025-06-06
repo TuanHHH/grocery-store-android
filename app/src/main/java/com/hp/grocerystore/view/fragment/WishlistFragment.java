@@ -4,6 +4,7 @@ import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
 
@@ -19,16 +20,17 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hp.grocerystore.R;
-import com.hp.grocerystore.application.GRCApplication;
 import com.hp.grocerystore.model.wishlist.Wishlist;
-import com.hp.grocerystore.network.RetrofitClient;
-import com.hp.grocerystore.repository.WishlistRepository;
+import com.hp.grocerystore.utils.Extensions;
+import com.hp.grocerystore.view.activity.LoginActivity;
+import com.hp.grocerystore.view.activity.ProductDetailActivity;
 import com.hp.grocerystore.view.adapter.WishlistAdapter;
 import com.hp.grocerystore.viewmodel.WishlistViewModel;
 
@@ -41,7 +43,7 @@ public class WishlistFragment extends Fragment {
     private WishlistViewModel mViewModel;
     private RecyclerView recyclerView;
     private WishlistAdapter adapter;
-    private ProgressBar progressBar,progressBarLoadmoreView;
+    private ProgressBar progressBarLoadMoreView;
     private NestedScrollView nestedScrollView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView btnViewMore;
@@ -49,10 +51,8 @@ public class WishlistFragment extends Fragment {
     private int currentPage = 1;
     private int countLoad = 0;
 
-
-    public static WishlistFragment newInstance() {
-        return new WishlistFragment();
-    }
+    private LinearLayout loginRequiredLayout;
+    private Button loginRequiredButton;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -63,25 +63,39 @@ public class WishlistFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        // Ánh xạ RecyclerView
         recyclerView = view.findViewById(R.id.recycler_wishlist);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         adapter = new WishlistAdapter(getContext(), wishlist);
         recyclerView.setAdapter(adapter);
-        progressBar = view.findViewById(R.id.progress_bar_wishlist_view);
-        progressBarLoadmoreView = view.findViewById(R.id.progress_bar_loadmore_view);
+        progressBarLoadMoreView = view.findViewById(R.id.progress_bar_loadmore_view);
         btnViewMore = view.findViewById(R.id.btn_view_more_wishlist);
         nestedScrollView = view.findViewById(R.id.wislist_container);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_wishlist);
 
+        loginRequiredLayout  = view.findViewById(R.id.login_required);
+        loginRequiredButton  = view.findViewById(R.id.button_login_required);
+        
+        loginRequiredButton.setOnClickListener(v -> {
+            Intent i = new Intent(getContext(), LoginActivity.class);
+            startActivity(i);
+        });
+        adapter.setOnWishlistItemClickListener(new WishlistAdapter.OnWishlistItemClickListener() {
+            @Override
+            public void onRemoveClick(int position) {
+                deleteWishlistItem(position);
+            }
 
-        adapter.setOnWishlistItemClickListener(position -> {
-            deleteWishlistItem(position); // ← gọi hàm bạn đã viết
+            @Override
+            public void onItemClick(int position) {
+                if (position < 0 || position >= wishlist.size()) return;
+                Wishlist clicked = wishlist.get(position);
+                Long productId = clicked.getId();
+                Intent intent = new Intent(getContext(), ProductDetailActivity.class);
+                intent.putExtra("product_id", productId);
+                startActivity(intent);
+            }
         });
 
-
-        // Khởi tạo ViewModel
         mViewModel = new ViewModelProvider(this, new ViewModelProvider.Factory() {
             @NonNull
             @Override
@@ -90,26 +104,20 @@ public class WishlistFragment extends Fragment {
             }
         }).get(WishlistViewModel.class);
 
-
-        // Load dữ liệu wishlist từ view model
-        loadWishlist(1,10);
-        // Thiết lập lắng nghe pull-to-refresh
+        loadWishlist(1);
         swipeRefreshLayout.setOnRefreshListener(() -> {
             currentPage = 1;
             countLoad = 0;
-            loadWishlist(currentPage, 10);
+            loadWishlist(currentPage);
         });
 
         btnViewMore.setOnClickListener(v -> {
             currentPage++;
-            loadWishlist(currentPage,10);
+            loadWishlist(currentPage);
         });
 
-
-        // Biến cờ kiểm soát click
         AtomicBoolean isCooldown = new AtomicBoolean(false);
-        // Thời gian delay giữa các lần click (ms)
-        int delayMillis = 3000; // 3 giây
+        int delayMillis = 3000;
 
 
         nestedScrollView.getViewTreeObserver().addOnScrollChangedListener(() -> {
@@ -122,14 +130,11 @@ public class WishlistFragment extends Fragment {
                         btnViewMore.performClick();
                     }, 1000);
                     isCooldown.set(true);
-
-                    // Đặt lại sau khoảng thời gian delay
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
                         isCooldown.set(false);
                     }, delayMillis);
                 }else {
                     countLoad++;
-                    // Đặt lại sau khoảng thời gian delay
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
                         isCooldown.set(false);
                     }, delayMillis);
@@ -137,37 +142,59 @@ public class WishlistFragment extends Fragment {
             }
         });
 
-
+        handleLoginState();
     }
-    private void loadWishlist(int page, int size){
-        // Khởi tạo observer 1 lần (ví dụ trong onViewCreated)
-        mViewModel.getWishlistLiveData(page,size).observe(getViewLifecycleOwner(), resource -> {
+
+    private void handleLoginState() {
+        if (Extensions.isLoggedIn(requireContext())) {
+            showWishlistUI();
+            if (wishlist.isEmpty()) {
+                currentPage = 1;
+                loadWishlist(currentPage);
+            }
+        } else {
+            showLoginRequiredUI();
+        }
+    }
+
+    private void showLoginRequiredUI() {
+        loginRequiredLayout.setVisibility(View.VISIBLE);
+        nestedScrollView.setVisibility(View.GONE);
+        swipeRefreshLayout.setEnabled(false);
+    }
+
+    private void showWishlistUI() {
+        loginRequiredLayout.setVisibility(View.GONE);
+        nestedScrollView.setVisibility(View.VISIBLE);
+        swipeRefreshLayout.setEnabled(true);
+    }
+
+    private void loadWishlist(int page){
+        if (!Extensions.isLoggedIn(requireContext())) return;
+        mViewModel.getWishlistLiveData(page, 10).observe(getViewLifecycleOwner(), resource -> {
             switch (resource.status) {
                 case LOADING:
                     if (page == 1 && !swipeRefreshLayout.isRefreshing()) {
-                        progressBar.setVisibility(View.VISIBLE);
                         recyclerView.setVisibility(View.GONE);
                     } else if (page > 1) {
-                        progressBarLoadmoreView.setVisibility(View.VISIBLE);
+                        progressBarLoadMoreView.setVisibility(View.VISIBLE);
                     }
                     break;
                 case SUCCESS:
-                    swipeRefreshLayout.setRefreshing(false); // Dừng refresh
-                    progressBar.setVisibility(View.GONE);
+                    swipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.VISIBLE);
-                    progressBarLoadmoreView.setVisibility(View.GONE);
+                    progressBarLoadMoreView.setVisibility(View.GONE);
                     if (resource.data != null && !resource.data.isEmpty()) {
 
                         if (page == 1) {
                             wishlist = new ArrayList<>(resource.data);
                         } else {
-                            // Load thêm -> nối thêm vào danh sách cũ
                             wishlist.addAll(resource.data);
                         }
                         adapter.updateData(wishlist);
                     }
 
-                    if (resource.data == null || resource.data.size() < size) {
+                    if (resource.data == null || resource.data.size() < 10) {
                         btnViewMore.setVisibility(View.GONE);
                     } else {
                         btnViewMore.setVisibility(View.VISIBLE);
@@ -175,10 +202,9 @@ public class WishlistFragment extends Fragment {
                     break;
 
                 case ERROR:
-                    swipeRefreshLayout.setRefreshing(false); // Dừng refresh
-                    progressBar.setVisibility(View.GONE);
+                    swipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.VISIBLE);
-                    progressBarLoadmoreView.setVisibility(View.GONE);
+                    progressBarLoadMoreView.setVisibility(View.GONE);
                     Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
                     break;
             }

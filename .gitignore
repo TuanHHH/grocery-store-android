@@ -17,3 +17,5 @@ secrets.properties
 **/*.jks
 *.jks
 app/src/main/java/com/hp/grocerystore/utils/Constants.java
+gradle.properties
+app/google-services.json

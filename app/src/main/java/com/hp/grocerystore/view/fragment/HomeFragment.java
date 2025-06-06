@@ -70,8 +70,6 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-//        btnViewMore = view.findViewById(R.id.btn_view_more);
         linearCategoryContainer = view.findViewById(R.id.category_container);
         linearCategoryBlockContainer = view.findViewById(R.id.category_block_container);
         progressBarCategoryView = view.findViewById(R.id.progress_bar_category_view);
@@ -98,7 +96,6 @@ public class HomeFragment extends Fragment {
         categoryAdapter = new CategoryAdapter(getContext(), categoryList);
         wishlistAdapter = new WishlistAdapter(getContext(), wishLists);
 
-        // Gọi ViewModel để load data
         loadCategories();
     }
 
@@ -106,13 +103,12 @@ public class HomeFragment extends Fragment {
         homeViewModel.getProducts(page, size, filter).observe(getViewLifecycleOwner(), resource -> {
             switch (resource.status) {
                 case LOADING:
-                    // TODO: Hiển thị loading nếu muốn
                     break;
 
                 case SUCCESS:
                     List<Product> products = resource.data;
                     if (products != null) {
-                        adapter.setProductList(products); // cập nhật danh sách sản phẩm
+                        adapter.setProductList(products);
                     }
                     break;
 
@@ -171,12 +167,10 @@ public class HomeFragment extends Fragment {
                     .placeholder(R.drawable.category_placeholder)
                     .into(categoryImage);
         } else {
-            // Có thể đặt placeholder mặc định hoặc lấy thumbnail nếu là video
             categoryImage.setImageResource(R.drawable.category_placeholder);
         }
         sectionTitle.setText(category.getName().toUpperCase());
 
-        // RecyclerView config
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         recyclerView.setHasFixedSize(true);
         int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin_product_grid);
@@ -185,7 +179,6 @@ public class HomeFragment extends Fragment {
         ProductAdapter productAdapter = new ProductAdapter(getContext(), new ArrayList<>(), wishlistViewModel, getViewLifecycleOwner());
         recyclerView.setAdapter(productAdapter);
 
-        // Gọi API load sản phẩm theo category.slug
         String filter = "category.slug~'" + category.getSlug() + "'";
         homeViewModel.getProducts(1, 6, filter).observe(getViewLifecycleOwner(), resource -> {
             switch (resource.status) {
@@ -202,7 +195,6 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        // "Xem thêm" logic
         btnViewMore.setText("Xem thêm sản phẩm " + category.getName() + " >");
         btnViewMore.setTag(category);
         btnViewMore.setOnClickListener(v -> {
@@ -213,12 +205,10 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        // Thêm view vào container
         linearCategoryBlockContainer.addView(categoryView);
     }
 
     private void loadWishlist(int page, int size, WishlistLoadedCallback callback) {
-        // Khởi tạo observer 1 lần (ví dụ trong onViewCreated)
         wishlistViewModel.getWishlistLiveData(page, size).observe(getViewLifecycleOwner(), resource -> {
             switch (resource.status) {
                 case SUCCESS:
@@ -235,11 +225,9 @@ public class HomeFragment extends Fragment {
                     if (callback != null) callback.onWishlistLoaded();
                     break;
                 case LOADING:
-                    // Hiển thị tiến trình nếu cần
                     break;
             }
         });
-        // Khi cần load dữ liệu (ví dụ ở onViewCreated hoặc khi refresh)
     }
 
     public interface WishlistLoadedCallback {

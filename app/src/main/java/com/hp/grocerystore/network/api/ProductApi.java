@@ -21,17 +21,11 @@ public interface ProductApi {
                                                  @Query("size") int size);
 
     @GET("products")
-    Call<ApiResponse<PaginationResponse<Product>>> getProductsPaginated(
+    Call<ApiResponse<PaginationResponse<Product>>> getProductsWithFilter(
             @Query("page") int page,
             @Query("size") int size,
             @Query("filter") String filter
     );
-
-    @GET("products")
-    Call<ApiResponse<PaginationResponse<Product>>> searchProducts(
-            @Query("page") int page,
-            @Query("size") int size,
-            @Query("filter") String filter);
 
     @GET("products")
     Call<ApiResponse<PaginationResponse<Product>>> searchAndFilterProducts(
