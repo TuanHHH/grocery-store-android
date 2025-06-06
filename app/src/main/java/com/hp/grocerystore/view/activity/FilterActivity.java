@@ -1,7 +1,5 @@
 package com.hp.grocerystore.view.activity;
 
-import static java.security.AccessController.getContext;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -13,7 +11,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,12 +28,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.slider.RangeSlider;
 import com.hp.grocerystore.R;
 
-import com.hp.grocerystore.application.GRCApplication;
 import com.hp.grocerystore.model.category.Category;
 import com.hp.grocerystore.model.product.Product;
-import com.hp.grocerystore.network.RetrofitClient;
-import com.hp.grocerystore.repository.CategoryRepository;
-import com.hp.grocerystore.repository.ProductRepository;
 import com.hp.grocerystore.view.adapter.CategoryAdapter;
 import com.hp.grocerystore.viewmodel.HomeViewModel;
 
@@ -49,7 +42,7 @@ public class FilterActivity extends AppCompatActivity {
     private CategoryAdapter categoryAdapter;
     private ImageButton btnClose;
     private GridLayout sortGrid, sortFilterCategoryGrid;
-    private Button btnApply,btnReset;
+    private Button btnApply, btnReset;
     private String[] sortOptions = {
             "Mới nhất",
             "Bán chạy",
@@ -120,23 +113,41 @@ public class FilterActivity extends AppCompatActivity {
             }
         });
 
-
-
-        selectedCategoryId = (long) intent.getSerializableExtra("selected_categoryId");
         selectedSort = (String) intent.getSerializableExtra("selected_sort");
-        if (intent.hasExtra("min_price")){
-            minPrice = (int) intent.getSerializableExtra("min_price");
+        Long categoryIdObj = (Long) intent.getSerializableExtra("selected_categoryId");
+        if (categoryIdObj != null) {
+            selectedCategoryId = categoryIdObj;
         }
-        if (intent.hasExtra("max_price")){
-            maxPrice = (int) intent.getSerializableExtra("max_price");
+
+        if (intent.hasExtra("min_price")) {
+            Integer minPriceObj = (Integer) intent.getSerializableExtra("min_price");
+            if (minPriceObj != null) {
+                minPrice = minPriceObj;
+            }
         }
-        if (intent.hasExtra("min_rating")){
-            minRating = (float) intent.getSerializableExtra("min_rating");
+
+        if (intent.hasExtra("max_price")) {
+            Integer maxPriceObj = (Integer) intent.getSerializableExtra("max_price");
+            if (maxPriceObj != null) {
+                maxPrice = maxPriceObj;
+            }
         }
-        if (intent.hasExtra("max_rating")){
-            maxRating = (float) intent.getSerializableExtra("max_rating");
+
+        if (intent.hasExtra("min_rating")) {
+            Float minRatingObj = (Float) intent.getSerializableExtra("min_rating");
+            if (minRatingObj != null) {
+                minRating = minRatingObj;
+            }
         }
-        if (intent.hasExtra("search_text")){
+
+        if (intent.hasExtra("max_rating")) {
+            Float maxRatingObj = (Float) intent.getSerializableExtra("max_rating");
+            if (maxRatingObj != null) {
+                maxRating = maxRatingObj;
+            }
+        }
+
+        if (intent.hasExtra("search_text")) {
             searchText = (String) intent.getSerializableExtra("search_text");
         }
 
@@ -193,8 +204,6 @@ public class FilterActivity extends AppCompatActivity {
         });
 
 
-
-
         btnClose.setOnClickListener(v -> finish()); // hoặc dismiss() nếu là dialog
         btnReset.setOnClickListener(view -> {
             // 1. Reset các biến lọc
@@ -240,10 +249,11 @@ public class FilterActivity extends AppCompatActivity {
             startActivity(filterIntent);
         });
     }
+
     private void loadCategories() {
         homeViewModel.getAllCategories().observe(this, resource -> {
 
-            switch (resource.status){
+            switch (resource.status) {
                 case LOADING:
                     progressBar.setVisibility(View.VISIBLE);
                     sortFilterCategoryGrid.setVisibility(View.GONE);
@@ -273,9 +283,9 @@ public class FilterActivity extends AppCompatActivity {
 
             TextView text = item.findViewById(R.id.filterText);
             text.setText(option);
-            if (!selectedSort.equals("")){
+            if (!selectedSort.equals("")) {
                 boolean isSelected = option.equals(selectedSort);
-                if(isSelected){
+                if (isSelected) {
                     item.setSelected(true);
                     item.findViewById(R.id.checkmarkIcon).setVisibility(View.VISIBLE);
                 }
@@ -306,7 +316,7 @@ public class FilterActivity extends AppCompatActivity {
         }
     }
 
-    private void cofigHeigthGridLayout(){
+    private void cofigHeigthGridLayout() {
         //Thiết lập chiều cao cho grid view category
         sortFilterCategoryGrid.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override

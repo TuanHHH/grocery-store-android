@@ -149,7 +149,7 @@ public class LoginActivity extends AppCompatActivity {
     }
     private void initGoogleSignIn() {
         oneTapClient = Identity.getSignInClient(this);
-
+        oneTapClient.signOut();
         signInRequest = BeginSignInRequest.builder()
                 .setGoogleIdTokenRequestOptions(
                         BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
@@ -183,7 +183,7 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     } else if (result.getResultCode() == RESULT_CANCELED) {
                         hideLoading();
-                        startLegacyGoogleSignIn();
+//                        startLegacyGoogleSignIn();
                     } else {
                         Log.d(TAG, "One Tap sign-in failed with code: " + result.getResultCode());
                         hideLoading();

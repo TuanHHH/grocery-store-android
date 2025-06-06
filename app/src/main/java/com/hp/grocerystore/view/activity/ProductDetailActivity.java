@@ -99,35 +99,39 @@ public class ProductDetailActivity extends AppCompatActivity {
 
     private void observeProduct(long productId) {
         viewModel.getProduct(productId).observe(this, resource -> {
-            if (resource.status == Resource.Status.LOADING) {
-                LoadingUtil.showLoading(loadingOverlay, progressBar);
-            } else if (resource.status == Resource.Status.SUCCESS) {
-                showProductDetails(resource.data);
-                LoadingUtil.hideLoading(loadingOverlay, progressBar);
-                observeFeedback(productId);
-            } else {
-                LoadingUtil.hideLoading(loadingOverlay, progressBar);
-                if (resource.message != null
-                        && resource.message.contains("404")) {
-                    AlertDialog dialog = new AlertDialog.Builder(this)
-                            .setTitle("Lỗi")
-                            .setMessage("Sản phẩm không tồn tại hoặc đã ngừng kinh doanh")
-                            .setPositiveButton("OK", (d, which) -> {
-                                finish();
-                            })
-                            .setCancelable(false)
-                            .create();
-                    dialog.show();
-                    Button btnOk = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-                    if (btnOk != null) {
-                        btnOk.setTextColor(ContextCompat.getColor(this, R.color.primary));
+            switch (resource.status) {
+                case LOADING:
+                    LoadingUtil.showLoading(loadingOverlay, progressBar);
+                    break;
+
+                case SUCCESS:
+                    showProductDetails(resource.data);
+                    LoadingUtil.hideLoading(loadingOverlay, progressBar);
+                    observeFeedback(productId);
+                    break;
+
+                case ERROR:
+                    LoadingUtil.hideLoading(loadingOverlay, progressBar);
+                    if (resource.message != null && resource.message.contains("404")) {
+                        AlertDialog dialog = new AlertDialog.Builder(this)
+                                .setTitle("Lỗi")
+                                .setMessage("Sản phẩm không tồn tại hoặc đã ngừng kinh doanh")
+                                .setPositiveButton("OK", (d, which) -> finish())
+                                .setCancelable(false)
+                                .create();
+                        dialog.show();
+                        Button btnOk = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                        if (btnOk != null) {
+                            btnOk.setTextColor(ContextCompat.getColor(this, R.color.primary));
+                        }
+                    } else {
+                        Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
                     }
-                } else {
-                    Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
-                }
+                    break;
             }
         });
     }
+
 
     private void observeFeedback(long productId) {
         viewModel.getFeedback(productId).observe(this, resource -> {

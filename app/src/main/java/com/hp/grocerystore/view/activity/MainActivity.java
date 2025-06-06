@@ -127,7 +127,10 @@ public class MainActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         if (intent.hasExtra("selected_categoryId")) {
-            selectedCategoryId = (long) intent.getSerializableExtra("selected_categoryId");
+            Long categoryIdObj = (Long) intent.getSerializableExtra("selected_categoryId");
+            if (categoryIdObj != null) {
+                selectedCategoryId = categoryIdObj;
+            }
         }
         if (intent.hasExtra("selected_categorySlug")) {
             selectedCategorySlug = (String) intent.getSerializableExtra("selected_categorySlug");
@@ -136,17 +139,33 @@ public class MainActivity extends AppCompatActivity {
             selectedSort = (String) intent.getSerializableExtra("selected_sort");
         }
         if (intent.hasExtra("min_price")) {
-            minPrice = (int) intent.getSerializableExtra("min_price");
+            Integer minPriceObj = (Integer) intent.getSerializableExtra("min_price");
+            if (minPriceObj != null) {
+                minPrice = minPriceObj;
+            }
         }
+
         if (intent.hasExtra("max_price")) {
-            maxPrice = (int) intent.getSerializableExtra("max_price");
+            Integer maxPriceObj = (Integer) intent.getSerializableExtra("max_price");
+            if (maxPriceObj != null) {
+                maxPrice = maxPriceObj;
+            }
         }
+
         if (intent.hasExtra("min_rating")) {
-            minRating = (float) intent.getSerializableExtra("min_rating");
+            Float minRatingObj = (Float) intent.getSerializableExtra("min_rating");
+            if (minRatingObj != null) {
+                minRating = minRatingObj;
+            }
         }
+
         if (intent.hasExtra("max_rating")) {
-            maxRating = (float) intent.getSerializableExtra("max_rating");
+            Float maxRatingObj = (Float) intent.getSerializableExtra("max_rating");
+            if (maxRatingObj != null) {
+                maxRating = maxRatingObj;
+            }
         }
+
         if (intent.hasExtra("search_text")) {
             searchText = (String) intent.getSerializableExtra("search_text");
             assert searchText != null;
