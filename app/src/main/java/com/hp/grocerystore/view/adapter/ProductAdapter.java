@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleOwner;
@@ -112,16 +111,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             }
         }
 
-        holder.imgFavorite.setOnClickListener(v -> {
-//         wishlistViewModel.getAddWishlistResult(product.getId()).observe(, resource->{
-//
-//         });
-
-        });
-
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ProductDetailActivity.class);
-            intent.putExtra("product_id", product.getId()); // gửi product qua Intent
+            intent.putExtra("product_id", product.getId());
             context.startActivity(intent);
         });
     }

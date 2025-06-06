@@ -1,7 +1,5 @@
 package com.hp.grocerystore.repository;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -10,6 +8,7 @@ import com.google.gson.Gson;
 import com.hp.grocerystore.application.GRCApplication;
 import com.hp.grocerystore.model.auth.AuthResponse;
 import com.hp.grocerystore.model.auth.ForgotPasswordRequest;
+import com.hp.grocerystore.model.auth.GoogleCredentialRequest;
 import com.hp.grocerystore.model.auth.LoginRequest;
 import com.hp.grocerystore.model.auth.OTPRequest;
 import com.hp.grocerystore.model.auth.OTPResponse;
@@ -279,4 +278,45 @@ public class AuthRepository {
         return resetPasswordLiveData;
     }
 
+    public LiveData<Resource<AuthResponse>> loginGoogle(GoogleCredentialRequest request) {
+        MutableLiveData<Resource<AuthResponse>> loginResult = new MutableLiveData<>();
+        loginResult.setValue(Resource.loading());
+        authApi.loginGoogle(request).enqueue(new Callback<ApiResponse<AuthResponse>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<AuthResponse>> call, @NonNull Response<ApiResponse<AuthResponse>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    if (response.body().getStatusCode() == 200) {
+                        AuthResponse loginData = response.body().getData();
+                        String accessToken = loginData.getAccessToken();
+                        List<String> cookies = response.headers().values("Set-Cookie");
+                        AuthPreferenceManager prefManager = AuthPreferenceManager.saveTokens(cookies, accessToken);
+                        prefManager.saveUserData(loginData.getUser().getName(), loginData.getUser().getEmail());
+                        loginResult.setValue(Resource.success(loginData));
+                    } else {
+                        loginResult.setValue(Resource.error(response.body().getMessage()));
+                    }
+                } else {
+                    String errorMessage = "Đăng nhập thất bại";
+                    try {
+                        if (response.errorBody() != null) {
+                            Gson gson = new Gson();
+                            ApiResponse<?> errorResponse = gson.fromJson(response.errorBody().charStream(), ApiResponse.class);
+                            if (errorResponse.getMessage() != null) {
+                                errorMessage = errorResponse.getMessage();
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    loginResult.setValue(Resource.error(errorMessage));
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<AuthResponse>> call, @NonNull Throwable t) {
+                loginResult.setValue(Resource.error(t.getMessage()));
+            }
+        });
+        return loginResult;
+    }
 }

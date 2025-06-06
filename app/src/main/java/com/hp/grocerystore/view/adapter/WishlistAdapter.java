@@ -49,8 +49,12 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.Wishli
     public void onBindViewHolder(@NonNull WishlistViewHolder holder, int position) {
         Wishlist product = wishList.get(position);
         holder.bind(product);
-
         holder.imgFavorite.setOnClickListener(v -> showDeleteDialog(holder.itemView.getContext(), holder.getAdapterPosition()));
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(holder.getAdapterPosition());
+            }
+        });
     }
 
     @Override
@@ -77,6 +81,7 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.Wishli
             tvPrice = itemView.findViewById(R.id.tv_product_price);
         }
 
+        @SuppressLint("SetTextI18n")
         public void bind(Wishlist wishlist) {
             tvName.setText(wishlist.getProductName());
             tvPrice.setText(wishlist.getPrice() + "đ");
@@ -96,6 +101,7 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.Wishli
 
     public interface OnWishlistItemClickListener {
         void onRemoveClick(int position);
+        void onItemClick(int position);
     }
     private void showDeleteDialog(Context context, int position) {
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_confirm_delete, null);

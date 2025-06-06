@@ -1,5 +1,7 @@
 package com.hp.grocerystore.repository;
 
+import android.annotation.SuppressLint;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -54,6 +56,7 @@ public class ProductRepository {
         MutableLiveData<Resource<Product>> productLiveData = new MutableLiveData<>();
         productLiveData.setValue(Resource.loading());
         productApi.getProductById(productId).enqueue(new Callback<ApiResponse<Product>>() {
+            @SuppressLint("DefaultLocale")
             @Override
             public void onResponse(@NonNull Call<ApiResponse<Product>> call, @NonNull Response<ApiResponse<Product>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -64,7 +67,11 @@ public class ProductRepository {
                         productLiveData.setValue(Resource.error(apiResponse.getMessage()));
                     }
                 } else {
-                    productLiveData.setValue(Resource.error("Không thể tải thông tin sản phẩm"));
+                    int statusCode = response.code();
+                    if (statusCode == 404) {
+                        productLiveData.setValue(Resource.error(String.format("%d", statusCode)));
+                    }
+                    else productLiveData.setValue(Resource.error("Không thể tải thông tin sản phẩm (HTTP " + statusCode + ")"));
                 }
             }
 
@@ -164,7 +171,7 @@ public class ProductRepository {
         MutableLiveData<Resource<List<Product>>> liveData = new MutableLiveData<>();
         liveData.setValue(Resource.loading());
 
-        productApi.getProductsPaginated(page, size, filter).enqueue(new Callback<ApiResponse<PaginationResponse<Product>>>() {
+        productApi.getProductsWithFilter(page, size, filter).enqueue(new Callback<ApiResponse<PaginationResponse<Product>>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<PaginationResponse<Product>>> call, @NonNull Response<ApiResponse<PaginationResponse<Product>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -187,7 +194,7 @@ public class ProductRepository {
     public LiveData<Resource<List<Product>>> searchProducts(int page, int size, String filter) {
         MutableLiveData<Resource<List<Product>>> liveData = new MutableLiveData<>();
         liveData.setValue(Resource.loading());
-        productApi.searchProducts(page, size, filter).enqueue(new Callback<ApiResponse<PaginationResponse<Product>>>() {
+        productApi.getProductsWithFilter(page, size, filter).enqueue(new Callback<ApiResponse<PaginationResponse<Product>>>() {
 
 
             @Override
@@ -284,6 +291,7 @@ public class ProductRepository {
         });
         return wishlistStatusLiveData;
     }
+
     public LiveData<Resource<String>> getSummaryFeedback(long productId) {
         MutableLiveData<Resource<String>> summaryFeedbackLiveData = new MutableLiveData<>();
         summaryFeedbackLiveData.setValue(Resource.loading());
@@ -291,9 +299,10 @@ public class ProductRepository {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                        summaryFeedbackLiveData.setValue(Resource.success(response.body()));
+                    summaryFeedbackLiveData.setValue(Resource.success(response.body()));
                 }
             }
+
             @Override
             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                 summaryFeedbackLiveData.setValue(Resource.error(t.getMessage()));
