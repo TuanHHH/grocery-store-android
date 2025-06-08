@@ -29,6 +29,7 @@ import com.hp.grocerystore.utils.Extensions;
 import com.hp.grocerystore.utils.LoadingUtil;
 import com.hp.grocerystore.utils.AuthPreferenceManager;
 import com.hp.grocerystore.utils.Resource;
+import com.hp.grocerystore.utils.UserSession;
 import com.hp.grocerystore.view.adapter.CartAdapter;
 import com.hp.grocerystore.model.cart.CartItem;
 import com.hp.grocerystore.R;
@@ -65,6 +66,14 @@ public class CartActivity extends AppCompatActivity {
 
         initViews();
         setupLoginCheck();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (viewModel != null) {
+            viewModel.refresh();
+        }
     }
 
     private void initViews() {
