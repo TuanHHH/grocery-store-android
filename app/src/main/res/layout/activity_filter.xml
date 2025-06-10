@@ -19,19 +19,17 @@
             android:paddingBottom="8dp"
             android:layout_marginBottom="8dp"
             android:background="#FFFFFF">
-
-            <!-- Tiêu đề căn giữa -->
             <TextView
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Bộ lọc nâng cao"
-                android:textSize="20sp"
+                android:textSize="18dp"
+                android:paddingBottom="8dp"
                 android:textStyle="bold"
                 android:layout_centerInParent="true"
                 android:textColor="#000000" />
 
-            <!-- Nút đóng -->
             <ImageButton
                 android:id="@+id/btnClose"
                 android:layout_width="24dp"
@@ -45,7 +43,6 @@
                 app:tint="#666666" />
         </RelativeLayout>
 
-        <!-- Sắp xếp sản phẩm -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -62,7 +59,6 @@
             android:layout_marginTop="8dp">
         </GridLayout>
 
-        <!-- Lọc theo ngành hàng -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -87,7 +83,6 @@
 
         </GridLayout>
 
-        <!-- Lọc theo giá -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -131,7 +126,6 @@
             app:thumbColor="#4CAF50"
             app:haloColor="#4CAF50" />
 
-        <!-- Lọc theo rating -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -176,7 +170,6 @@
             app:haloColor="#4CAF50"
             app:tickColor="@android:color/transparent"/>
 
-        <!-- Nút chọn lại / áp dụng -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

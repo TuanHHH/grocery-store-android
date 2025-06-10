@@ -59,7 +59,6 @@ public class ProfileFragment extends Fragment {
     private ImageView profileImage;
     private ProfileViewModel viewModel;
     private List<DeviceInfoResponse> devices = new ArrayList<>();
-    private ActivityResultLauncher<Intent> updateUserLauncher;
 
     @Override
     @SuppressLint("SetTextI18n")
@@ -121,11 +120,11 @@ public class ProfileFragment extends Fragment {
         successOrder.setOnClickListener(listener);
         cancelOrder.setOnClickListener(listener);
 
-        updateUserLauncher = registerForActivityResult(
+        ActivityResultLauncher<Intent> updateUserLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK) {
-                       loadUserInfo();
+                        loadUserInfo();
                     }
                 });
 

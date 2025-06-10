@@ -1,5 +1,7 @@
 package com.hp.grocerystore.view.fragment;
 
+import static com.hp.grocerystore.utils.Resource.Status.LOADING;
+
 import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
@@ -238,6 +240,32 @@ public class WishlistFragment extends Fragment {
                     break;
             }
         });
+    }
+
+    private void loadWishlist(int page, int size, WishlistLoadedCallback callback) {
+        mViewModel.getWishlistLiveData(page, size).observe(getViewLifecycleOwner(), resource -> {
+            switch (resource.status) {
+                case SUCCESS:
+                    if (resource.data != null && !resource.data.isEmpty()) {
+                        ArrayList<Wishlist> wishLists = new ArrayList<>(resource.data);
+                        adapter.updateData(wishLists);
+                    } else {
+                        Toast.makeText(getContext(), "Danh sách yêu thích trống!", Toast.LENGTH_SHORT).show();
+                    }
+                    if (callback != null) callback.onWishlistLoaded();
+                    break;
+                case ERROR:
+                    Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
+                    if (callback != null) callback.onWishlistLoaded();
+                    break;
+                case LOADING:
+                    break;
+            }
+        });
+    }
+
+    public interface WishlistLoadedCallback {
+        void onWishlistLoaded();
     }
 
 }
