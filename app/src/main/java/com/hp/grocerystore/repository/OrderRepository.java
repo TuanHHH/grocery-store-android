@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.hp.grocerystore.model.base.ApiResponse;
 import com.hp.grocerystore.model.base.PaginationResponse;
 import com.hp.grocerystore.model.order.Order;
+import com.hp.grocerystore.model.order.StatusUpdateRequest;
 import com.hp.grocerystore.model.product.ProductOrder;
 import com.hp.grocerystore.network.api.OrderApi;
 import com.hp.grocerystore.utils.Resource;
@@ -18,7 +19,6 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
 public class OrderRepository {
     private static volatile OrderRepository INSTANCE;
     private final OrderApi orderApi;
@@ -26,12 +26,13 @@ public class OrderRepository {
     private final MutableLiveData<Resource<Integer>> totalOrders;
     private int currentPage;
     private final int pageSize;
-    private int status;
+    private int currentStatus; // Thêm biến để track status hiện tại
     private boolean isLoading;
     private boolean hasMoreData;
 
     private final MutableLiveData<Resource<List<ProductOrder>>> productLiveData;
     private final MutableLiveData<Resource<Order>> orderInfo;
+    private final MutableLiveData<Resource<Order>> updateStatusResult = new MutableLiveData<>();
 
     private OrderRepository(OrderApi orderApi) {
         this.orderApi = orderApi;
@@ -41,11 +42,10 @@ public class OrderRepository {
         this.totalOrders = new MutableLiveData<>();
         this.currentPage = 1;
         this.pageSize = 15;
-        this.status = 1;
+        this.currentStatus = -1; // Khởi tạo với giá trị không hợp lệ
         this.isLoading = false;
         this.hasMoreData = true;
     }
-
     public static OrderRepository getInstance(OrderApi orderApi) {
         if (INSTANCE == null) {
             synchronized (OrderRepository.class) {
@@ -57,93 +57,73 @@ public class OrderRepository {
         return INSTANCE;
     }
 
+
     public LiveData<Resource<List<Order>>> getOrdersByStatus(int status) {
-        this.status = status;
+        // Reset trạng thái khi status thay đổi
+        if (this.currentStatus != status) {
+            resetState();
+            this.currentStatus = status;
+        }
+
         if (!isLoading && hasMoreData) {
             loadOrdersByStatus(status);
         }
         return ordersLiveData;
     }
 
-    public LiveData<Resource<Integer>> getTotalOrders() {
-        return totalOrders;
-    }
+//    public void fetchOrdersByStatus(int status) {
+//        // Reset trạng thái khi fetch status mới
+//        if (this.currentStatus != status) {
+//            resetState();
+//            this.currentStatus = status;
+//        }
+//
+//        if (!isLoading) {
+//            loadOrdersByStatus(status);
+//        }
+//    }
 
-    public void fetchOrdersByStatus(int status) {
-        this.status = status;
+    private void resetState() {
         this.currentPage = 1;
-        if (!isLoading && hasMoreData) {
-            loadOrdersByStatus(status);
-        }
-    }
-
-    public void loadMoreOrders() {
-        if (!isLoading && hasMoreData) {
-            currentPage++;
-            loadOrders();
-        }
-    }
-
-    public void loadMoreOrdersByStatus(int status) {
-        this.status = status;
-        if (!isLoading && hasMoreData) {
-            currentPage++;
-            loadOrdersByStatus(status);
-        }
-    }
-
-    public void refreshOrders() {
-        currentPage = 1;
-        hasMoreData = true;
-        loadOrders();
+        this.isLoading = false;
+        this.hasMoreData = true;
+        this.ordersLiveData.setValue(Resource.loading());
     }
 
     public void refreshOrdersByStatus(int status) {
-        this.status = status;
-        currentPage = 1;
-        hasMoreData = true;
+        this.currentStatus = status;
+        resetState();
         loadOrdersByStatus(status);
     }
 
-    private void loadOrders() {
-        isLoading = true;
-        ordersLiveData.setValue(Resource.loading());
-        orderApi.getMyOrders(status, currentPage, pageSize).enqueue(new Callback<ApiResponse<PaginationResponse<Order>>>() {
+
+    public LiveData<Resource<Order>> updateOrderStatus(int orderId, int status) {
+        updateStatusResult.setValue(Resource.loading());
+
+        orderApi.updateOrderStatus(orderId, new StatusUpdateRequest(status)).enqueue(new Callback<ApiResponse<Order>>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<PaginationResponse<Order>>> call, @NonNull Response<ApiResponse<PaginationResponse<Order>>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<Order>> call, @NonNull Response<ApiResponse<Order>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<PaginationResponse<Order>> apiResponse = response.body();
+                    ApiResponse<Order> apiResponse = response.body();
                     if (apiResponse.getStatusCode() == 200) {
-                        PaginationResponse<Order> pagedResult = apiResponse.getData();
-                        List<Order> orders = pagedResult.getResult();
-                        Log.d("OrderRepository", "loadOrders: Orders received: " + (orders != null ? orders.size() : "null"));
-                        if (orders != null) {
-                            if (orders.isEmpty()) {
-                                hasMoreData = false;
-                            }
-                            ordersLiveData.setValue(Resource.success(orders));
-                        } else {
-                            ordersLiveData.setValue(Resource.error("Không có dữ liệu"));
-                        }
+                        updateStatusResult.setValue(Resource.success(apiResponse.getData()));
                     } else {
-                        Log.e("OrderRepository", "loadOrders: API error: " + apiResponse.getMessage());
-                        ordersLiveData.setValue(Resource.error(apiResponse.getMessage()));
+                        updateStatusResult.setValue(Resource.error(apiResponse.getMessage()));
                     }
                 } else {
-                    Log.e("OrderRepository", "loadOrders: Response failed: " + response.message());
-                    ordersLiveData.setValue(Resource.error("Lỗi khi tải dữ liệu"));
+                    updateStatusResult.setValue(Resource.error("Cập nhật trạng thái thất bại"));
                 }
-                isLoading = false;
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<PaginationResponse<Order>>> call, @NonNull Throwable t) {
-                isLoading = false;
-                Log.e("OrderRepository", "loadOrders: Failure: " + t.getMessage());
-                ordersLiveData.setValue(Resource.error(t.getMessage()));
+            public void onFailure(@NonNull Call<ApiResponse<Order>> call, @NonNull Throwable t) {
+                updateStatusResult.setValue(Resource.error(t.getMessage()));
             }
         });
+
+        return updateStatusResult;
     }
+
 
     private void loadOrdersByStatus(int status) {
         isLoading = true;
@@ -201,7 +181,6 @@ public class OrderRepository {
                     if (apiResponse.getStatusCode() == 200) {
                         Order order = apiResponse.getData();
                         Log.d("OrderRepository", "loadOrderInformationById: Order received: " + (order != null ? order.toString() : "null"));
-                        Log.d("OrderRepository", "loadOrderInformationById: Order received: " + (order != null ? order.toString() : "null"));
                         if (order != null) {
                             orderInfo.setValue(Resource.success(order));
                         } else {
@@ -209,11 +188,9 @@ public class OrderRepository {
                         }
                     } else {
                         Log.e("OrderRepository", "loadOrderInformationById: API error: " + apiResponse.getMessage());
-                        Log.e("OrderRepository", "loadOrderInformationById: API error: " + apiResponse.getMessage());
                         orderInfo.setValue(Resource.error(apiResponse.getMessage()));
                     }
                 } else {
-                    Log.e("OrderRepository", "loadOrderInformationById: Response failed: " + response.message());
                     Log.e("OrderRepository", "loadOrderInformationById: Response failed: " + response.message());
                     orderInfo.setValue(Resource.error("Lỗi khi tải thông tin đơn hàng"));
                 }
@@ -223,7 +200,6 @@ public class OrderRepository {
             @Override
             public void onFailure(@NonNull Call<ApiResponse<Order>> call, @NonNull Throwable t) {
                 isLoading = false;
-                Log.e("OrderRepository", "loadOrderInformationById: Failure: " + t.getMessage());
                 Log.e("OrderRepository", "loadOrderInformationById: Failure: " + t.getMessage());
                 orderInfo.setValue(Resource.error(t.getMessage()));
             }
@@ -246,15 +222,12 @@ public class OrderRepository {
                     if (apiResponse.getStatusCode() == 200) {
                         List<ProductOrder> products = apiResponse.getData();
                         Log.d("OrderRepository", "loadProductsInOrderDetailById: Products received: " + (products != null ? products.size() : "null"));
-                        Log.d("OrderRepository", "loadProductsInOrderDetailById: Products received: " + (products != null ? products.size() : "null"));
                         productLiveData.setValue(Resource.success(products));
                     } else {
-                        Log.e("OrderRepository", "loadProductsInOrderDetailById: API error: " + apiResponse.getMessage());
                         Log.e("OrderRepository", "loadProductsInOrderDetailById: API error: " + apiResponse.getMessage());
                         productLiveData.setValue(Resource.error(apiResponse.getMessage()));
                     }
                 } else {
-                    Log.e("OrderRepository", "loadProductsInOrderDetailById: Response failed: " + response.message());
                     Log.e("OrderRepository", "loadProductsInOrderDetailById: Response failed: " + response.message());
                     productLiveData.setValue(Resource.error("Lỗi khi tải chi tiết đơn hàng"));
                 }
@@ -265,10 +238,8 @@ public class OrderRepository {
             public void onFailure(@NonNull Call<ApiResponse<List<ProductOrder>>> call, @NonNull Throwable t) {
                 isLoading = false;
                 Log.e("OrderRepository", "loadProductsInOrderDetailById: Failure: " + t.getMessage());
-                Log.e("OrderRepository", "loadProductsInOrderDetailById: Failure: " + t.getMessage());
                 productLiveData.setValue(Resource.error(t.getMessage()));
             }
         });
     }
-
 }

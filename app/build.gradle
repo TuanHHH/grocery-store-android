@@ -6,20 +6,20 @@ android {
     namespace 'com.hp.grocerystore'
     compileSdk 35
 
-    signingConfigs {
-        release {
-            storeFile file("../${KEYSTORE_FILE}")
-            storePassword KEYSTORE_PASSWORD
-            keyAlias KEY_ALIAS
-            keyPassword KEY_PASSWORD
-        }
-        debug {
-            storeFile file("../${KEYSTORE_FILE}")
-            storePassword KEYSTORE_PASSWORD
-            keyAlias KEY_ALIAS
-            keyPassword KEY_PASSWORD
-        }
-    }
+//    signingConfigs {
+//        release {
+//            storeFile file("../${KEYSTORE_FILE}")
+//            storePassword KEYSTORE_PASSWORD
+//            keyAlias KEY_ALIAS
+//            keyPassword KEY_PASSWORD
+//        }
+//        debug {
+//            storeFile file("../${KEYSTORE_FILE}")
+//            storePassword KEYSTORE_PASSWORD
+//            keyAlias KEY_ALIAS
+//            keyPassword KEY_PASSWORD
+//        }
+//    }
 
     defaultConfig {
         applicationId "com.hp.grocerystore"

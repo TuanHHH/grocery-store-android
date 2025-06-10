@@ -13,10 +13,11 @@ import com.hp.grocerystore.model.base.PaginationResponse;
 import com.hp.grocerystore.model.cart.AddCartResponse;
 import com.hp.grocerystore.model.cart.AddToCartRequest;
 import com.hp.grocerystore.model.cart.CartItem;
+import com.hp.grocerystore.model.payment.VNPayResponse;
 import com.hp.grocerystore.network.api.AuthApi;
 import com.hp.grocerystore.network.api.CartApi;
 import com.hp.grocerystore.utils.Resource;
-
+import com.hp.grocerystore.model.order.CheckoutRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +31,9 @@ public class CartRepository {
     private final MutableLiveData<Resource<List<CartItem>>> cartItemsLiveData;
     private final MutableLiveData<Resource<Boolean>> selectAllLiveData;
     private final MutableLiveData<Resource<Integer>> totalItemsLiveData;
+    private final MutableLiveData<Resource<Void>> checkoutResult = new MutableLiveData<>();
+    private final MutableLiveData<Resource<String>> vnpayPaymentUrlLiveData = new MutableLiveData<>();
+
 
     private int currentPage;
     private boolean isLoading;
@@ -244,4 +248,103 @@ public class CartRepository {
         });
         return addCartLiveData;
     }
+    public LiveData<Resource<Void>> getCheckoutResult() {
+        return checkoutResult;
+    }
+
+    public void checkoutOrder(CheckoutRequest request) {
+        checkoutResult.setValue(Resource.loading());
+
+        cartApi.checkoutOrder(request).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<Void>> call, @NonNull Response<ApiResponse<Void>> response) {
+                Log.d("CartRepository", "API Called: " + call.request().url());
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<Void> apiResponse = response.body();
+                    if (apiResponse.getStatusCode() == 201) {
+                        Log.d("CartRepository", "Đặt hàng thành công: " + apiResponse.getMessage());
+                        checkoutResult.setValue(Resource.success(null));
+                    } else {
+                        Log.e("CartRepository", "Đặt hàng lỗi: " + apiResponse.getMessage());
+                        checkoutResult.setValue(Resource.error(apiResponse.getMessage()));
+                    }
+                } else {
+                    String errorMessage = "Đặt hàng thất bại";
+                    try {
+                        if (response.errorBody() != null) {
+                            Gson gson = new Gson();
+                            ApiResponse<?> errorResponse = gson.fromJson(response.errorBody().charStream(), ApiResponse.class);
+                            if (errorResponse.getMessage() != null) {
+                                errorMessage = errorResponse.getMessage();
+                            }
+                        }
+                    } catch (Exception e) {
+                        // ignore
+                    }
+                    Log.e("CartRepository", "Lỗi khi gửi yêu cầu đặt hàng: " + errorMessage);
+                    checkoutResult.setValue(Resource.error(errorMessage));
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
+                Log.e("CartRepository", "Lỗi kết nối khi đặt hàng: " + t.getMessage());
+                checkoutResult.setValue(Resource.error(t.getMessage()));
+            }
+        });
+    }
+//    public LiveData<Resource<String>> createVnPayPayment(int amount, String bankCode) {
+//        vnpayPaymentUrlLiveData.setValue(Resource.loading());
+//
+//        cartApi.createVnPayPayment(amount, bankCode).enqueue(new Callback<ApiResponse<VNPayResponse>>() {
+//            @Override
+//            public void onResponse(@NonNull Call<ApiResponse<VNPayResponse>> call, @NonNull Response<ApiResponse<VNPayResponse>> response) {
+//                if (response.isSuccessful() && response.body() != null) {
+//                    ApiResponse<VNPayResponse> apiResponse = response.body();
+//                    if (apiResponse.getStatusCode() == 200) {
+//                        vnpayPaymentUrlLiveData.setValue(Resource.success(apiResponse.getData().paymentUrl));
+//                    } else {
+//                        vnpayPaymentUrlLiveData.setValue(Resource.error(apiResponse.getMessage()));
+//                    }
+//                } else {
+//                    vnpayPaymentUrlLiveData.setValue(Resource.error("Lỗi khi tạo yêu cầu thanh toán VNPay"));
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(@NonNull Call<ApiResponse<VNPayResponse>> call, @NonNull Throwable t) {
+//                vnpayPaymentUrlLiveData.setValue(Resource.error("Kết nối thất bại: " + t.getMessage()));
+//            }
+//        });
+//
+//        return vnpayPaymentUrlLiveData;
+//    }
+//    public LiveData<Resource<String>> getVnPayBaseUrl() {
+//        MutableLiveData<Resource<String>> baseUrlLiveData = new MutableLiveData<>();
+//        baseUrlLiveData.setValue(Resource.loading());
+//
+//        cartApi.getVnPayBaseUrl().enqueue(new Callback<ApiResponse<String>>() {
+//            @Override
+//            public void onResponse(@NonNull Call<ApiResponse<String>> call, @NonNull Response<ApiResponse<String>> response) {
+//                if (response.isSuccessful() && response.body() != null) {
+//                    ApiResponse<String> apiResponse = response.body();
+//                    if (apiResponse.getStatusCode() == 200) {
+//                        baseUrlLiveData.setValue(Resource.success(apiResponse.getData()));
+//                    } else {
+//                        baseUrlLiveData.setValue(Resource.error(apiResponse.getMessage()));
+//                    }
+//                } else {
+//                    baseUrlLiveData.setValue(Resource.error("Không thể lấy base URL VNPay"));
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(@NonNull Call<ApiResponse<String>> call, @NonNull Throwable t) {
+//                baseUrlLiveData.setValue(Resource.error("Lỗi kết nối: " + t.getMessage()));
+//            }
+//        });
+//
+//        return baseUrlLiveData;
+//    }
+
 }

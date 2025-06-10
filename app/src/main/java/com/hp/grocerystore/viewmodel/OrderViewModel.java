@@ -25,10 +25,6 @@ public class OrderViewModel extends ViewModel {
         return repository.getOrdersByStatus(status);
     }
 
-    public LiveData<Resource<Integer>> getTotalOrders() {
-        return repository.getTotalOrders();
-    }
-
     public LiveData<Resource<Order>> getOrderById(int orderId) {
         return repository.getOrderById(orderId);
     }
@@ -37,19 +33,14 @@ public class OrderViewModel extends ViewModel {
         return repository.getProductLiveData(orderId);
     }
 
-    public void loadMoreOrders() {
-        repository.loadMoreOrders();
-    }
+//    public void fetchOrdersByStatus(int status) {
+//        repository.fetchOrdersByStatus(status);
+//    }
 
-    public void refresh() {
-        repository.refreshOrders();
+    public LiveData<Resource<Order>> updateOrderStatus(int orderId, int status) {
+        return repository.updateOrderStatus(orderId, status);
     }
-
-    public void loadMoreOrdersByStatus(int status) {
-        repository.loadMoreOrdersByStatus(status);
-    }
-
-    public void fetchOrdersByStatus(int status) {
-        repository.fetchOrdersByStatus(status);
+    public void refreshOrdersByStatus(int status) {
+        repository.refreshOrdersByStatus(status);
     }
 }

@@ -9,6 +9,7 @@ import com.hp.grocerystore.network.api.FeedbackApi;
 import com.hp.grocerystore.network.api.OrderApi;
 import com.hp.grocerystore.network.api.ProductApi;
 import com.hp.grocerystore.network.api.UserApi;
+import com.hp.grocerystore.network.api.VNPayApi;
 import com.hp.grocerystore.network.api.WishlistApi;
 import com.hp.grocerystore.network.authenticator.TokenAuthenticator;
 import com.hp.grocerystore.network.interceptor.AuthInterceptor;
@@ -90,4 +91,8 @@ public class RetrofitClient {
     public static OrderApi getOrderApi() {
         return createRetrofit().create(OrderApi.class);
     }
+    public static VNPayApi getVNPayApi() {
+        return createRetrofit().create(VNPayApi.class);
+    }
+
 }

@@ -59,7 +59,10 @@
             android:exported="true" />
         <activity
             android:name=".view.activity.OrderActivity"
-            android:exported="true" >
+            android:exported="true"
+
+            >
+<!--            android:theme="@style/Theme.AppCompat.Light.NoActionBar"-->
 <!--            <intent-filter>-->
 <!--                <action android:name="android.intent.action.MAIN" />-->
 
@@ -67,8 +70,18 @@
 <!--            </intent-filter>-->
         </activity>
         <activity
+            android:name=".view.activity.CheckoutConfirmationActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity
             android:name=".view.activity.OrderDetailActivity"
-            android:exported="true"/>
+            android:exported="true"
+            />
+
+<!--        android:theme="@style/Theme.AppCompat.Light.NoActionBar"-->
+        <activity android:name=".view.activity.VnPayPaymentActivity"
+            android:exported="true"
+            />
 
     </application>
 

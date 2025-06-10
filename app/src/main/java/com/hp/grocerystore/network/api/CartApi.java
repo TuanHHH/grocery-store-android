@@ -5,6 +5,8 @@ import com.hp.grocerystore.model.base.PaginationResponse;
 import com.hp.grocerystore.model.cart.AddCartResponse;
 import com.hp.grocerystore.model.cart.AddToCartRequest;
 import com.hp.grocerystore.model.cart.CartItem;
+import com.hp.grocerystore.model.order.CheckoutRequest;
+import com.hp.grocerystore.model.payment.VNPayResponse;
 
 import java.util.List;
 
@@ -28,4 +30,8 @@ public interface CartApi {
 
     @POST("cart")
     Call<ApiResponse<AddCartResponse>> addOrUpdateCart(@Body AddToCartRequest request);
+
+    @POST("orders/checkout")
+    Call<ApiResponse<Void>> checkoutOrder(@Body CheckoutRequest request);
+
 }

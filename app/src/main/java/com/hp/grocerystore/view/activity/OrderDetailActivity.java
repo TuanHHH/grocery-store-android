@@ -1,16 +1,20 @@
 package com.hp.grocerystore.view.activity;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,12 +44,20 @@ public class OrderDetailActivity extends AppCompatActivity {
     private OrderViewModel viewModel;
     private int orderId;
 
+    private Button btnCancelOrder;
+
     private LinearLayout orderContentLayout;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_order_detail);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.orderDetail), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
         ImageButton btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
 
@@ -66,6 +78,13 @@ public class OrderDetailActivity extends AppCompatActivity {
 
         viewModel.getOrderById(orderId);
         viewModel.getProductLiveData(orderId);
+
+        btnCancelOrder.setOnClickListener(v -> {
+            viewModel.updateOrderStatus(orderId, 3);
+            viewModel.refreshOrdersByStatus(0);
+            setResult(RESULT_OK);
+            finish();
+        });
     }
 
     private void initViews() {
@@ -81,6 +100,7 @@ public class OrderDetailActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         productRecyclerView = findViewById(R.id.productRecyclerView);
         orderContentLayout = findViewById(R.id.orderContentLayout);
+        btnCancelOrder = findViewById(R.id.btnCancelOrder);
         productRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         productAdapter = new OrderDetailAdapter(new ArrayList<>());
         productRecyclerView.setAdapter(productAdapter);
@@ -96,7 +116,7 @@ public class OrderDetailActivity extends AppCompatActivity {
                         bindOrderData(resource.data);
 //                        Toast.makeText(this, "Loaded order successfully", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(this, "Order data is null", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(this, "Order data is null", Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case ERROR:
@@ -121,7 +141,7 @@ public class OrderDetailActivity extends AppCompatActivity {
                         productAdapter.updateProductOrders(productOrders);
 //                        Toast.makeText(this, "Loaded " + productOrders.size() + " products", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(this, "No products found in this order", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(this, "No products found in this order", Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case ERROR:
@@ -136,44 +156,42 @@ public class OrderDetailActivity extends AppCompatActivity {
     }
 
     private void bindOrderData(Order order) {
-        orderIdText.setText("Order #" + order.getId());
+        orderIdText.setText("Đơn hàng #" + order.getId());
         String statusText;
         int status = order.getStatus();
 
         switch (status) {
             case 0:
-                statusText = "Pending";
-                orderStatusText.setTextColor(Color.RED);
+                statusText = "Chờ xác nhận";
+                btnCancelOrder.setVisibility(View.VISIBLE);
+//                orderStatusText.setTextColor(Color.RED);
                 break;
             case 1:
-                statusText = "Delivery";
-                orderStatusText.setTextColor(Color.BLUE);
+                statusText = "Đang giao";
+//                orderStatusText.setTextColor(Color.BLUE);
                 break;
             case 2:
-                statusText = "Success";
-                orderStatusText.setTextColor(Color.GREEN);
+                statusText = "Thành công";
+//                orderStatusText.setTextColor(Color.GREEN);
                 break;
             case 3:
-                statusText = "Canceled";
-                orderStatusText.setTextColor(Color.GRAY);
+                statusText = "Đã hủy";
+//                orderStatusText.setTextColor(Color.GRAY);
                 break;
             default:
-                statusText = "Unknown";
-                orderStatusText.setTextColor(Color.BLACK);
+                statusText = "Không xác định";
+//                orderStatusText.setTextColor(Color.BLACK);
                 break;
         }
-        orderStatusText.setText("Status: " + statusText);
-//        orderTimeText.setText("Order Time: " + order.getOrderTime());
 
-//        deliveryTimeText.setText("Delivery Time: " + order.getDeliveryTime());
-        paymentMethodText.setText("Payment: " + order.getPaymentMethod());
-        deliveryTimeText.setText("Delivery Time: " + formatOrderTime(order.getOrderTime()));
-        orderTimeText.setText("Order Time: " + formatOrderTime(order.getOrderTime()));
-        addressText.setText("Address: " + order.getAddress());
-        phoneText.setText("Phone: " + order.getPhone());
-        userNameText.setText("User: " + order.getUserName());
-//        totalPriceText.setText(String.format("Total: $%.2f", order.getTotalPrice()));
-        totalPriceText.setText(Extensions.formatCurrency( order.getTotalPrice()));
+        orderStatusText.setText("Trạng thái: " + statusText);
+        paymentMethodText.setText("Thanh toán: " + order.getPaymentMethod());
+        deliveryTimeText.setText("Thời gian giao hàng: " + formatOrderTime(order.getOrderTime()));
+        orderTimeText.setText("Thời gian đặt hàng: " + formatOrderTime(order.getOrderTime()));
+        addressText.setText("Địa chỉ: " + order.getAddress());
+        phoneText.setText("Số điện thoại: " + order.getPhone());
+        userNameText.setText("Khách hàng: " + order.getUserName());
+        totalPriceText.setText("Tổng tiền: " + Extensions.formatCurrency(order.getTotalPrice()));
     }
     private String formatOrderTime(String orderTime) {
         try {

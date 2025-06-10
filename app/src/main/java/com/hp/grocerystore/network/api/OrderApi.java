@@ -1,10 +1,8 @@
 package com.hp.grocerystore.network.api;
-
-import com.google.gson.annotations.SerializedName;
 import com.hp.grocerystore.model.base.ApiResponse;
 import com.hp.grocerystore.model.base.PaginationResponse;
-import com.hp.grocerystore.model.order.CheckoutRequest;
 import com.hp.grocerystore.model.order.Order;
+import com.hp.grocerystore.model.order.StatusUpdateRequest;
 import com.hp.grocerystore.model.product.ProductOrder;
 
 import java.util.List;
@@ -12,6 +10,8 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Headers;
+import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -26,10 +26,8 @@ public interface OrderApi {
     );
     // Lấy chi tiết đơn hàng theo ID
 
-//    @GET("orders/{id}/info")
-//    Call<ApiResponse<PagedResult<Order>>> getOrderInfo(@Path("id") int orderId);
-@GET("orders/{id}/info")
-Call<ApiResponse<Order>> getOrderInfo(@Path("id") int orderId); // Sửa từ List<Order> thành Order
+    @GET("orders/{id}/info")
+    Call<ApiResponse<Order>> getOrderInfo(@Path("id") int orderId);
 
 
     @GET("orders/me")
@@ -39,47 +37,14 @@ Call<ApiResponse<Order>> getOrderInfo(@Path("id") int orderId); // Sửa từ Li
             @Query("size") int size
     );
 
-    @POST("orders/checkout")
-    Call<ApiResponse> checkoutOrder(@Body CheckoutRequest request);
-
-//    https://grocery-store-client-sepia.vercel.app/api/order/17/detail
-//    @GET("order/{id}/detail")
-//    Call<ApiResponse<PagedResult<ProductOrder>>> getOrderDetail(@Path("id") int orderId);
     @GET("order/{id}/detail")
     Call<ApiResponse<List<ProductOrder>>> getOrderDetail(@Path("id") int orderId);
 
+    @PATCH("orders/{id}/status")
+    @Headers("Content-Type: application/json")
+    Call<ApiResponse<Order>> updateOrderStatus(
+            @Path("id") int orderId,
+            @Body StatusUpdateRequest statusUpdate
+    );
 }
 
-
-//class CheckoutRequest {
-//
-//    @SerializedName("address")
-//    private String address;
-//
-//    @SerializedName("phone")
-//    private String phone;
-//
-//    @SerializedName("paymentMethod")
-//    private String paymentMethod;
-//
-//    @SerializedName("totalPrice")
-//    private double totalPrice;
-//
-//    @SerializedName("items")
-//    private List<CartItem> items;
-//
-//    // Constructors, getters, setters
-//    public CheckoutRequest(String address, String phone, String paymentMethod, double totalPrice, List<CartItem> items) {
-//        this.address = address;
-//        this.phone = phone;
-//        this.paymentMethod = paymentMethod;
-//        this.totalPrice = totalPrice;
-//        this.items = items;
-//    }
-//
-//    public String getAddress() { return address; }
-//    public String getPhone() { return phone; }
-//    public String getPaymentMethod() { return paymentMethod; }
-//    public double getTotalPrice() { return totalPrice; }
-//    public List<CartItem> getItems() { return items; }
-//}
