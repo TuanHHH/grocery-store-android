@@ -28,27 +28,13 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     private final Context context;
     private List<Product> productList;
     private static List<Wishlist> wishlistList = new ArrayList<>();
-    private WishlistViewModel wishlistViewModel;
     private LifecycleOwner lifecycleOwner;
-
-
 
     public ProductAdapter(Context context, List<Product> productList,LifecycleOwner lifecycleOwner) {
         this.context = context;
         this.productList = productList;
         this.lifecycleOwner = lifecycleOwner;
     }
-    public ProductAdapter(Context context, List<Product> productList, WishlistViewModel wishlistViewModel,LifecycleOwner lifecycleOwner) {
-        this.context = context;
-        this.productList = productList;
-        this.wishlistViewModel = wishlistViewModel;
-        this.lifecycleOwner = lifecycleOwner;
-    }
-
-    public void setWishlistViewModel(WishlistViewModel wishlistViewModel) {
-        this.wishlistViewModel = wishlistViewModel;
-    }
-
 
     @SuppressLint("NotifyDataSetChanged")
     public void setProductList(List<Product> products) {
@@ -68,6 +54,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         return new ProductViewHolder(view);
     }
 
+    @SuppressLint({"SetTextI18n", "DefaultLocale"})
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = productList.get(position);
@@ -121,6 +108,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     @Override
     public int getItemCount() {
         return productList != null ? productList.size() : 0;
+    }
+
+    public LifecycleOwner getLifecycleOwner() {
+        return lifecycleOwner;
+    }
+
+    public void setLifecycleOwner(LifecycleOwner lifecycleOwner) {
+        this.lifecycleOwner = lifecycleOwner;
     }
 
     public static class ProductViewHolder extends RecyclerView.ViewHolder {

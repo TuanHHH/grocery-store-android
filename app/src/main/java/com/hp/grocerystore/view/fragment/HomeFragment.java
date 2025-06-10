@@ -44,8 +44,6 @@ public class HomeFragment extends Fragment {
     private HomeViewModel homeViewModel;
     private WishlistViewModel wishlistViewModel;
     private SharedViewModel sharedViewModel;
-    //Components
-    private RecyclerView recyclerViewProducts;
     private LinearLayout linearCategoryContainer, linearCategoryBlockContainer;
     private ProgressBar progressBarCategoryView;
     //List
@@ -55,7 +53,6 @@ public class HomeFragment extends Fragment {
     //Adapter
     private ProductAdapter adapter;
     private CategoryAdapter categoryAdapter;
-    private WishlistAdapter wishlistAdapter;
 
     public static HomeFragment newInstance() {
         return new HomeFragment();
@@ -82,19 +79,11 @@ public class HomeFragment extends Fragment {
             }
         }).get(HomeViewModel.class);
 
-        wishlistViewModel = new ViewModelProvider(this, new ViewModelProvider.Factory() {
-            @NonNull
-            @Override
-            public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                return (T) new WishlistViewModel();
-            }
-        }).get(WishlistViewModel.class);
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
 
         adapter = new ProductAdapter(getContext(), productList, getViewLifecycleOwner());
         categoryAdapter = new CategoryAdapter(getContext(), categoryList);
-        wishlistAdapter = new WishlistAdapter(getContext(), wishLists);
 
         loadCategories();
     }
@@ -104,7 +93,6 @@ public class HomeFragment extends Fragment {
             switch (resource.status) {
                 case LOADING:
                     break;
-
                 case SUCCESS:
                     List<Product> products = resource.data;
                     if (products != null) {
@@ -148,8 +136,6 @@ public class HomeFragment extends Fragment {
     private void addCategoryBlock(Category category) {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View categoryView = inflater.inflate(R.layout.item_category_block, linearCategoryBlockContainer, false);
-
-        // Gắn tên và ảnh
         TextView categoryName = categoryView.findViewById(R.id.category_name);
         TextView sectionTitle = categoryView.findViewById(R.id.section_title);
         ImageView categoryImage = categoryView.findViewById(R.id.category_image);
@@ -157,7 +143,6 @@ public class HomeFragment extends Fragment {
         TextView btnViewMore = categoryView.findViewById(R.id.btn_view_more);
 
         categoryName.setText(category.getName());
-        // Load ảnh bằng Glide/Picasso nếu có URL ảnh
         String imageUrl = category.getImageUrl();
         if (imageUrl != null && (imageUrl.endsWith(".jpg") || imageUrl.endsWith(".png") || imageUrl.endsWith(".jpeg"))) {
             Glide.with(this)
@@ -176,7 +161,7 @@ public class HomeFragment extends Fragment {
         int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin_product_grid);
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(3, spacingInPixels, true));
 
-        ProductAdapter productAdapter = new ProductAdapter(getContext(), new ArrayList<>(), wishlistViewModel, getViewLifecycleOwner());
+        ProductAdapter productAdapter = new ProductAdapter(getContext(), new ArrayList<>(), getViewLifecycleOwner());
         recyclerView.setAdapter(productAdapter);
 
         String filter = "category.slug~'" + category.getSlug() + "'";
@@ -207,31 +192,4 @@ public class HomeFragment extends Fragment {
 
         linearCategoryBlockContainer.addView(categoryView);
     }
-
-    private void loadWishlist(int page, int size, WishlistLoadedCallback callback) {
-        wishlistViewModel.getWishlistLiveData(page, size).observe(getViewLifecycleOwner(), resource -> {
-            switch (resource.status) {
-                case SUCCESS:
-                    if (resource.data != null && !resource.data.isEmpty()) {
-                        wishLists = new ArrayList<>(resource.data);
-                        wishlistAdapter.updateData(wishLists);
-                    } else {
-                        Toast.makeText(getContext(), "Danh sách yêu thích trống!", Toast.LENGTH_SHORT).show();
-                    }
-                    if (callback != null) callback.onWishlistLoaded();
-                    break;
-                case ERROR:
-                    Toast.makeText(getContext(), "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
-                    if (callback != null) callback.onWishlistLoaded();
-                    break;
-                case LOADING:
-                    break;
-            }
-        });
-    }
-
-    public interface WishlistLoadedCallback {
-        void onWishlistLoaded();
-    }
-
 }

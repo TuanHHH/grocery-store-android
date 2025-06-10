@@ -57,9 +57,9 @@ public class FilterActivity extends AppCompatActivity {
     private TextView tvMinPrice, tvMaxPrice, tvMinRating, tvMaxRating;
     private List<Category> categoryList = new ArrayList<>();
     private List<Product> productList = new ArrayList<>();
-    private long selectedCategoryId = -1; // Không lọc
+    private long selectedCategoryId = -1;
     private String selectedCategorySlug = "";
-    private String selectedSort = "";    // Không sắp xếp
+    private String selectedSort = "";
     private int minPrice = 0;
     private int maxPrice = 500000;
     private float minRating = 0;
