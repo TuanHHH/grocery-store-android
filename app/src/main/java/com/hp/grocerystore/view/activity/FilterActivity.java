@@ -57,9 +57,9 @@ public class FilterActivity extends AppCompatActivity {
     private TextView tvMinPrice, tvMaxPrice, tvMinRating, tvMaxRating;
     private List<Category> categoryList = new ArrayList<>();
     private List<Product> productList = new ArrayList<>();
-    private long selectedCategoryId = -1; // Không lọc
+    private long selectedCategoryId = -1;
     private String selectedCategorySlug = "";
-    private String selectedSort = "";    // Không sắp xếp
+    private String selectedSort = "";
     private int minPrice = 0;
     private int maxPrice = 500000;
     private float minRating = 0;
@@ -204,7 +204,7 @@ public class FilterActivity extends AppCompatActivity {
         });
 
 
-        btnClose.setOnClickListener(v -> finish()); // hoặc dismiss() nếu là dialog
+        btnClose.setOnClickListener(v -> finish());
         btnReset.setOnClickListener(view -> {
             // 1. Reset các biến lọc
             selectedCategoryId = -1;
@@ -234,7 +234,7 @@ public class FilterActivity extends AppCompatActivity {
             // 4. Bỏ chọn các category
             categoryAdapter.setSelectedCategoryId(-1);
             categoryAdapter.populateGridLayoutForFilter(sortFilterCategoryGrid, -1);
-            cofigHeigthGridLayout();
+            configHeidegretLayout();
         });
         btnApply.setOnClickListener(view -> {
             Intent filterIntent = new Intent(FilterActivity.this, MainActivity.class);
@@ -267,7 +267,7 @@ public class FilterActivity extends AppCompatActivity {
                     categoryList = resource.data;
                     categoryAdapter.setCategoryList(categoryList);
                     categoryAdapter.populateGridLayoutForFilter(sortFilterCategoryGrid, selectedCategoryId);
-                    cofigHeigthGridLayout();
+                    configHeidegretLayout();
                     break;
                 case ERROR:
                     Toast.makeText(this, "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
@@ -316,8 +316,7 @@ public class FilterActivity extends AppCompatActivity {
         }
     }
 
-    private void cofigHeigthGridLayout() {
-        //Thiết lập chiều cao cho grid view category
+    private void configHeidegretLayout() {
         sortFilterCategoryGrid.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
@@ -328,8 +327,6 @@ public class FilterActivity extends AppCompatActivity {
 
                 for (int i = 0; i < childCount; i += columnCount) {
                     int maxHeight = 0;
-
-                    // Tìm chiều cao lớn nhất trong 1 hàng
                     for (int j = 0; j < columnCount; j++) {
                         if (i + j < childCount) {
                             View child = sortFilterCategoryGrid.getChildAt(i + j);

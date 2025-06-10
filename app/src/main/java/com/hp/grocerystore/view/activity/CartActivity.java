@@ -1211,6 +1211,14 @@ public class CartActivity extends AppCompatActivity {
         setupLoginCheck();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (viewModel != null) {
+            viewModel.refresh();
+        }
+    }
+
     private void initViews() {
         loadingOverlay = findViewById(R.id.loading_overlay);
         progressBar = findViewById(R.id.progress_bar);

@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.hp.grocerystore.utils.AuthPreferenceManager;
 import com.hp.grocerystore.utils.Extensions;
 import com.hp.grocerystore.view.activity.OrderActivity;
 import com.bumptech.glide.Glide;
@@ -58,7 +59,6 @@ public class ProfileFragment extends Fragment {
     private ImageView profileImage;
     private ProfileViewModel viewModel;
     private List<DeviceInfoResponse> devices = new ArrayList<>();
-    private ActivityResultLauncher<Intent> updateUserLauncher;
 
     @Override
     @SuppressLint("SetTextI18n")
@@ -120,11 +120,11 @@ public class ProfileFragment extends Fragment {
         successOrder.setOnClickListener(listener);
         cancelOrder.setOnClickListener(listener);
 
-        updateUserLauncher = registerForActivityResult(
+        ActivityResultLauncher<Intent> updateUserLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK) {
-                       loadUserInfo();
+                        loadUserInfo();
                     }
                 });
 
@@ -290,8 +290,6 @@ public class ProfileFragment extends Fragment {
         });
     }
 
-
-
     private void logout(View view) {
         viewModel.logout().observe(getViewLifecycleOwner(), resource -> {
             if (resource.status == Resource.Status.LOADING){
@@ -299,6 +297,7 @@ public class ProfileFragment extends Fragment {
             }
             else if (resource.status == Resource.Status.SUCCESS) {
                 Toast.makeText(requireContext(), "Đăng xuất thành công", Toast.LENGTH_SHORT).show();
+                AuthPreferenceManager.getInstance(requireContext()).clear();
                 UserSession.getInstance().clear();
                 Intent intent = new Intent(requireActivity(), LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
