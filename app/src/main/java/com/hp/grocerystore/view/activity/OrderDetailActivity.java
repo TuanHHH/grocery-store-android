@@ -55,7 +55,13 @@ public class OrderDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_order_detail);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.orderDetail), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            int originalPadding = (int) (16 * getResources().getDisplayMetrics().density);
+            v.setPadding(
+                    Math.max(systemBars.left, originalPadding),
+                    Math.max(systemBars.top, originalPadding),
+                    Math.max(systemBars.right, originalPadding),
+                    Math.max(systemBars.bottom, originalPadding)
+            );
             return insets;
         });
         ImageButton btnBack = findViewById(R.id.btnBack);
@@ -67,7 +73,7 @@ public class OrderDetailActivity extends AppCompatActivity {
             finish();
             return;
         } else {
-            Toast.makeText(this, "orderId " + orderId, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "orderId " + orderId, Toast.LENGTH_SHORT).show();
         }
 
         initViews();
@@ -164,29 +170,33 @@ public class OrderDetailActivity extends AppCompatActivity {
             case 0:
                 statusText = "Chờ xác nhận";
                 btnCancelOrder.setVisibility(View.VISIBLE);
+                deliveryTimeText.setText("Thời gian giao hàng: " + formatOrderTime(order.getDeliveryTime()));
 //                orderStatusText.setTextColor(Color.RED);
                 break;
             case 1:
                 statusText = "Đang giao";
+                deliveryTimeText.setText("Thời gian giao hàng: " + formatOrderTime(order.getDeliveryTime()));
 //                orderStatusText.setTextColor(Color.BLUE);
                 break;
             case 2:
                 statusText = "Thành công";
+                deliveryTimeText.setText("Thời gian giao hàng: " + formatOrderTime(order.getDeliveryTime()));
 //                orderStatusText.setTextColor(Color.GREEN);
                 break;
             case 3:
                 statusText = "Đã hủy";
+                deliveryTimeText.setText("Thời gian hủy giao hàng: " + formatOrderTime(order.getDeliveryTime()));
 //                orderStatusText.setTextColor(Color.GRAY);
                 break;
             default:
                 statusText = "Không xác định";
+                deliveryTimeText.setText("Thời gian giao hàng: " + formatOrderTime(order.getDeliveryTime()));
 //                orderStatusText.setTextColor(Color.BLACK);
                 break;
         }
 
         orderStatusText.setText("Trạng thái: " + statusText);
         paymentMethodText.setText("Thanh toán: " + order.getPaymentMethod());
-        deliveryTimeText.setText("Thời gian giao hàng: " + formatOrderTime(order.getOrderTime()));
         orderTimeText.setText("Thời gian đặt hàng: " + formatOrderTime(order.getOrderTime()));
         addressText.setText("Địa chỉ: " + order.getAddress());
         phoneText.setText("Số điện thoại: " + order.getPhone());
@@ -195,15 +205,13 @@ public class OrderDetailActivity extends AppCompatActivity {
     }
     private String formatOrderTime(String orderTime) {
         try {
-            // Định dạng đầu vào ISO 8601
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'", Locale.getDefault());
-            inputFormat.setTimeZone(TimeZone.getTimeZone("UTC")); // Vì chuỗi có 'Z' = UTC
+            inputFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
             Date date = inputFormat.parse(orderTime);
-
-            // Định dạng đầu ra: giây:phút:giờ ngày/tháng/năm
+            
             SimpleDateFormat outputFormat = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy", Locale.getDefault());
-            outputFormat.setTimeZone(TimeZone.getDefault()); // Giờ địa phương
+            outputFormat.setTimeZone(TimeZone.getDefault());
 
             return outputFormat.format(date);
         } catch (Exception e) {

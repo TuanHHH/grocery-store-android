@@ -29,10 +29,10 @@ public class VNPayViewModel extends ViewModel {
         vnPayRepository.createPayment(amount, orderData);
     }
 
-    public void handlePaymentCallback(String responseCode, String txnRef, String amount,
-                                      String orderInfo, String bankCode, String transactionNo,
-                                      String payDate, String secureHash) {
-        vnPayRepository.handlePaymentCallback(responseCode, txnRef, amount, orderInfo, bankCode,
-                transactionNo, payDate, secureHash);
-    }
+//    public void handlePaymentCallback(String responseCode, String txnRef, String amount,
+//                                      String orderInfo, String bankCode, String transactionNo,
+//                                      String payDate, String secureHash) {
+//        vnPayRepository.handlePaymentCallback(responseCode, txnRef, amount, orderInfo, bankCode,
+//                transactionNo, payDate, secureHash);
+//    }
 }

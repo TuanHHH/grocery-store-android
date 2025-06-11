@@ -6,8 +6,10 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.gson.Gson;
 import com.hp.grocerystore.model.base.ApiResponse;
 import com.hp.grocerystore.model.base.PaginationResponse;
+import com.hp.grocerystore.model.order.CheckoutRequest;
 import com.hp.grocerystore.model.order.Order;
 import com.hp.grocerystore.model.order.StatusUpdateRequest;
 import com.hp.grocerystore.model.product.ProductOrder;
@@ -33,6 +35,7 @@ public class OrderRepository {
     private final MutableLiveData<Resource<List<ProductOrder>>> productLiveData;
     private final MutableLiveData<Resource<Order>> orderInfo;
     private final MutableLiveData<Resource<Order>> updateStatusResult = new MutableLiveData<>();
+    private final MutableLiveData<Resource<Void>> checkoutResult = new MutableLiveData<>();
 
     private OrderRepository(OrderApi orderApi) {
         this.orderApi = orderApi;
@@ -71,18 +74,6 @@ public class OrderRepository {
         return ordersLiveData;
     }
 
-//    public void fetchOrdersByStatus(int status) {
-//        // Reset trạng thái khi fetch status mới
-//        if (this.currentStatus != status) {
-//            resetState();
-//            this.currentStatus = status;
-//        }
-//
-//        if (!isLoading) {
-//            loadOrdersByStatus(status);
-//        }
-//    }
-
     private void resetState() {
         this.currentPage = 1;
         this.isLoading = false;
@@ -95,6 +86,10 @@ public class OrderRepository {
         resetState();
         loadOrdersByStatus(status);
     }
+    public LiveData<Resource<Void>> getCheckoutResult() {
+        return checkoutResult;
+    }
+
 
 
     public LiveData<Resource<Order>> updateOrderStatus(int orderId, int status) {
@@ -239,6 +234,47 @@ public class OrderRepository {
                 isLoading = false;
                 Log.e("OrderRepository", "loadProductsInOrderDetailById: Failure: " + t.getMessage());
                 productLiveData.setValue(Resource.error(t.getMessage()));
+            }
+        });
+    }
+    public void checkoutOrder(CheckoutRequest request) {
+        checkoutResult.setValue(Resource.loading());
+
+        orderApi.checkoutOrder(request).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<Void>> call, @NonNull Response<ApiResponse<Void>> response) {
+                Log.d("CartRepository", "API Called: " + call.request().url());
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<Void> apiResponse = response.body();
+                    if (apiResponse.getStatusCode() == 201) {
+                        Log.d("CartRepository", "Đặt hàng thành công: " + apiResponse.getMessage());
+                        checkoutResult.setValue(Resource.success(null));
+                    } else {
+                        Log.e("CartRepository", "Đặt hàng lỗi: " + apiResponse.getMessage());
+                        checkoutResult.setValue(Resource.error(apiResponse.getMessage()));
+                    }
+                } else {
+                    String errorMessage = "Đặt hàng thất bại";
+                    try {
+                        if (response.errorBody() != null) {
+                            Gson gson = new Gson();
+                            ApiResponse<?> errorResponse = gson.fromJson(response.errorBody().charStream(), ApiResponse.class);
+                            if (errorResponse.getMessage() != null) {
+                                errorMessage = errorResponse.getMessage();
+                            }
+                        }
+                    } catch (Exception e) {
+                        // ignore
+                    }
+                    Log.e("CartRepository", "Lỗi khi gửi yêu cầu đặt hàng: " + errorMessage);
+                    checkoutResult.setValue(Resource.error(errorMessage));
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<Void>> call, @NonNull Throwable t) {
+                Log.e("CartRepository", "Lỗi kết nối khi đặt hàng: " + t.getMessage());
+                checkoutResult.setValue(Resource.error(t.getMessage()));
             }
         });
     }

@@ -19,3 +19,19 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+# Keep CartItem and its serialization metadata
+-keep class com.hp.grocerystore.model.cart.CartItem { *; }
+-keepclassmembers class com.hp.grocerystore.model.cart.CartItem {
+    *;
+}
+-keep class com.hp.grocerystore.model.** { *; }
+
+# Keep Serializable classes
+-keep class * implements java.io.Serializable {
+    *;
+}
+
+# Firebase Analytics rules
+-keep class com.google.firebase.analytics.** { *; }
+-keep class com.google.android.gms.measurement.internal.** { *; }
+-dontwarn com.google.android.gms.measurement.internal.**

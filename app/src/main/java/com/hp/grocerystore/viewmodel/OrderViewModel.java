@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.hp.grocerystore.application.GRCApplication;
+import com.hp.grocerystore.model.order.CheckoutRequest;
 import com.hp.grocerystore.model.order.Order;
 import com.hp.grocerystore.model.product.ProductOrder;
 import com.hp.grocerystore.network.api.OrderApi;
@@ -33,10 +34,12 @@ public class OrderViewModel extends ViewModel {
         return repository.getProductLiveData(orderId);
     }
 
-//    public void fetchOrdersByStatus(int status) {
-//        repository.fetchOrdersByStatus(status);
-//    }
-
+    public LiveData<Resource<Void>> getCheckoutResult() {
+        return repository.getCheckoutResult();
+    }
+    public void checkout(CheckoutRequest request) {
+        repository.checkoutOrder(request);
+    }
     public LiveData<Resource<Order>> updateOrderStatus(int orderId, int status) {
         return repository.updateOrderStatus(orderId, status);
     }

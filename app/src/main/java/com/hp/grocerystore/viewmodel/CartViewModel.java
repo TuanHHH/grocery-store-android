@@ -54,29 +54,4 @@ public class CartViewModel extends ViewModel {
         return repository.addOrUpdateCart(new AddToCartRequest(productId, quantity));
     }
 
-    // LiveData để quan sát kết quả checkout từ Activity
-//    public LiveData<Resource<Void>> getCheckoutResult() {
-//        return checkoutResult;
-//    }
-//
-//    public void checkout(CheckoutRequest request) {
-//        // Gọi hàm checkout từ repository và post giá trị vào LiveData
-//        repository.checkoutOrder(request).observeForever(checkoutResult::setValue);
-//    }
-
-    public LiveData<Resource<Void>> getCheckoutResult() {
-        return repository.getCheckoutResult();
-    }
-
-    public void checkout(CheckoutRequest request) {
-        repository.checkoutOrder(request);
-    }
-//    public LiveData<Resource<String>> createVnPayPayment(int amount, String bankCode) {
-//        return repository.createVnPayPayment(amount, bankCode);
-//    }
-//    public LiveData<Resource<String>> getVnPayBaseUrl() {
-//        return repository.getVnPayBaseUrl();
-//    }
-
-
 }

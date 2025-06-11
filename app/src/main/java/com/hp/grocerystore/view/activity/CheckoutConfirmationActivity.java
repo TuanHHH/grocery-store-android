@@ -4,8 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,6 +18,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.hp.grocerystore.R;
 import com.hp.grocerystore.model.cart.CartItem;
 import com.hp.grocerystore.model.order.CheckoutRequest;
@@ -25,27 +26,28 @@ import com.hp.grocerystore.model.payment.VNPayResponse;
 import com.hp.grocerystore.model.user.User;
 import com.hp.grocerystore.utils.Extensions;
 import com.hp.grocerystore.utils.LoadingUtil;
-import com.hp.grocerystore.utils.Resource;
 import com.hp.grocerystore.utils.UserSession;
 import com.hp.grocerystore.view.adapter.ConfirmationAdapter;
-import com.hp.grocerystore.viewmodel.CartViewModel;
+import com.hp.grocerystore.viewmodel.OrderViewModel;
 import com.hp.grocerystore.viewmodel.VNPayViewModel;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CheckoutConfirmationActivity extends AppCompatActivity {
-    private TextView textAddress, textPhone, textPaymentMethod, textTotalPrice,text_name;
+    private TextView  textTotalPrice,textName;
+    private EditText editAddress,textPhone;
     private RecyclerView recyclerViewItems;
     private Button buttonConfirm, buttonVNPay;
     private ImageButton buttonBack;
     private List<CartItem> selectedItems;
     private double totalPrice;
     private String address, phone, paymentMethod;
-    private CartViewModel cartViewModel;
+    private OrderViewModel orderViewModel;
     private VNPayViewModel vnPayViewModel;
     private static final int VNPAY_REQUEST_CODE = 1001;
     User user = UserSession.getInstance().getUser();
@@ -69,10 +71,9 @@ public class CheckoutConfirmationActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        textAddress = findViewById(R.id.text_address);
+        editAddress = findViewById(R.id.edit_text_address);
         textPhone = findViewById(R.id.text_phone);
-//        textPaymentMethod = findViewById(R.id.text_payment_method);
-        text_name = findViewById(R.id.text_name);
+        textName = findViewById(R.id.text_name);
         textTotalPrice = findViewById(R.id.text_total_price);
         recyclerViewItems = findViewById(R.id.recycler_view_items);
         buttonConfirm = findViewById(R.id.button_confirm);
@@ -81,17 +82,15 @@ public class CheckoutConfirmationActivity extends AppCompatActivity {
     }
 
     private void setupViewModel() {
-        cartViewModel = new ViewModelProvider(this).get(CartViewModel.class);
+        orderViewModel = new ViewModelProvider(this).get(OrderViewModel.class);
         vnPayViewModel = new ViewModelProvider(this).get(VNPayViewModel.class);
     }
 
     private void retrieveData() {
-        // Lấy dữ liệu từ Intent
-        selectedItems = getIntent().getParcelableArrayListExtra("selectedItems");
+//        selectedItems = getIntent().getParcelableArrayListExtra("selectedItems");
+        selectedItems = (ArrayList<CartItem>) getIntent().getSerializableExtra("selectedItems");
+//        intent.putExtra("selectedItems", (Serializable) selectedCartItems);
         totalPrice = getIntent().getDoubleExtra("totalPrice", 0.0);
-//        address = getIntent().getStringExtra("address");
-//        phone = getIntent().getStringExtra("phone");
-//        paymentMethod = getIntent().getStringExtra("paymentMethod");
     }
 
     private void setupRecyclerView() {
@@ -101,38 +100,61 @@ public class CheckoutConfirmationActivity extends AppCompatActivity {
     }
 
     private void displayOrderDetails() {
-//        textAddress.setText("Địa chỉ: " + (address != null ? address : "N/A"));
-//        textPhone.setText("Số điện thoại: " + (phone != null ? phone : "N/A"));
-        textAddress.setText("Địa chỉ: " + user.getAddress());
-        textPhone.setText("Số điện thoại: " + user.getPhone());
-        text_name.setText("Tên: " + user.getName());
-//        textPaymentMethod.setText("Phương thức thanh toán: " + (paymentMethod != null ? paymentMethod : "N/A"));
+        editAddress.setText(user.getAddress());
+        textPhone.setText(user.getPhone());
+        textName.setText(user.getName());
         textTotalPrice.setText("Tổng cộng: " + Extensions.formatCurrency(totalPrice));
     }
 
     private void setupListeners() {
         buttonBack.setOnClickListener(v -> finish());
-
         buttonConfirm.setOnClickListener(v -> processCheckout());
-
         buttonVNPay.setOnClickListener(v -> processVNPayPayment());
+    }
+    private boolean checkCondition() {
+        String address = editAddress.getText().toString().trim();
+        String phone = textPhone.getText().toString().trim();
+        if (totalPrice <= 0) {
+            Toast.makeText(this, "Số tiền không hợp lệ", Toast.LENGTH_LONG).show();
+            return false;
+        }
+        Log.d("CheckoutConfirmation", "Total Price: " + totalPrice);
+
+        if (address.isEmpty()) {
+            Toast.makeText(this, "Vui lòng nhập địa chỉ", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (phone.length() < 9) {
+            Toast.makeText(this, "Số điện thoại phải có ít nhất 9 ký tự", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (!phone.matches("^\\+?[0-9]+$")) {
+            Toast.makeText(this, "Số điện thoại chỉ được chứa số", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 
     private void processCheckout() {
+        if (!checkCondition()) {
+            return;
+        }
+
         CheckoutRequest request = new CheckoutRequest();
-        request.setAddress(address);
-        request.setPhone(phone);
-        request.setPaymentMethod(paymentMethod);
+        request.setAddress(editAddress.getText().toString());
+        request.setPhone(textPhone.getText().toString());
+        request.setPaymentMethod("COD");
         request.setTotalPrice((int) totalPrice);
         request.setItems(selectedItems);
 
-        // Gọi ViewModel để thực hiện checkout
-        cartViewModel.checkout(request);
+        orderViewModel.checkout(request);
         observeCheckoutResult();
     }
 
     private void observeCheckoutResult() {
-        cartViewModel.getCheckoutResult().observe(this, result -> {
+        orderViewModel.getCheckoutResult().observe(this, result -> {
             switch (result.status) {
                 case LOADING:
                     LoadingUtil.showLoading(findViewById(R.id.loading_overlay), findViewById(R.id.progress_bar));
@@ -140,7 +162,6 @@ public class CheckoutConfirmationActivity extends AppCompatActivity {
                 case SUCCESS:
                     LoadingUtil.hideLoading(findViewById(R.id.loading_overlay), findViewById(R.id.progress_bar));
                     Toast.makeText(this, "Đặt hàng thành công!", Toast.LENGTH_SHORT).show();
-                    cartViewModel.refresh();
                     Intent intent = new Intent(this, MainActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
@@ -156,12 +177,11 @@ public class CheckoutConfirmationActivity extends AppCompatActivity {
     }
 
     private void processVNPayPayment() {
-        Log.d("CheckoutConfirmation", "Total Price: " + totalPrice);
-        if (totalPrice <= 0) {
-            Toast.makeText(this, "Số tiền không hợp lệ", Toast.LENGTH_LONG).show();
+        if (!checkCondition()) {
             return;
         }
-
+        address = editAddress.getText().toString();
+        phone = textPhone.getText().toString();
         // Tạo JSON đơn hàng
         JSONObject orderJson = new JSONObject();
         try {

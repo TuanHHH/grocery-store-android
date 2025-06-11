@@ -87,25 +87,25 @@ public class VNPayRepository {
         });
     }
 
-    public void handlePaymentCallback(String responseCode, String txnRef, String amount,
-                                      String orderInfo, String bankCode, String transactionNo,
-                                      String payDate, String secureHash) {
-        paymentCallbackLiveData.setValue(Resource.loading());
-        vnPayApi.paymentCallback(responseCode, txnRef, amount, orderInfo, bankCode,
-                transactionNo, payDate, secureHash).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                if (response.isSuccessful()) {
-                    paymentCallbackLiveData.setValue(Resource.success(null));
-                } else {
-                    paymentCallbackLiveData.setValue(Resource.error("Payment callback failed"));
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                paymentCallbackLiveData.setValue(Resource.error(t.getMessage()));
-            }
-        });
-    }
+//    public void handlePaymentCallback(String responseCode, String txnRef, String amount,
+//                                      String orderInfo, String bankCode, String transactionNo,
+//                                      String payDate, String secureHash) {
+//        paymentCallbackLiveData.setValue(Resource.loading());
+//        vnPayApi.paymentCallback(responseCode, txnRef, amount, orderInfo, bankCode,
+//                transactionNo, payDate, secureHash).enqueue(new Callback<Void>() {
+//            @Override
+//            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+//                if (response.isSuccessful()) {
+//                    paymentCallbackLiveData.setValue(Resource.success(null));
+//                } else {
+//                    paymentCallbackLiveData.setValue(Resource.error("Payment callback failed"));
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+//                paymentCallbackLiveData.setValue(Resource.error(t.getMessage()));
+//            }
+//        });
+//    }
 }

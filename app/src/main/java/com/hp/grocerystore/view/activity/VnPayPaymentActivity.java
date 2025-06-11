@@ -41,30 +41,58 @@ public class VnPayPaymentActivity extends AppCompatActivity {
         }
     }
 
-    private class VNPayWebViewClient extends WebViewClient {
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            Log.d("VnPayPaymentActivity", "Redirect URL: " + url);
-            if (url.startsWith(RETURN_URL)) {
-                Intent resultIntent = new Intent();
-                String responseCode = parseResponseCode(url);
-                resultIntent.putExtra("vnp_ResponseCode", responseCode);
-                setResult(RESULT_OK, resultIntent);
-                finish();
-                return true;
-            }
-            return false;
+private class VNPayWebViewClient extends WebViewClient {
+    @Override
+    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        Log.d("VnPayPaymentActivity", "Redirect URL: " + url);
+
+        if (url.startsWith(RETURN_URL)) {
+            String responseCode = parseResponseCode(url);
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("vnp_ResponseCode", responseCode);
+            setResult(RESULT_OK, resultIntent);
+            finish();
+            return true;
         }
 
-        private String parseResponseCode(String url) {
-            try {
-                Uri uri = Uri.parse(url);
-                String responseCode = uri.getQueryParameter("vnp_ResponseCode");
-                return responseCode != null ? responseCode : "99";
-            } catch (Exception e) {
-                Log.e("VnPayPaymentActivity", "Error parsing response code", e);
-                return "99";
-            }
+        if (url.contains("success")) {
+            Log.d("VnPayPaymentActivity", "Payment successful - blocking URL load");
+            navigateToMainWithResult(true, "Thanh toán thành công");
+            return true;
+        }
+
+        if (url.contains("failure")) {
+            Log.d("VnPayPaymentActivity", "Payment failed - blocking URL load");
+            navigateToMainWithResult(false, "Thanh toán thất bại");
+            return true;
+        }
+
+        return false;
+    }
+
+
+    private void navigateToMainWithResult(boolean isSuccess, String message) {
+        Intent intent = new Intent(VnPayPaymentActivity.this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("payment_result", isSuccess);
+        intent.putExtra("payment_message", message);
+
+        startActivity(intent);
+        finish();
+    }
+
+    private String parseResponseCode(String url) {
+        try {
+            Uri uri = Uri.parse(url);
+            String responseCode = uri.getQueryParameter("vnp_ResponseCode");
+            return responseCode != null ? responseCode : "99";
+        } catch (Exception e) {
+            Log.e("VnPayPaymentActivity", "Error parsing response code", e);
+            return "99";
         }
     }
+}
+
+
+
 }

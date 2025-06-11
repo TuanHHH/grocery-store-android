@@ -57,7 +57,13 @@ public class OrderActivity extends AppCompatActivity {
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.order), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            int originalPadding = (int) (16 * getResources().getDisplayMetrics().density);
+            v.setPadding(
+                    Math.max(systemBars.left, originalPadding),
+                    Math.max(systemBars.top, originalPadding),
+                    Math.max(systemBars.right, originalPadding),
+                    Math.max(systemBars.bottom, originalPadding)
+            );
             return insets;
         });
 

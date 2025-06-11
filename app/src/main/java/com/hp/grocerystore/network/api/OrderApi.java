@@ -1,6 +1,7 @@
 package com.hp.grocerystore.network.api;
 import com.hp.grocerystore.model.base.ApiResponse;
 import com.hp.grocerystore.model.base.PaginationResponse;
+import com.hp.grocerystore.model.order.CheckoutRequest;
 import com.hp.grocerystore.model.order.Order;
 import com.hp.grocerystore.model.order.StatusUpdateRequest;
 import com.hp.grocerystore.model.product.ProductOrder;
@@ -24,7 +25,6 @@ public interface OrderApi {
             @Query("page") int page,
             @Query("size") int size
     );
-    // Lấy chi tiết đơn hàng theo ID
 
     @GET("orders/{id}/info")
     Call<ApiResponse<Order>> getOrderInfo(@Path("id") int orderId);
@@ -46,5 +46,7 @@ public interface OrderApi {
             @Path("id") int orderId,
             @Body StatusUpdateRequest statusUpdate
     );
+    @POST("orders/checkout")
+    Call<ApiResponse<Void>> checkoutOrder(@Body CheckoutRequest request);
 }
 
