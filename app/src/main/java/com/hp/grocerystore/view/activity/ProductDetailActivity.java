@@ -258,14 +258,22 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         if (UserSession.getInstance().isLoggedIn() && AuthPreferenceManager.getInstance(GRCApplication.getAppContext()).isUserLoggedIn()) {
             viewModel.getWishlistStatus(product.getId()).observe(this, resource -> {
-                if (resource.status == Resource.Status.LOADING) {
-                    // pass
-                } else if (resource.status == Resource.Status.SUCCESS) {
-                    isWishlisted = resource.data.getWishlisted();
-                    updateWishlistUI(wishlistBtn);
-                } else {
-                    Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                switch (resource.status) {
+                    case LOADING:
+                        // pass
+                        break;
+
+                    case SUCCESS:
+                        isWishlisted = resource.data.getWishlisted();
+                        updateWishlistUI(wishlistBtn);
+                        break;
+
+                    case ERROR:
+                    default:
+                        Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                        break;
                 }
+
             });
         } else {
             isWishlisted = false;
@@ -294,28 +302,43 @@ public class ProductDetailActivity extends AppCompatActivity {
         if (isWishlisted){
             wishlistViewModel.deleteWishlist(currentProduct.getId()).observe(this, resource ->{
                 wishlistBtn.setEnabled(true);
-                if (resource.status == Resource.Status.LOADING) {
-                    // pass
-                } else if (resource.status == Resource.Status.SUCCESS) {
-                    isWishlisted = false;
-                    updateWishlistUI(wishlistBtn);
-                    Toast.makeText(this, "Đã xóa khỏi danh sách yêu thích", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
+                switch (resource.status) {
+                    case LOADING:
+                        // pass
+                        break;
+
+                    case SUCCESS:
+                        isWishlisted = false;
+                        updateWishlistUI(wishlistBtn);
+                        Toast.makeText(this, "Đã xóa khỏi danh sách yêu thích", Toast.LENGTH_SHORT).show();
+                        break;
+
+                    case ERROR:
+                    default:
+                        Toast.makeText(this, "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
+                        break;
                 }
+
             });
         }
         else {
             wishlistViewModel.addWishlist(currentProduct.getId()).observe(this, resource ->{
                 wishlistBtn.setEnabled(true);
-                if (resource.status == Resource.Status.LOADING) {
-                    // pass
-                } else if (resource.status == Resource.Status.SUCCESS) {
-                    isWishlisted = true;
-                    updateWishlistUI(wishlistBtn);
-                    Toast.makeText(this, "Đã thêm vào danh sách yêu thích", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
+                switch (resource.status) {
+                    case LOADING:
+                        // pass
+                        break;
+
+                    case SUCCESS:
+                        isWishlisted = true;
+                        updateWishlistUI(wishlistBtn);
+                        Toast.makeText(this, "Đã thêm vào danh sách yêu thích", Toast.LENGTH_SHORT).show();
+                        break;
+
+                    case ERROR:
+                    default:
+                        Toast.makeText(this, "Lỗi: " + resource.message, Toast.LENGTH_SHORT).show();
+                        break;
                 }
             });
         }
@@ -355,16 +378,24 @@ public class ProductDetailActivity extends AppCompatActivity {
         confirmBtn.setOnClickListener(v -> {
             int q = Integer.parseInt(quantityView.getText().toString());
             cartViewModel.addOrUpdateCart(currentProduct.getId(), q).observe(this, resource -> {
-                if (resource.status == Resource.Status.LOADING) {
-                    LoadingUtil.showLoading(loadingOverlay, progressBar);
-                } else if (resource.status == Resource.Status.SUCCESS) {
-                    LoadingUtil.hideLoading(loadingOverlay, progressBar);
-                    Toast.makeText(this, "Thêm giỏ hàng thành công", Toast.LENGTH_SHORT).show();
-                    dialog.dismiss();
-                } else {
-                    LoadingUtil.hideLoading(loadingOverlay, progressBar);
-                    Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                switch (resource.status) {
+                    case LOADING:
+                        LoadingUtil.showLoading(loadingOverlay, progressBar);
+                        break;
+
+                    case SUCCESS:
+                        LoadingUtil.hideLoading(loadingOverlay, progressBar);
+                        Toast.makeText(this, "Thêm vào giỏ hàng thành công", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                        break;
+
+                    case ERROR:
+                    default:
+                        LoadingUtil.hideLoading(loadingOverlay, progressBar);
+                        Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                        break;
                 }
+
             });
         });
 
@@ -399,29 +430,37 @@ public class ProductDetailActivity extends AppCompatActivity {
                         rating,
                         comment
                 ).observe(this, resource -> {
-                    if (resource.status == Resource.Status.LOADING) {
-                        LoadingUtil.showLoading(loadingOverlay, progressBar);
-                    } else if (resource.status == Resource.Status.SUCCESS) {
-                        Feedback fb = resource.data;
-                        int existingIndex = IntStream.range(0, feedbackList.size())
-                                .filter(i -> feedbackList.get(i).getId() == fb.getId())
-                                .findFirst()
-                                .orElse(-1);
-                        if (existingIndex >= 0) {
-                            feedbackList.set(existingIndex, fb);
-                            feedbackAdapter.notifyItemChanged(existingIndex);
-                        } else {
-                            feedbackList.add(0, fb);
-                            feedbackAdapter.notifyItemInserted(0);
-                            recyclerFeedback.scrollToPosition(0);
-                        }
-                        LoadingUtil.hideLoading(loadingOverlay, progressBar);
-                        Toast.makeText(this, "Đánh giá thành công", Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
-                    } else {
-                        LoadingUtil.hideLoading(loadingOverlay, progressBar);
-                        Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                    switch (resource.status) {
+                        case LOADING:
+                            LoadingUtil.showLoading(loadingOverlay, progressBar);
+                            break;
+
+                        case SUCCESS:
+                            Feedback fb = resource.data;
+                            int existingIndex = IntStream.range(0, feedbackList.size())
+                                    .filter(i -> feedbackList.get(i).getId() == fb.getId())
+                                    .findFirst()
+                                    .orElse(-1);
+                            if (existingIndex >= 0) {
+                                feedbackList.set(existingIndex, fb);
+                                feedbackAdapter.notifyItemChanged(existingIndex);
+                            } else {
+                                feedbackList.add(0, fb);
+                                feedbackAdapter.notifyItemInserted(0);
+                                recyclerFeedback.scrollToPosition(0);
+                            }
+                            LoadingUtil.hideLoading(loadingOverlay, progressBar);
+                            Toast.makeText(this, "Đánh giá thành công", Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                            break;
+
+                        case ERROR:
+                        default:
+                            LoadingUtil.hideLoading(loadingOverlay, progressBar);
+                            Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
+                            break;
                     }
+
                 });
             }
         });
