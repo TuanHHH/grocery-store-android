@@ -13,10 +13,11 @@ import com.hp.grocerystore.model.base.PaginationResponse;
 import com.hp.grocerystore.model.cart.AddCartResponse;
 import com.hp.grocerystore.model.cart.AddToCartRequest;
 import com.hp.grocerystore.model.cart.CartItem;
+import com.hp.grocerystore.model.payment.VNPayResponse;
 import com.hp.grocerystore.network.api.AuthApi;
 import com.hp.grocerystore.network.api.CartApi;
 import com.hp.grocerystore.utils.Resource;
-
+import com.hp.grocerystore.model.order.CheckoutRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +31,9 @@ public class CartRepository {
     private final MutableLiveData<Resource<List<CartItem>>> cartItemsLiveData;
     private final MutableLiveData<Resource<Boolean>> selectAllLiveData;
     private final MutableLiveData<Resource<Integer>> totalItemsLiveData;
+    private final MutableLiveData<Resource<Void>> checkoutResult = new MutableLiveData<>();
+    private final MutableLiveData<Resource<String>> vnpayPaymentUrlLiveData = new MutableLiveData<>();
+
 
     private int currentPage;
     private boolean isLoading;
@@ -215,13 +219,11 @@ public class CartRepository {
                     if (apiResponse.getStatusCode() == 201) {
                         addCartLiveData.setValue(Resource.success(null));
                     } else {
-                        Log.d("API", "call cart error");
                         addCartLiveData.setValue(Resource.error("Thêm vào giỏ hàng thất bại"));
                     }
                 } else {
                     String errorMessage = "Thêm vào giỏ hàng thất bại";
                     try {
-                        Log.d("API", "call cart error");
                         if (response.errorBody() != null) {
                             Gson gson = new Gson();
                             ApiResponse<?> errorResponse = gson.fromJson(response.errorBody().charStream(), ApiResponse.class);
@@ -238,7 +240,6 @@ public class CartRepository {
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<AddCartResponse>> call, @NonNull Throwable throwable) {
-                Log.d("API", "call cart error");
                 addCartLiveData.setValue(Resource.error(throwable.getMessage()));
             }
         });

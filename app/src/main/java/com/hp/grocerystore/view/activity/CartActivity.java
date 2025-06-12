@@ -15,7 +15,6 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.TextView;
 import android.widget.CheckBox;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -24,10 +23,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.hp.grocerystore.application.GRCApplication;
+import com.hp.grocerystore.model.user.User;
 import com.hp.grocerystore.utils.Extensions;
 import com.hp.grocerystore.utils.LoadingUtil;
-import com.hp.grocerystore.utils.AuthPreferenceManager;
 import com.hp.grocerystore.utils.Resource;
 import com.hp.grocerystore.utils.UserSession;
 import com.hp.grocerystore.view.adapter.CartAdapter;
@@ -35,6 +33,7 @@ import com.hp.grocerystore.model.cart.CartItem;
 import com.hp.grocerystore.R;
 import com.hp.grocerystore.viewmodel.CartViewModel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +50,8 @@ public class CartActivity extends AppCompatActivity {
     private FrameLayout loadingOverlay;
     private ProgressBar progressBar;
     private ConstraintLayout cartFooter;
+    User user = UserSession.getInstance().getUser();
+    private static final int CHECKOUT_REQUEST_CODE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,8 +100,7 @@ public class CartActivity extends AppCompatActivity {
             textEmptyCart.setVisibility(View.GONE);
             cartFooter.setVisibility(View.GONE);
             buttonLoginRequired.setOnClickListener(this::navigateToLogin);
-        }
-        else {
+        } else {
             cartItems = new ArrayList<>();
             setupListView();
             setupViewModel();
@@ -217,26 +217,46 @@ public class CartActivity extends AppCompatActivity {
     public void processCheckout(View view) {
         double total = 0.0;
         int selectedCount = 0;
-        StringBuilder selectedItems = new StringBuilder();
-        
+        StringBuilder selectedItemsLog = new StringBuilder();
+        ArrayList<CartItem> selectedCartItems = new ArrayList<>();
+
         for (CartItem item : cartItems) {
             if (item.isSelected() && item.getStock() > 0) {
                 total += item.getPrice() * item.getQuantity();
                 selectedCount++;
-                selectedItems.append(String.format("\n- %s: %d x %s = %s", 
-                    item.getProductName(),
-                    item.getQuantity(),
-                    Extensions.formatCurrency(item.getPrice()),
-                    Extensions.formatCurrency(item.getPrice() * item.getQuantity())
+                selectedItemsLog.append(String.format("\n- %s: %d x %s = %s",
+                        item.getProductName(),
+                        item.getQuantity(),
+                        Extensions.formatCurrency(item.getPrice()),
+                        Extensions.formatCurrency(item.getPrice() * item.getQuantity())
                 ));
+                selectedCartItems.add(item);
             }
         }
-        
-        String message = String.format("Thanh toán %d sản phẩm:%s\nTổng cộng: %s", 
-            selectedCount, selectedItems.toString(), Extensions.formatCurrency(total));
-            
+
+        String message = String.format("Thanh toán %d sản phẩm:%s\nTổng cộng: %s",
+                selectedCount, selectedItemsLog, Extensions.formatCurrency(total));
         Log.d("CartActivity", "Chi tiết thanh toán: " + message);
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+
+        if (cartItems == null || cartItems.isEmpty()) {
+            Toast.makeText(this, "Không có sản phẩm hợp lệ để đặt hàng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (selectedCartItems.isEmpty()) {
+            Toast.makeText(this, "Vui lòng chọn ít nhất một sản phẩm để đặt hàng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (user.getName().isEmpty() || user.getPhone().isEmpty() || user.getAddress().isEmpty()) {
+            Toast.makeText(this, "Vui lòng cập nhật thông tin cá nhân trước khi đặt hàng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new Intent(this, CheckoutConfirmationActivity.class);
+        intent.putExtra("selectedItems", (Serializable) selectedCartItems);
+        intent.putExtra("totalPrice", total);
+        startActivityForResult(intent, CHECKOUT_REQUEST_CODE);
     }
 
     public void navigateToLogin(View view) {
@@ -249,30 +269,20 @@ public class CartActivity extends AppCompatActivity {
     private void updateHeader(int totalItems) {
         TextView textTotalProducts = findViewById(R.id.text_total_products);
         textTotalProducts.setText(String.format("Giỏ hàng (%d)", totalItems));
-        Log.d("CartActivity", "Tổng số sản phẩm từ API: " + totalItems);
     }
 
+    @SuppressLint("DefaultLocale")
     private void updateFooter() {
         TextView textTotalPrice = findViewById(R.id.text_total_price);
         double total = 0.0;
         int selectedCount = 0;
-        
+
         for (CartItem item : cartItems) {
             if (item.isSelected() && item.getStock() > 0) {
                 total += item.getPrice() * item.getQuantity();
                 selectedCount++;
-                Log.d("CartActivity", String.format("Sản phẩm: %s, Số lượng: %d, Giá: %s, Tổng: %s", 
-                    item.getProductName(),
-                    item.getQuantity(),
-                    Extensions.formatCurrency(item.getPrice()),
-                    Extensions.formatCurrency(item.getPrice() * item.getQuantity())
-                ));
             }
         }
-        
-        Log.d("CartActivity", String.format("Tổng số sản phẩm đã chọn: %d, Tổng tiền: %s", 
-            selectedCount, Extensions.formatCurrency(total)));
-            
         textTotalPrice.setText(String.format("Tổng: %s", Extensions.formatCurrency(total)));
     }
 
@@ -283,7 +293,6 @@ public class CartActivity extends AppCompatActivity {
             return;
         }
 
-        // Kiểm tra xem tất cả các sản phẩm còn hàng có được chọn không
         boolean allInStockSelected = true;
         boolean hasInStockItems = false;
         int inStockCount = 0;
@@ -300,11 +309,7 @@ public class CartActivity extends AppCompatActivity {
                 }
             }
         }
-
-        Log.d("CartActivity", String.format("Tổng số sản phẩm còn hàng: %d, Đã chọn: %d", 
-            inStockCount, selectedInStockCount));
         checkboxSelectAll.setChecked(hasInStockItems && allInStockSelected);
-        Log.d("CartActivity", "Trạng thái chọn tất cả: " + (hasInStockItems && allInStockSelected));
     }
 
     private void setupSelectAllCheckbox() {
@@ -318,5 +323,13 @@ public class CartActivity extends AppCompatActivity {
             boolean isChecked = selectAllCheckbox.isChecked();
             viewModel.selectAll(isChecked);
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CHECKOUT_REQUEST_CODE && resultCode == RESULT_OK) {
+            viewModel.refresh();
+        }
     }
 }

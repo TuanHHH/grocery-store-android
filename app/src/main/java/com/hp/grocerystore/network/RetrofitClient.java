@@ -9,6 +9,7 @@ import com.hp.grocerystore.network.api.FeedbackApi;
 import com.hp.grocerystore.network.api.OrderApi;
 import com.hp.grocerystore.network.api.ProductApi;
 import com.hp.grocerystore.network.api.UserApi;
+import com.hp.grocerystore.network.api.VNPayApi;
 import com.hp.grocerystore.network.api.WishlistApi;
 import com.hp.grocerystore.network.authenticator.TokenAuthenticator;
 import com.hp.grocerystore.network.interceptor.AuthInterceptor;
@@ -23,8 +24,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class RetrofitClient {
-
-    // Khởi tạo Retrofit một lần duy nhất
     private static Retrofit retrofit = null;
 
     private static Retrofit createRetrofit() {
@@ -59,7 +58,6 @@ public class RetrofitClient {
         return retrofit;
     }
 
-    // Các API phương thức không còn cần Context nữa
     public static ProductApi getProductApi() {
         return createRetrofit().create(ProductApi.class);
     }
@@ -87,7 +85,13 @@ public class RetrofitClient {
     public static UserApi getUserApi() {
         return createRetrofit().create(UserApi.class);
     }
+
     public static OrderApi getOrderApi() {
         return createRetrofit().create(OrderApi.class);
     }
+
+    public static VNPayApi getVNPayApi() {
+        return createRetrofit().create(VNPayApi.class);
+    }
+
 }

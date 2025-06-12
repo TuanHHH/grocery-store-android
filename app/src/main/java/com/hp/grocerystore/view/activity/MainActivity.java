@@ -25,6 +25,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 
 import android.view.View;
+import android.widget.Toast;
 
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -79,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
         mViewPager.setAdapter(viewpagerAdapter);
         mViewPager.setCurrentItem(0);
-
+        handlePaymentResult();
         mViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
@@ -240,5 +241,28 @@ public class MainActivity extends AppCompatActivity {
     public void redirectToCart(View view) {
         Intent intent = new Intent(MainActivity.this, CartActivity.class);
         startActivity(intent);
+    }
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handlePaymentResult();
+    }
+
+    private void handlePaymentResult() {
+        Intent intent = getIntent();
+        if (intent.hasExtra("payment_result")) {
+            boolean isSuccess = intent.getBooleanExtra("payment_result", false);
+            String message = intent.getStringExtra("payment_message");
+
+            if (message != null) {
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            }
+
+            // Xóa extras để tránh hiển thị lại khi rotate screen
+            intent.removeExtra("payment_result");
+            intent.removeExtra("payment_message");
+
+        }
     }
 }

@@ -1,7 +1,5 @@
 package com.hp.grocerystore.repository;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -10,7 +8,6 @@ import com.hp.grocerystore.model.base.ApiResponse;
 import com.hp.grocerystore.network.api.CategoryApi;
 import com.hp.grocerystore.model.category.Category;
 import com.hp.grocerystore.model.base.PaginationResponse;
-import com.hp.grocerystore.network.api.UserApi;
 import com.hp.grocerystore.utils.Resource;
 
 import java.util.List;

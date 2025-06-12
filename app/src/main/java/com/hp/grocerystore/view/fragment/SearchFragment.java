@@ -72,9 +72,9 @@ public class SearchFragment extends Fragment {
     private TextView[] filters;
     private ProgressBar progressBarSearchView, progressBarLoadmoreView;
     // Filter Args
-    private long selectedCategoryId = -1; // Không lọc
+    private long selectedCategoryId = -1;
     private String selectedCategorySlug = "";
-    private String selectedSort = "";    // Không sắp xếp
+    private String selectedSort = "";
     private int minPrice = 0;
     private int maxPrice = 500000;
     private float minRating = 0;

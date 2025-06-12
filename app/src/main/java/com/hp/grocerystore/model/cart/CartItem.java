@@ -1,13 +1,22 @@
 package com.hp.grocerystore.model.cart;
 
-public class CartItem {
+import androidx.annotation.Keep;
+
+import java.io.Serializable;
+
+@Keep
+public class CartItem implements Serializable {
     private long id;
     private String productName;
     private String imageUrl;
     private int stock;
     private int quantity;
     private double price;
-    private boolean selected = false;
+    private boolean selected;
+
+    public CartItem() {
+        this.selected = false;
+    }
 
     public CartItem(long id, String productName, String imageUrl, int stock, int quantity, double price) {
         this.id = id;
@@ -16,6 +25,7 @@ public class CartItem {
         this.stock = stock;
         this.quantity = quantity;
         this.price = price;
+        this.selected = false;
     }
 
     public long getId() {

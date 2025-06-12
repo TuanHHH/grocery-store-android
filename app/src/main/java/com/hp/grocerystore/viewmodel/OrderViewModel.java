@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.hp.grocerystore.application.GRCApplication;
+import com.hp.grocerystore.model.order.CheckoutRequest;
 import com.hp.grocerystore.model.order.Order;
 import com.hp.grocerystore.model.product.ProductOrder;
 import com.hp.grocerystore.network.api.OrderApi;
@@ -25,10 +26,6 @@ public class OrderViewModel extends ViewModel {
         return repository.getOrdersByStatus(status);
     }
 
-    public LiveData<Resource<Integer>> getTotalOrders() {
-        return repository.getTotalOrders();
-    }
-
     public LiveData<Resource<Order>> getOrderById(int orderId) {
         return repository.getOrderById(orderId);
     }
@@ -37,19 +34,16 @@ public class OrderViewModel extends ViewModel {
         return repository.getProductLiveData(orderId);
     }
 
-    public void loadMoreOrders() {
-        repository.loadMoreOrders();
+    public LiveData<Resource<Void>> getCheckoutResult() {
+        return repository.getCheckoutResult();
     }
-
-    public void refresh() {
-        repository.refreshOrders();
+    public void checkout(CheckoutRequest request) {
+        repository.checkoutOrder(request);
     }
-
-    public void loadMoreOrdersByStatus(int status) {
-        repository.loadMoreOrdersByStatus(status);
+    public LiveData<Resource<Order>> updateOrderStatus(int orderId, int status) {
+        return repository.updateOrderStatus(orderId, status);
     }
-
-    public void fetchOrdersByStatus(int status) {
-        repository.fetchOrdersByStatus(status);
+    public void refreshOrdersByStatus(int status) {
+        repository.refreshOrdersByStatus(status);
     }
 }

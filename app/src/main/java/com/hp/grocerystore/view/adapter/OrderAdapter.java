@@ -40,11 +40,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     @Override
     public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
         Order order = orders.get(position);
-        holder.orderId.setText("Order #" + order.getId());
-        holder.orderStatus.setText("Status: " + getStatusText(order.getStatus()));
+        holder.orderId.setText("Đơn số #" + order.getId());
+        holder.orderStatus.setText("Trạng thái: " + getStatusText(order.getStatus()));
         holder.orderTotal.setText(Extensions.formatCurrency(order.getTotalPrice()));
 //        holder.orderTotal.setText(String.format("Total: $%.2f", order.getTotalPrice()));
-        holder.orderTime.setText("Ordered: " + formatOrderTime(order.getOrderTime()));
+        holder.orderTime.setText("Đặt lúc: " + formatOrderTime(order.getOrderTime()));
         holder.itemView.setOnClickListener(v -> listener.onOrderClick(order));
     }
 
@@ -64,15 +64,15 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     private String getStatusText(int status) {
         switch (status) {
             case 0:
-                return "Pending";
+                return "Chờ xác nhận";
             case 1:
-                return "In delivery";
+                return "Đang giao";
             case 2:
-                return "Success";
+                return "Thành công";
             case 3:
-                return "Canceled";
+                return "Đã hủy";
             default:
-                return "Unknown";
+                return "Không xác định";
         }
     }
 
