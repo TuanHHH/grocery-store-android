@@ -7,7 +7,6 @@
     android:padding="16dp"
     android:id="@+id/order">
 
-    <!-- Top bar: Back button and Title aligned horizontally -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -26,15 +25,13 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Order List"
+            android:text="Đơn mua"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginStart="12dp" />
     </LinearLayout>
 
 
-
-    <!-- Progress bar centered -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
@@ -43,7 +40,6 @@
         android:visibility="gone"
         android:layout_marginBottom="8dp" />
 
-    <!-- Login required layout -->
     <LinearLayout
         android:id="@+id/login_required"
         android:layout_width="wrap_content"
@@ -71,95 +67,9 @@
             android:visibility="gone" />
     </LinearLayout>
 
-    <!-- Recycler view for order list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/orderRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
 </LinearLayout>
-    <!--<?xml version="1.0" encoding="utf-8"?>-->
-    <!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-    <!--    android:layout_width="match_parent"-->
-    <!--    android:layout_height="match_parent"-->
-    <!--    android:orientation="vertical"-->
-    <!--    android:padding="16dp">-->
-
-    <!--    &lt;!&ndash; Top bar: Back button and Title aligned horizontally &ndash;&gt;-->
-    <!--    <LinearLayout-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:orientation="horizontal"-->
-    <!--        android:gravity="center_vertical"-->
-    <!--        android:layout_marginBottom="12dp">-->
-
-    <!--        <ImageButton-->
-    <!--            android:id="@+id/btnBack"-->
-    <!--            android:layout_width="40dp"-->
-    <!--            android:layout_height="40dp"-->
-    <!--            android:background="?attr/selectableItemBackgroundBorderless"-->
-    <!--            android:src="@drawable/ic_arrow_back"-->
-    <!--            android:contentDescription="Back" />-->
-
-    <!--        <TextView-->
-    <!--            android:layout_width="wrap_content"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:text="Order List"-->
-    <!--            android:textSize="20sp"-->
-    <!--            android:textStyle="bold"-->
-    <!--            android:layout_marginStart="12dp" />-->
-    <!--    </LinearLayout>-->
-
-    <!--    &lt;!&ndash; Progress bar centered &ndash;&gt;-->
-    <!--    <ProgressBar-->
-    <!--        android:id="@+id/progressBar"-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_gravity="center_horizontal"-->
-    <!--        android:visibility="gone"-->
-    <!--        android:layout_marginBottom="8dp" />-->
-
-    <!--    &lt;!&ndash; Recycler view for order list &ndash;&gt;-->
-    <!--    <androidx.recyclerview.widget.RecyclerView-->
-    <!--        android:id="@+id/orderRecyclerView"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="0dp"-->
-    <!--        android:layout_weight="1" />-->
-    <!--</LinearLayout>-->
-
-    <!--<?xml version="1.0" encoding="utf-8"?>-->
-    <!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-    <!--    android:layout_width="match_parent"-->
-    <!--    android:layout_height="match_parent"-->
-    <!--    android:orientation="vertical"-->
-    <!--    android:padding="8dp">-->
-
-    <!--    <ImageButton-->
-    <!--        android:id="@+id/btnBack"-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:background="?attr/selectableItemBackgroundBorderless"-->
-    <!--        android:src="@drawable/ic_arrow_back"-->
-    <!--        android:contentDescription="Back"-->
-    <!--        android:layout_marginBottom="8dp" />-->
-
-    <!--    <TextView-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:padding="8dp"-->
-    <!--        android:text="Order List"-->
-    <!--        android:textSize="20sp"-->
-    <!--        android:textStyle="bold" />-->
-
-    <!--    <ProgressBar-->
-    <!--        android:id="@+id/progressBar"-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_gravity="center"-->
-    <!--        android:visibility="gone" />-->
-
-    <!--    <androidx.recyclerview.widget.RecyclerView-->
-    <!--        android:id="@+id/orderRecyclerView"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="match_parent" />-->
-    <!--</LinearLayout>-->

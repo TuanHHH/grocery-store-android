@@ -8,6 +8,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -57,6 +59,14 @@ public class PersonalActivity extends AppCompatActivity {
     private FrameLayout loadingOverlay;
     private ProgressBar progressBar;
 
+    // Lưu trữ thông tin ban đầu để so sánh
+    private String originalName = "";
+    private String originalEmail = "";
+    private String originalPhone = "";
+    private String originalAddress = "";
+    private String originalAvatarUrl = "";
+    private boolean imageChanged = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,9 +77,21 @@ public class PersonalActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        initViews();
+        setupViewModel();
+        loadUserData();
+        setupImagePicker();
+        setupClickListeners();
+        setupTextWatchers();
+
+        // Ẩn nút submit ban đầu
+        submitButton.setVisibility(View.GONE);
+    }
+
+    private void initViews() {
         loadingOverlay = findViewById(R.id.loading_overlay);
         progressBar = findViewById(R.id.progress_bar);
-        viewModel = new ViewModelProvider(this).get(PersonalViewModel.class);
         profileImage = findViewById(R.id.profileImage);
         nameEdit = findViewById(R.id.name);
         emailEdit = findViewById(R.id.email);
@@ -77,16 +99,29 @@ public class PersonalActivity extends AppCompatActivity {
         addressEdit = findViewById(R.id.address);
         submitButton = findViewById(R.id.submitButton);
         backButton = findViewById(R.id.backButton);
-        User user = UserSession.getInstance().getUser();
+    }
 
+    private void setupViewModel() {
+        viewModel = new ViewModelProvider(this).get(PersonalViewModel.class);
+    }
+
+    private void loadUserData() {
+        User user = UserSession.getInstance().getUser();
         if (user != null) {
-            nameEdit.setText(user.getName());
-            emailEdit.setText(user.getEmail());
-            phoneEdit.setText(user.getPhone());
-            addressEdit.setText(user.getAddress());
-            if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+            originalName = user.getName() != null ? user.getName() : "";
+            originalEmail = user.getEmail() != null ? user.getEmail() : "";
+            originalPhone = user.getPhone() != null ? user.getPhone() : "";
+            originalAddress = user.getAddress() != null ? user.getAddress() : "";
+            originalAvatarUrl = user.getAvatarUrl() != null ? user.getAvatarUrl() : "";
+
+            nameEdit.setText(originalName);
+            emailEdit.setText(originalEmail);
+            phoneEdit.setText(originalPhone);
+            addressEdit.setText(originalAddress);
+
+            if (!originalAvatarUrl.isEmpty()) {
                 Glide.with(this)
-                        .load(user.getAvatarUrl())
+                        .load(originalAvatarUrl)
                         .placeholder(R.drawable.ic_user)
                         .error(R.drawable.ic_user)
                         .circleCrop()
@@ -95,21 +130,64 @@ public class PersonalActivity extends AppCompatActivity {
                 profileImage.setImageResource(R.drawable.ic_user);
             }
         }
+    }
+
+    private void setupImagePicker() {
         pickImageLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         selectedImageUri = result.getData().getData();
+                        imageChanged = true;
                         Glide.with(this)
                                 .load(selectedImageUri)
                                 .circleCrop()
                                 .into(profileImage);
+                        checkForChanges();
                     }
                 });
-        profileImage = findViewById(R.id.profileImage);
+    }
+
+    private void setupClickListeners() {
         profileImage.setOnClickListener(v -> checkAndPickImage());
         submitButton.setOnClickListener(this::handleSubmit);
         backButton.setOnClickListener(v -> finish());
+    }
+
+    private void setupTextWatchers() {
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                checkForChanges();
+            }
+        };
+
+        nameEdit.addTextChangedListener(textWatcher);
+        phoneEdit.addTextChangedListener(textWatcher);
+        addressEdit.addTextChangedListener(textWatcher);
+    }
+
+    private void checkForChanges() {
+        String currentName = nameEdit.getText().toString().trim();
+        String currentPhone = phoneEdit.getText().toString().trim();
+        String currentAddress = addressEdit.getText().toString().trim();
+
+        boolean hasChanges = imageChanged ||
+                !currentName.equals(originalName) ||
+                !currentPhone.equals(originalPhone) ||
+                !currentAddress.equals(originalAddress);
+
+        if (hasChanges) {
+            submitButton.setVisibility(View.VISIBLE);
+        } else {
+            submitButton.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -165,7 +243,7 @@ public class PersonalActivity extends AppCompatActivity {
             return;
         }
 
-        if (selectedImageUri != null) {
+        if (selectedImageUri != null && imageChanged) {
             File file;
             try {
                 file = createTempFileFromUri(selectedImageUri);
@@ -183,11 +261,9 @@ public class PersonalActivity extends AppCompatActivity {
                 MultipartBody.Part filePart = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
 
                 viewModel.uploadFile(filePart).observe(this, resource -> {
-
                     if (resource.status == Resource.Status.SUCCESS && resource.data != null) {
                         String avatarUrl = resource.data.getFileName();
                         updateUser(name, phone, address, avatarUrl);
-
                     } else if (resource.status == Resource.Status.ERROR) {
                         LoadingUtil.hideLoading(loadingOverlay, progressBar);
                         Toast.makeText(this, "Có lỗi khi cập nhật thông tin", Toast.LENGTH_SHORT).show();
@@ -215,6 +291,10 @@ public class PersonalActivity extends AppCompatActivity {
                     UserSession.getInstance().setUser(resource.data);
                     LoadingUtil.hideLoading(loadingOverlay, progressBar);
                     Toast.makeText(this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
+
+                    // Cập nhật lại thông tin gốc sau khi cập nhật thành công
+                    updateOriginalData();
+
                     Intent intent = new Intent();
                     setResult(Activity.RESULT_OK, intent);
                     finish();
@@ -228,6 +308,17 @@ public class PersonalActivity extends AppCompatActivity {
         });
     }
 
+    private void updateOriginalData() {
+        User user = UserSession.getInstance().getUser();
+        if (user != null) {
+            originalName = user.getName() != null ? user.getName() : "";
+            originalPhone = user.getPhone() != null ? user.getPhone() : "";
+            originalAddress = user.getAddress() != null ? user.getAddress() : "";
+            originalAvatarUrl = user.getAvatarUrl() != null ? user.getAvatarUrl() : "";
+            imageChanged = false;
+            submitButton.setVisibility(View.GONE);
+        }
+    }
 
     private File createTempFileFromUri(Uri uri) throws IOException {
         String mimeType = getContentResolver().getType(uri);
@@ -251,7 +342,6 @@ public class PersonalActivity extends AppCompatActivity {
             return null;
         }
 
-        // Tạo tên file với extension phù hợp
         String extension = getAppropriateExtension(mimeType, uri);
         File tempFile = File.createTempFile("upload_", extension, getCacheDir());
 
@@ -316,7 +406,6 @@ public class PersonalActivity extends AppCompatActivity {
             }
         }
 
-        // Fallback: lấy từ tên file
         String fileName = getFileName(uri);
         String extension = getFileExtensionFromFileName(fileName);
         if (isValidImageExtension(extension)) {

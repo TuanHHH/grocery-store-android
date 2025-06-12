@@ -387,6 +387,4 @@ public class ProductDetailActivity extends AppCompatActivity {
     public void navigateBack(View view) {
         finish();
     }
-
-
 }

@@ -27,14 +27,13 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Order Detail"
+            android:text="Chi tiết đơn hàng"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginStart="12dp"
             android:textColor="@android:color/black" />
     </LinearLayout>
 
-    <!-- Progress Bar -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
@@ -42,7 +41,6 @@
         android:layout_gravity="center"
         android:visibility="gone" />
 
-    <!-- Nội dung chính -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -56,12 +54,10 @@
             android:orientation="vertical"
             android:visibility="gone">
 
-            <!-- Card đơn hàng -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                card_view:cardElevation="4dp"
                 card_view:cardCornerRadius="12dp">
 
                 <LinearLayout
@@ -147,11 +143,10 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Danh sách sản phẩm -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Products"
+                android:text="Danh sách sản phẩm"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="8dp"
@@ -162,7 +157,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <!-- Nút hủy đơn hàng -->
             <Button
                 android:id="@+id/btnCancelOrder"
                 android:layout_width="match_parent"
@@ -173,8 +167,7 @@
                 android:backgroundTint="#FF3D00"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
-                android:visibility="gone"
-                android:elevation="4dp" />
+                android:visibility="gone" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

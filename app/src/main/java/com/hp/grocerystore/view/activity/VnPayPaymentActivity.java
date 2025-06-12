@@ -1,5 +1,6 @@
 package com.hp.grocerystore.view.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ public class VnPayPaymentActivity extends AppCompatActivity {
     private static final String RETURN_URL = "http://localhost:8080/api/v2/payment/vn-pay-callback";
 
     @Override
+    @SuppressLint("SetJavaScriptEnabled")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);

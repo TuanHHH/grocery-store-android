@@ -4,10 +4,12 @@
     package="com.hp.grocerystore">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
         tools:ignore="SelectedPhotoAccess" />
 
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
     <application
         android:name=".application.GRCApplication"
         android:allowBackup="true"
@@ -47,41 +49,25 @@
             android:exported="false" />
         <activity
             android:name=".view.activity.MainActivity"
-            android:exported="true">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-        </activity>
+            android:exported="true" />
         <activity
             android:name=".view.activity.FilterActivity"
             android:exported="true" />
         <activity
             android:name=".view.activity.OrderActivity"
-            android:exported="true"
-
-            >
-<!--            android:theme="@style/Theme.AppCompat.Light.NoActionBar"-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
-
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
-        </activity>
+            android:exported="true" />
         <activity
             android:name=".view.activity.CheckoutConfirmationActivity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".view.activity.OrderDetailActivity"
-            android:exported="true"
-            />
+            android:exported="true" />
 
-<!--        android:theme="@style/Theme.AppCompat.Light.NoActionBar"-->
-        <activity android:name=".view.activity.VnPayPaymentActivity"
-            android:exported="true"
-            />
+        <!--        android:theme="@style/Theme.AppCompat.Light.NoActionBar"-->
+        <activity
+            android:name=".view.activity.VnPayPaymentActivity"
+            android:exported="true" />
 
     </application>
 

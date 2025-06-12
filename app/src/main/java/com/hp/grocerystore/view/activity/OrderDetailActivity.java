@@ -1,5 +1,6 @@
 package com.hp.grocerystore.view.activity;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -72,8 +73,6 @@ public class OrderDetailActivity extends AppCompatActivity {
             Toast.makeText(this, "Invalid order ID", Toast.LENGTH_SHORT).show();
             finish();
             return;
-        } else {
-//            Toast.makeText(this, "orderId " + orderId, Toast.LENGTH_SHORT).show();
         }
 
         initViews();
@@ -120,7 +119,6 @@ public class OrderDetailActivity extends AppCompatActivity {
                     if (resource.data != null) {
                         orderContentLayout.setVisibility(View.VISIBLE);
                         bindOrderData(resource.data);
-//                        Toast.makeText(this, "Loaded order successfully", Toast.LENGTH_SHORT).show();
                     } else {
 //                        Toast.makeText(this, "Order data is null", Toast.LENGTH_SHORT).show();
                     }
@@ -146,8 +144,6 @@ public class OrderDetailActivity extends AppCompatActivity {
                     if (productOrders != null && !productOrders.isEmpty()) {
                         productAdapter.updateProductOrders(productOrders);
 //                        Toast.makeText(this, "Loaded " + productOrders.size() + " products", Toast.LENGTH_SHORT).show();
-                    } else {
-//                        Toast.makeText(this, "No products found in this order", Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case ERROR:
@@ -161,6 +157,7 @@ public class OrderDetailActivity extends AppCompatActivity {
         });
     }
 
+    @SuppressLint("SetTextI18n")
     private void bindOrderData(Order order) {
         orderIdText.setText("Đơn hàng #" + order.getId());
         String statusText;
@@ -170,28 +167,23 @@ public class OrderDetailActivity extends AppCompatActivity {
             case 0:
                 statusText = "Chờ xác nhận";
                 btnCancelOrder.setVisibility(View.VISIBLE);
-                deliveryTimeText.setText("Thời gian giao hàng: " + formatOrderTime(order.getDeliveryTime()));
-//                orderStatusText.setTextColor(Color.RED);
+                deliveryTimeText.setText("");
                 break;
             case 1:
                 statusText = "Đang giao";
-                deliveryTimeText.setText("Thời gian giao hàng: " + formatOrderTime(order.getDeliveryTime()));
-//                orderStatusText.setTextColor(Color.BLUE);
+                deliveryTimeText.setText("");
                 break;
             case 2:
                 statusText = "Thành công";
                 deliveryTimeText.setText("Thời gian giao hàng: " + formatOrderTime(order.getDeliveryTime()));
-//                orderStatusText.setTextColor(Color.GREEN);
                 break;
             case 3:
                 statusText = "Đã hủy";
                 deliveryTimeText.setText("Thời gian hủy giao hàng: " + formatOrderTime(order.getDeliveryTime()));
-//                orderStatusText.setTextColor(Color.GRAY);
                 break;
             default:
                 statusText = "Không xác định";
                 deliveryTimeText.setText("Thời gian giao hàng: " + formatOrderTime(order.getDeliveryTime()));
-//                orderStatusText.setTextColor(Color.BLACK);
                 break;
         }
 
@@ -213,6 +205,7 @@ public class OrderDetailActivity extends AppCompatActivity {
             SimpleDateFormat outputFormat = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy", Locale.getDefault());
             outputFormat.setTimeZone(TimeZone.getDefault());
 
+            assert date != null;
             return outputFormat.format(date);
         } catch (Exception e) {
             return orderTime;

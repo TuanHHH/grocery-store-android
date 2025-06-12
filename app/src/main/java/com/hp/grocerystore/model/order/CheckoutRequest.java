@@ -47,17 +47,39 @@ public class CheckoutRequest {
             this.unitPrice = unitPrice;
         }
 
-        public long getProductId() { return productId; }
-        public void setProductId(long productId) { this.productId = productId; }
-        public int getQuantity() { return quantity; }
-        public void setQuantity(int quantity) { this.quantity = quantity; }
-        public String getProductName() { return productName; }
-        public void setProductName(String productName) { this.productName = productName; }
-        public double getUnitPrice() { return unitPrice; }
-        public void setUnitPrice(double unitPrice) { this.unitPrice = unitPrice; }
+        public long getProductId() {
+            return productId;
+        }
+
+        public void setProductId(long productId) {
+            this.productId = productId;
+        }
+
+        public int getQuantity() {
+            return quantity;
+        }
+
+        public void setQuantity(int quantity) {
+            this.quantity = quantity;
+        }
+
+        public String getProductName() {
+            return productName;
+        }
+
+        public void setProductName(String productName) {
+            this.productName = productName;
+        }
+
+        public double getUnitPrice() {
+            return unitPrice;
+        }
+
+        public void setUnitPrice(double unitPrice) {
+            this.unitPrice = unitPrice;
+        }
     }
 
-    // Constructors
     public CheckoutRequest(String address, String phone, String paymentMethod, double totalPrice, List<Item> items) {
         this.address = address;
         this.phone = phone;
@@ -66,18 +88,45 @@ public class CheckoutRequest {
         this.items = items;
     }
 
-    public CheckoutRequest() {}
+    public CheckoutRequest() {
+    }
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
-    public String getPaymentMethod() { return paymentMethod; }
-    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
-    public double getTotalPrice() { return totalPrice; }
-    public void setTotalPrice(double totalPrice) { this.totalPrice = totalPrice; }
-    public List<Item> getItems() { return items; }
-//    public void setItems(List<Item> items) { this.items = items; }
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public double getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
+    public List<Item> getItems() {
+        return items;
+    }
+
     public void setItems(List<CartItem> cartItems) {
         for (CartItem cartItem : cartItems) {
             Item item = new Item(
@@ -86,7 +135,6 @@ public class CheckoutRequest {
                     cartItem.getProductName(),
                     cartItem.getPrice()
             );
-//            Log.d("CheckoutRequest", "Item added: " + item.getProductName() + ", Quantity: " + item.getQuantity() + ", Price: " + item.getUnitPrice() + ", Product ID: " + item.getProductId());
             items.add(item);
         }
     }

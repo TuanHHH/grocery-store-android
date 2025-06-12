@@ -22,11 +22,10 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
-import com.hp.grocerystore.application.GRCApplication;
+
 import com.hp.grocerystore.model.user.User;
 import com.hp.grocerystore.utils.Extensions;
 import com.hp.grocerystore.utils.LoadingUtil;
-import com.hp.grocerystore.utils.AuthPreferenceManager;
 import com.hp.grocerystore.utils.Resource;
 import com.hp.grocerystore.utils.UserSession;
 import com.hp.grocerystore.view.adapter.CartAdapter;
@@ -236,7 +235,7 @@ public class CartActivity extends AppCompatActivity {
         }
 
         String message = String.format("Thanh toán %d sản phẩm:%s\nTổng cộng: %s",
-                selectedCount, selectedItemsLog.toString(), Extensions.formatCurrency(total));
+                selectedCount, selectedItemsLog, Extensions.formatCurrency(total));
         Log.d("CartActivity", "Chi tiết thanh toán: " + message);
 
         if (cartItems == null || cartItems.isEmpty()) {
@@ -254,7 +253,6 @@ public class CartActivity extends AppCompatActivity {
             return;
         }
 
-        // Chuyển sang CheckoutConfirmationActivity
         Intent intent = new Intent(this, CheckoutConfirmationActivity.class);
         intent.putExtra("selectedItems", (Serializable) selectedCartItems);
         intent.putExtra("totalPrice", total);
@@ -271,7 +269,6 @@ public class CartActivity extends AppCompatActivity {
     private void updateHeader(int totalItems) {
         TextView textTotalProducts = findViewById(R.id.text_total_products);
         textTotalProducts.setText(String.format("Giỏ hàng (%d)", totalItems));
-        Log.d("CartActivity", "Tổng số sản phẩm từ API: " + totalItems);
     }
 
     @SuppressLint("DefaultLocale")
@@ -284,17 +281,8 @@ public class CartActivity extends AppCompatActivity {
             if (item.isSelected() && item.getStock() > 0) {
                 total += item.getPrice() * item.getQuantity();
                 selectedCount++;
-                Log.d("CartActivity", String.format("Sản phẩm: %s, Số lượng: %d, Giá: %s, Tổng: %s",
-                        item.getProductName(),
-                        item.getQuantity(),
-                        Extensions.formatCurrency(item.getPrice()),
-                        Extensions.formatCurrency(item.getPrice() * item.getQuantity())
-                ));
             }
         }
-
-        Log.d("CartActivity", String.format("Tổng số sản phẩm đã chọn: %d, Tổng tiền: %s",
-                selectedCount, Extensions.formatCurrency(total)));
         textTotalPrice.setText(String.format("Tổng: %s", Extensions.formatCurrency(total)));
     }
 
@@ -321,11 +309,7 @@ public class CartActivity extends AppCompatActivity {
                 }
             }
         }
-
-        Log.d("CartActivity", String.format("Tổng số sản phẩm còn hàng: %d, Đã chọn: %d",
-                inStockCount, selectedInStockCount));
         checkboxSelectAll.setChecked(hasInStockItems && allInStockSelected);
-        Log.d("CartActivity", "Trạng thái chọn tất cả: " + (hasInStockItems && allInStockSelected));
     }
 
     private void setupSelectAllCheckbox() {

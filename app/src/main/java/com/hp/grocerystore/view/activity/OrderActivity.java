@@ -46,7 +46,7 @@ public class OrderActivity extends AppCompatActivity {
     private LiveData<Resource<List<Order>>> currentOrderLiveData;
     private ActivityResultLauncher<Intent> orderDetailLauncher;
 
-    private int currentStatus = 0; // Default
+    private int currentStatus = 0;
 
     @SuppressLint("MissingInflatedId")
     @Override

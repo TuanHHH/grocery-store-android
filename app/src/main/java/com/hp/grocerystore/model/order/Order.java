@@ -1,4 +1,5 @@
 package com.hp.grocerystore.model.order;
+
 import com.google.gson.annotations.SerializedName;
 
 public class Order {
@@ -36,15 +37,47 @@ public class Order {
     private double totalPrice;
 
     // Getters
-    public int getId() { return id; }
-    public String getOrderTime() { return orderTime; }
-    public String getDeliveryTime() { return deliveryTime; }
-    public int getStatus() { return status; }
-    public String getPaymentMethod() { return paymentMethod; }
-    public String getAddress() { return address; }
-    public String getPhone() { return phone; }
-    public String getUserEmail() { return userEmail; }
-    public String getUserName() { return userName; }
-    public int getUserId() { return userId; }
-    public double getTotalPrice() { return totalPrice; }
+    public int getId() {
+        return id;
+    }
+
+    public String getOrderTime() {
+        return orderTime;
+    }
+
+    public String getDeliveryTime() {
+        return deliveryTime;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public double getTotalPrice() {
+        return totalPrice;
+    }
 }

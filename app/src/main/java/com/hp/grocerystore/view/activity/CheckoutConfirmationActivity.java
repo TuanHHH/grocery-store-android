@@ -87,9 +87,7 @@ public class CheckoutConfirmationActivity extends AppCompatActivity {
     }
 
     private void retrieveData() {
-//        selectedItems = getIntent().getParcelableArrayListExtra("selectedItems");
         selectedItems = (ArrayList<CartItem>) getIntent().getSerializableExtra("selectedItems");
-//        intent.putExtra("selectedItems", (Serializable) selectedCartItems);
         totalPrice = getIntent().getDoubleExtra("totalPrice", 0.0);
     }
 
@@ -265,17 +263,14 @@ public class CheckoutConfirmationActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VNPAY_REQUEST_CODE) {
             if (resultCode == RESULT_OK && data != null) {
-                // Thanh toán thành công
                 String responseCode = data.getStringExtra("vnp_ResponseCode");
                 if ("00".equals(responseCode)) {
                     Toast.makeText(this, "Thanh toán VNPay thành công!", Toast.LENGTH_SHORT).show();
-                    // Gọi lại checkout để lưu đơn hàng nếu cần
                     processCheckout();
                 } else {
                     Toast.makeText(this, "Thanh toán VNPay thất bại", Toast.LENGTH_LONG).show();
                 }
             } else if (resultCode == RESULT_CANCELED) {
-                // Thanh toán bị hủy
                 Toast.makeText(this, "Thanh toán VNPay đã bị hủy", Toast.LENGTH_LONG).show();
             }
         }
