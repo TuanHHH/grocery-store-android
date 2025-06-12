@@ -19,7 +19,7 @@ public class SearchViewModel extends ViewModel {
         this.productRepository = ProductRepository.getInstance(RetrofitClient.getProductApi(), RetrofitClient.getFeedbackApi());;
     }
     public LiveData<Resource<List<Product>>> searchProducts(int page, int size, String query) {
-        return productRepository.searchProducts(page, size, query);
+        return productRepository.filterProducts(page, size, query);
     }
 
     public LiveData<Resource<List<Product>>> searchAndFilterProducts(int page, int size, String filter1,

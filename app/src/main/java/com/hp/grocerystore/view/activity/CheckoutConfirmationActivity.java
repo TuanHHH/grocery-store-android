@@ -101,7 +101,7 @@ public class CheckoutConfirmationActivity extends AppCompatActivity {
         editAddress.setText(user.getAddress());
         textPhone.setText(user.getPhone());
         textName.setText(user.getName());
-        textTotalPrice.setText("Tổng cộng: " + Extensions.formatCurrency(totalPrice));
+        textTotalPrice.setText(Extensions.formatCurrency(totalPrice));
     }
 
     private void setupListeners() {
@@ -220,38 +220,28 @@ public class CheckoutConfirmationActivity extends AppCompatActivity {
                     LoadingUtil.hideLoading(findViewById(R.id.loading_overlay), findViewById(R.id.progress_bar));
                     VNPayResponse vnPayResponse = result.data;
                     if (vnPayResponse != null) {
-                        Log.d("CheckoutConfirmation", "VNPayResponse: statusCode=" + vnPayResponse.getStatusCode() +
-                                ", error=" + vnPayResponse.getError() + ", message=" + vnPayResponse.getMessage());
-                        if (vnPayResponse.getData() != null) {
-                            Log.d("CheckoutConfirmation", "ResponseData: code=" + vnPayResponse.getData().getCode() +
-                                    ", message=" + vnPayResponse.getData().getMessage() + ", paymentUrl=" + vnPayResponse.getData().getPaymentData().getPaymentUrl());
-                            if ("ok".equals(vnPayResponse.getData().getPaymentData().getCode())) {
+                         if (vnPayResponse.getData() != null) {
+                              if ("ok".equals(vnPayResponse.getData().getPaymentData().getCode())) {
                                 String paymentUrl = vnPayResponse.getData().getPaymentData().getPaymentUrl();
                                 if (paymentUrl != null && !paymentUrl.isEmpty()) {
-                                    Log.d("CheckoutConfirmation", "Payment URL: " + paymentUrl);
                                     Intent intent = new Intent(this, VnPayPaymentActivity.class);
                                     intent.putExtra("paymentUrl", paymentUrl);
                                     startActivityForResult(intent, VNPAY_REQUEST_CODE);
                                 } else {
-                                    Log.e("CheckoutConfirmation", "Payment URL is null or empty");
                                     Toast.makeText(this, "Không thể tạo URL thanh toán: URL rỗng", Toast.LENGTH_LONG).show();
                                 }
                             } else {
-                                Log.e("CheckoutConfirmation", "Invalid code: " + vnPayResponse.getData().getCode());
                                 Toast.makeText(this, "Không thể tạo URL thanh toán: Mã không hợp lệ", Toast.LENGTH_LONG).show();
                             }
                         } else {
-                            Log.e("CheckoutConfirmation", "ResponseData is null");
                             Toast.makeText(this, "Không thể tạo URL thanh toán: Dữ liệu phản hồi null", Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        Log.e("CheckoutConfirmation", "VNPayResponse is null");
                         Toast.makeText(this, "Không thể tạo URL thanh toán: Phản hồi null", Toast.LENGTH_LONG).show();
                     }
                     break;
                 case ERROR:
                     LoadingUtil.hideLoading(findViewById(R.id.loading_overlay), findViewById(R.id.progress_bar));
-                    Log.e("CheckoutConfirmation", "API Error: " + result.message);
                     Toast.makeText(this, "Lỗi gọi API VNPay: " + result.message, Toast.LENGTH_LONG).show();
                     break;
             }

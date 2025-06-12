@@ -23,6 +23,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -40,6 +41,7 @@ import com.hp.grocerystore.utils.LoadingUtil;
 import com.hp.grocerystore.utils.Resource;
 import com.hp.grocerystore.utils.UserSession;
 import com.hp.grocerystore.view.adapter.FeedbackAdapter;
+import com.hp.grocerystore.view.adapter.ProductAdapter;
 import com.hp.grocerystore.viewmodel.CartViewModel;
 import com.hp.grocerystore.viewmodel.ProductViewModel;
 import com.hp.grocerystore.viewmodel.WishlistViewModel;
@@ -62,6 +64,11 @@ public class ProductDetailActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private ImageButton wishlistBtn;
 
+    private RecyclerView recyclerSimilarProducts;
+    private ProductAdapter similarProductsAdapter;
+    private List<Product> similarProductsList;
+    private TextView textSimilarProductsTitle;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
@@ -78,6 +85,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         viewModel = new ViewModelProvider(this).get(ProductViewModel.class);
         cartViewModel = new ViewModelProvider(this).get(CartViewModel.class);
         wishlistViewModel = new ViewModelProvider(this).get(WishlistViewModel.class);
+
         setupRecyclerView();
         Intent intent = getIntent();
         long productId;
@@ -108,6 +116,7 @@ public class ProductDetailActivity extends AppCompatActivity {
                     showProductDetails(resource.data);
                     LoadingUtil.hideLoading(loadingOverlay, progressBar);
                     observeFeedback(productId);
+                    loadSimilarProducts();
                     break;
 
                 case ERROR:
@@ -127,6 +136,38 @@ public class ProductDetailActivity extends AppCompatActivity {
                     } else {
                         Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show();
                     }
+                    break;
+            }
+        });
+    }
+
+    private void loadSimilarProducts() {
+        String categorySlug = getIntent().getStringExtra("category");
+
+        if (categorySlug == null || categorySlug.isEmpty()) {
+            textSimilarProductsTitle.setVisibility(View.GONE);
+            recyclerSimilarProducts.setVisibility(View.GONE);
+            return;
+        }
+
+        String filter = String.format(Locale.US, "category.slug='%s' and id! %d", categorySlug, currentProduct.getId());
+        viewModel.filterProduct(1,12, filter).observe(this, resource ->{
+            switch (resource.status) {
+                case LOADING:
+                    break;
+                case SUCCESS:
+                    if (resource.data != null && !resource.data.isEmpty()) {
+                        similarProductsAdapter.setProductList(resource.data);
+                        textSimilarProductsTitle.setVisibility(View.VISIBLE);
+                        recyclerSimilarProducts.setVisibility(View.VISIBLE);
+                    } else {
+                        textSimilarProductsTitle.setVisibility(View.GONE);
+                        recyclerSimilarProducts.setVisibility(View.GONE);
+                    }
+                    break;
+                case ERROR:
+                    textSimilarProductsTitle.setVisibility(View.GONE);
+                    recyclerSimilarProducts.setVisibility(View.GONE);
                     break;
             }
         });
@@ -174,6 +215,14 @@ public class ProductDetailActivity extends AppCompatActivity {
         feedbackList = new ArrayList<>();
         feedbackAdapter = new FeedbackAdapter(feedbackList);
         recyclerFeedback.setAdapter(feedbackAdapter);
+
+        textSimilarProductsTitle = findViewById(R.id.text_similar_products_title);
+        recyclerSimilarProducts = findViewById(R.id.recycler_similar_products);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
+        recyclerSimilarProducts.setLayoutManager(gridLayoutManager);
+        similarProductsList = new ArrayList<>();
+        similarProductsAdapter = new ProductAdapter(this, similarProductsList, this);
+        recyclerSimilarProducts.setAdapter(similarProductsAdapter);
     }
 
     @SuppressLint("DefaultLocale")

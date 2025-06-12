@@ -25,12 +25,9 @@ public class HomeViewModel extends ViewModel {
     }
 
     public LiveData<Resource<List<Product>>> getProducts(int page, int size, String filter) {
-        return productRepository.getHomeProducts(page, size, filter);
+        return productRepository.filterProducts(page, size, filter);
     }
     public LiveData<Resource<List<Category>>> getAllCategories() {
         return categoryRepository.getAllCategories();
-    }
-    public LiveData<Resource<Category>> getCategoryById(long categoryId) {
-        return categoryRepository.getCategoryById(categoryId);
     }
 }
