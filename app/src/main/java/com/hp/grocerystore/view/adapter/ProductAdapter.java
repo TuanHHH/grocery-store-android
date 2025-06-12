@@ -18,7 +18,6 @@ import com.hp.grocerystore.R;
 import com.hp.grocerystore.model.product.Product;
 import com.hp.grocerystore.model.wishlist.Wishlist;
 import com.hp.grocerystore.view.activity.ProductDetailActivity;
-import com.hp.grocerystore.viewmodel.WishlistViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +26,6 @@ import java.util.List;
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
     private final Context context;
     private List<Product> productList;
-    private static List<Wishlist> wishlistList = new ArrayList<>();
     private LifecycleOwner lifecycleOwner;
 
     public ProductAdapter(Context context, List<Product> productList,LifecycleOwner lifecycleOwner) {
@@ -41,10 +39,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         this.productList.clear();
         this.productList.addAll(products);
         notifyDataSetChanged();
-    }
-    public static void setWishList(List<Wishlist> wishlistList){
-        if (ProductAdapter.wishlistList.size() > 0) ProductAdapter.wishlistList.clear();
-        ProductAdapter.wishlistList.addAll(wishlistList);
     }
 
     @NonNull
@@ -101,6 +95,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ProductDetailActivity.class);
             intent.putExtra("product_id", product.getId());
+            intent.putExtra("category", product.getCategory());
             context.startActivity(intent);
         });
     }

@@ -166,32 +166,7 @@ public class ProductRepository {
         });
     }
 
-
-    public LiveData<Resource<List<Product>>> getHomeProducts(int page, int size, String filter) {
-        MutableLiveData<Resource<List<Product>>> liveData = new MutableLiveData<>();
-        liveData.setValue(Resource.loading());
-
-        productApi.getProductsWithFilter(page, size, filter).enqueue(new Callback<ApiResponse<PaginationResponse<Product>>>() {
-            @Override
-            public void onResponse(@NonNull Call<ApiResponse<PaginationResponse<Product>>> call, @NonNull Response<ApiResponse<PaginationResponse<Product>>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Product> products = response.body().getData().getResult();
-                    liveData.setValue(Resource.success(products));
-                } else {
-                    liveData.setValue(Resource.error("Lỗi khi tải danh sách sản phẩm"));
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ApiResponse<PaginationResponse<Product>>> call, @NonNull Throwable t) {
-                liveData.setValue(Resource.error(t.getMessage()));
-            }
-        });
-
-        return liveData;
-    }
-
-    public LiveData<Resource<List<Product>>> searchProducts(int page, int size, String filter) {
+    public LiveData<Resource<List<Product>>> filterProducts(int page, int size, String filter) {
         MutableLiveData<Resource<List<Product>>> liveData = new MutableLiveData<>();
         liveData.setValue(Resource.loading());
         productApi.getProductsWithFilter(page, size, filter).enqueue(new Callback<ApiResponse<PaginationResponse<Product>>>() {

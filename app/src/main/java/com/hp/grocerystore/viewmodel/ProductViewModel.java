@@ -57,4 +57,8 @@ public class ProductViewModel extends ViewModel {
     public LiveData<Resource<String>> getSummaryFeedback(long productId){
         return repository.getSummaryFeedback(productId);
     }
+
+    public LiveData<Resource<List<Product>>> filterProduct(int page, int size, String filter) {
+        return repository.filterProducts(page, size, filter);
+    }
 }
